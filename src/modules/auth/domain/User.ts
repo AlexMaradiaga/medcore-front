@@ -7,7 +7,7 @@ export interface User {
 
 export interface AuthState {
   user: User | null;
-  token: string | null; // El token debe estar al mismo nivel que el usuario en el estado
+  token: string | null; 
   isAuthenticated: boolean;
   loading: boolean;
 }

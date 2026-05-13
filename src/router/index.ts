@@ -31,7 +31,7 @@ const router = createRouter({
       path: '/medico/perfil',
       name: 'patient-profile',
       component: PatientProfileView,
-      meta: { requiresAuth: true, role: 'Doctor' } // Asegúrate de mantener la seguridad
+      meta: { requiresAuth: true, role: 'Doctor' } 
     },
     {
       path: '/medico/historial',

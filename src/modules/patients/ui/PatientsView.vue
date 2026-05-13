@@ -7,7 +7,6 @@ const patientRepo = new PatientRepositoryImpl();
 const patients = ref<Patient[]>([]);
 const loading = ref(true);
 
-// Estados para el Modal
 const showModal = ref(false);
 const isEditing = ref(false);
 const selectedPatientId = ref<string | null>(null);

@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-[#f8fafc] font-sans text-left">
-    <!-- NAVBAR SUPERIOR INSTITUCIONAL -->
     <header class="bg-[#005596] text-white px-8 py-3 flex justify-between items-center shadow-lg">
       <div class="flex items-center gap-4">
         <div class="bg-white/20 p-2 rounded-lg font-black text-lg">M+</div>
@@ -39,7 +38,7 @@
         </button>
       </div>
 
-      <!-- SECCIÓN 1: CONSULTA INMEDIATA (Pendientes) -->
+      <!-- SECCIÓN 1: CONSULTA Pendientes -->
       <section class="bg-red-50/20 border border-red-100/50 rounded-[3rem] p-10 text-left">
         <div class="flex items-center gap-4 mb-8">
           <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg text-xl">🛑</div>
@@ -65,7 +64,6 @@
               <p class="text-sm font-bold text-slate-500">{{ cita.Motivo }}</p>
             </div>
             <div class="flex gap-4">
-              <!-- Solo Aprobar y Rechazar (Rojo) para pendientes -->
               <button @click="handleApprove(cita.CitaID)"
                 class="px-8 py-4 bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-green-100 hover:bg-green-600 transition-all">
                 Aprobar
@@ -103,7 +101,6 @@
                 <p class="text-xs font-bold text-slate-400">{{ cita.Motivo }}</p>
               </div>
             </div>
-            <!-- Solo el botón de Atender cuando está en confirmadas -->
             <button @click="startConsultation(cita)" class="px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl shadow-red-200 hover:scale-105 active:scale-95 transition-all">
               Atender Ahora
             </button>
@@ -139,12 +136,10 @@ const repo = new DoctorRepository();
 const doctorName = ref('Médico');
 const appointments = ref<DoctorAppointment[]>([]);
 
-// Clasifica citas pendientes o sin estado en la sección roja[cite: 2]
 const citasUrgentes = computed(() => {
   return appointments.value.filter(c => !c.EstadoCita || c.EstadoCita === 'Pendiente');
 });
 
-// Clasifica citas confirmadas en la sección azul[cite: 2]
 const citasConfirmadas = computed(() => {
   return appointments.value.filter(c => c.EstadoCita === 'Confirmada');
 });

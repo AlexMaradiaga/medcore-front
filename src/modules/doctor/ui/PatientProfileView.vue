@@ -1,7 +1,6 @@
 <template>
   <DoctorLayout>
     <main class="p-8 max-w-350 mx-auto space-y-8">
-      <!-- CABECERA DE PERFIL -->
       <div class="flex justify-between items-end mb-4">
         <div class="text-left">
           <h2 class="text-4xl font-black text-[#005596] tracking-tighter">Perfil del Paciente</h2>
@@ -15,9 +14,8 @@
         </button>
       </div>
 
-      <!-- SECCIÓN CON DEGRADADO (Ajustado según ilustración) -->
       <section class="overflow-hidden rounded-[3rem] shadow-2xl border border-blue-200/50">
-        <!-- Banner con Degradado -->
+
         <div class="bg-linear-to-r from-[#005596] to-[#00345c] p-6 text-left">
           <h4 class="text-white font-black text-lg">Perfil del Paciente</h4>
           <p class="text-blue-100 text-[10px] font-bold uppercase tracking-widest">Información completa del paciente citado</p>
@@ -53,7 +51,6 @@
         </div>
       </section>
 
-      <!-- Formulario de Registro -->
       <section class="bg-white rounded-[3.5rem] p-12 border border-slate-100 shadow-sm space-y-10 text-left">
         <h4 class="text-xl font-black text-slate-800 border-l-8 border-blue-600 pl-6 uppercase">Formulario de Registro</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">

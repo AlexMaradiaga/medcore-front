@@ -92,7 +92,6 @@ const form = reactive({
 const handleRegister = async () => {
   loading.value = true;
   try {
-    // Creamos el objeto siguiendo tu interfaz Patient
     const newPatient: Patient = {
       Nombre: form.nombre,
       Apellido: form.apellido,
@@ -100,7 +99,7 @@ const handleRegister = async () => {
       email: form.email,
       password: form.password,
       Telefono: form.telefono,
-      entidad_id: 1 // Ahora TypeScript lo reconoce
+      entidad_id: 1 
     };
 
     await patientRepo.create(newPatient);

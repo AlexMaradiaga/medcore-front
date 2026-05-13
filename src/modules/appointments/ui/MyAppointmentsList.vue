@@ -126,7 +126,6 @@ const appointmentRepo = new AppointmentRepository();
 const appointments = ref<Appointment[]>([]);
 const loading = ref(false);
 
-// Estado para el Modal
 const showModal = ref(false);
 const selectedCita = ref<Appointment | null>(null);
 

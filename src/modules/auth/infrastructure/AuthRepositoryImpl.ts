@@ -7,7 +7,6 @@ export class AuthRepositoryImpl implements AuthRepository {
         const response = await api.post('/login', credentials);
         const serverResponse = response.data;
 
-        // 1. Extraemos el objeto que contiene id, email, rol_id
         const rawUser = serverResponse.data;
         const token = serverResponse.access_token;
 
@@ -15,12 +14,11 @@ export class AuthRepositoryImpl implements AuthRepository {
             throw new Error('La respuesta del servidor no tiene el formato esperado.');
         }
 
-        // 2. Mapeamos a nuestra interfaz de Dominio usando los datos reales de la DB
         const user: User = {
             id: rawUser.id,
             nombre: rawUser.nombre || rawUser.email.split('@')[0],
             email: rawUser.email,
-            rol_id: rawUser.rol_id 
+            rol_id: rawUser.rol_id
         };
 
         return { user, token };

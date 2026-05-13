@@ -38,7 +38,6 @@ import { DashboardRepositoryImpl, type DashboardStats } from '../infrastructure/
 const authStore = useAuthStore();
 const dashboardRepo = new DashboardRepositoryImpl();
 
-// Estado para las métricas
 const stats = ref<DashboardStats>({
   citas_pendientes: '0',
   total_pacientes: '0',
@@ -53,7 +52,6 @@ onMounted(async () => {
     console.log("Stats en el componente:", data);
     stats.value = data;
   } catch (error: unknown) {
-    // Verificamos si es un error de Axios para obtener detalles del servidor
     if (axios.isAxiosError(error)) {
       console.error("Error de la API:", error.response?.data || error.message);
     } else {

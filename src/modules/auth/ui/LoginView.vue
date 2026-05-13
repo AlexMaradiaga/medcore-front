@@ -131,7 +131,6 @@ const handleLogin = async () => {
 
       console.log("Login exitoso. Rol detectado:", role);
 
-      // AJUSTA ESTOS NÚMEROS SEGÚN TU BASE DE DATOS
       switch (role) {
         case 1: // Si en tu DB el 1 es el Admin
           router.push('/dashboard');

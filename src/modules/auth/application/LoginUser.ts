@@ -5,7 +5,6 @@ export class LoginUser {
     constructor(private readonly authRepository: AuthRepository) {}
 
     async execute(credentials: { email: string; password: string }): Promise<{ user: User; token: string }> {
-        // Aquí podrías agregar validaciones de lógica de negocio antes de llamar al repositorio
         if (!credentials.email.includes('@')) {
             throw new Error('El formato del correo no es válido');
         }

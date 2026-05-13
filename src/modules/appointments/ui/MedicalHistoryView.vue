@@ -132,18 +132,15 @@ const loadData = async () => {
   }
 };
 
-// 4. Observador: Si cambias de pestaña, recarga los datos automáticamente
 watch(activeSubTab, () => {
   loadData();
 });
 
-// 5. Funciones de acción
 const showDetail = (item: MedicalRecord) => {
   selectedItem.value = item;
 };
 
 const downloadFile = (url: string) => {
-  // Abre el PDF del examen en una pestaña nueva
   window.open(url, '_blank');
 };
 

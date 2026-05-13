@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <!-- TABS DE NAVEGACIÓN SOAP -->
+      <!-- TABS DE NAVEGACIÓN -->
       <nav class="bg-white border-b border-slate-200 px-12 flex gap-12 shadow-sm sticky top-0 z-10">
         <button
           v-for="tab in ['Subjetivo', 'Objetivo', 'Evaluación', 'Plan']"
@@ -40,7 +40,6 @@
         </button>
       </nav>
 
-      <!-- CONTENIDO DINÁMICO -->
       <div class="p-12 max-w-7xl mx-auto">
         <div class="bg-white rounded-[2.5rem] p-12 border border-slate-100 shadow-sm min-h-125">
 
@@ -113,7 +112,6 @@
                       <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hallazgos:</p>
                       <div class="grid grid-cols-2 gap-4">
                         <label v-for="opcion in sistema.opciones" :key="opcion" class="flex items-center gap-3 cursor-pointer group">
-                          <!-- Type assertion para evitar error de undefined -->
                           <input
                             type="checkbox"
                             v-model="(form.examen_fisico_opciones[sistema.id] as Record<string, boolean>)[opcion]"
@@ -123,7 +121,6 @@
                         </label>
                       </div>
                     </div>
-                     <!-- NOTAS ADICIONALES: Fuera del v-if para que se vea siempre -->
                     <div class="space-y-2 pt-4 border-t border-slate-50">
                       <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Notas adicionales:</label>
                       <textarea
@@ -173,7 +170,6 @@ import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
 import { DoctorRepository } from '../infrastructure/DoctorRepository';
 import type { DoctorAppointment } from '../domain/DoctorAppointment';
 
-// --- INTERFACES CON FIRMAS DE ÍNDICE ---
 interface SignosVitales {
   presion: string;
   pulso: string;

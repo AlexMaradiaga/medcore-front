@@ -13,7 +13,6 @@ interface PatientDto {
 export class PatientRepositoryImpl {
   async getAll(): Promise<Patient[]> {
     const response = await api.get('/pacientes');
-    // Laravel devuelve { status: 'success', data: [...] }
     return response.data.data;
   }
 
