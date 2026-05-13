@@ -1,0 +1,216 @@
+<template>
+  <div class="min-h-screen bg-[#f8fafc] font-sans text-left">
+    <!-- NAVBAR SUPERIOR INSTITUCIONAL -->
+    <header class="bg-[#005596] text-white px-8 py-3 flex justify-between items-center shadow-lg">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/20 p-2 rounded-lg font-black text-lg">M+</div>
+        <div class="text-left">
+          <h1 class="text-lg font-bold leading-tight">Panel Médico - MedGo+</h1>
+          <p class="text-blue-100 text-[10px] font-medium">Dr. {{ doctorName }}</p>
+        </div>
+      </div>
+      <button @click="handleLogout" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all border border-white/10">
+        Salir
+      </button>
+    </header>
+
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <nav class="bg-white border-b border-slate-200 px-8 py-2 sticky top-0 z-20 shadow-sm">
+      <div class="max-w-350 mx-auto flex gap-2">
+        <button class="px-6 py-2 bg-[#005596] text-white rounded-xl text-xs font-bold shadow-md shadow-blue-100">
+          <span class="mr-1">⊞</span> Panel
+        </button>
+        <button v-for="item in ['Agenda', 'Perfil', 'Consulta', 'Historial', 'Receta']" :key="item"
+                class="px-5 py-2 text-slate-500 text-xs font-bold hover:bg-slate-50 rounded-xl transition-all">
+          {{ item }}
+        </button>
+      </div>
+    </nav>
+
+    <main class="p-8 max-w-350 mx-auto space-y-12">
+      <!-- CABECERA DE AGENDA -->
+      <div class="flex justify-between items-center">
+        <div class="text-left">
+          <h2 class="text-4xl font-black text-[#005596] tracking-tighter">Agenda del Día</h2>
+          <p class="text-slate-400 font-bold capitalize">{{ new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }}</p>
+        </div>
+        <button class="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
+          <span>📅</span> Ver Calendario
+        </button>
+      </div>
+
+      <!-- SECCIÓN 1: CONSULTA INMEDIATA (Pendientes) -->
+      <section class="bg-red-50/20 border border-red-100/50 rounded-[3rem] p-10 text-left">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg text-xl">🛑</div>
+          <div class="text-left">
+            <h3 class="text-xl font-black text-red-900">Consulta Inmediata ({{ citasUrgentes.length }})</h3>
+            <p class="text-red-500/70 text-[10px] font-black uppercase tracking-[0.2em]">Solicitudes de atención urgente</p>
+          </div>
+        </div>
+
+        <div v-if="citasUrgentes.length === 0" class="p-10 text-center border-2 border-dashed border-red-100 rounded-4xl text-slate-400 font-bold">
+          No hay consultas urgentes pendientes
+        </div>
+
+        <div v-else class="space-y-6">
+          <div v-for="cita in citasUrgentes" :key="cita.CitaID"
+               class="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100 flex justify-between items-center hover:shadow-xl transition-all group">
+            <div class="text-left space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="bg-red-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter">Prioridad</span>
+                <span class="text-slate-400 text-[10px] font-bold">⏰ {{ formatHora(cita.FechaHora) }}</span>
+              </div>
+              <h4 class="text-2xl font-black text-slate-800">{{ cita.Paciente }}</h4>
+              <p class="text-sm font-bold text-slate-500">{{ cita.Motivo }}</p>
+            </div>
+            <div class="flex gap-4">
+              <!-- Solo Aprobar y Rechazar (Rojo) para pendientes -->
+              <button @click="handleApprove(cita.CitaID)"
+                class="px-8 py-4 bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-green-100 hover:bg-green-600 transition-all">
+                Aprobar
+              </button>
+              <button @click="handleReject(cita.CitaID)"
+                class="px-8 py-4 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-red-100 hover:bg-red-600 transition-all">
+                Rechazar
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: CITAS CONFIRMADAS DEL DÍA -->
+      <section class="bg-blue-50/30 border border-blue-100 rounded-[3rem] p-10 text-left">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg text-xl">🕒</div>
+          <h3 class="text-xl font-black text-blue-900">Citas Confirmadas del Día ({{ citasConfirmadas.length }})</h3>
+        </div>
+
+        <div v-if="citasConfirmadas.length === 0" class="p-10 text-center border-2 border-dashed border-blue-100 rounded-4xl text-slate-400 font-bold">
+          No hay citas confirmadas para hoy
+        </div>
+
+        <div v-else class="space-y-6">
+          <div v-for="cita in citasConfirmadas" :key="cita.CitaID"
+               class="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex justify-between items-center shadow-sm hover:shadow-md transition-all">
+            <div class="flex items-center gap-6">
+              <div class="bg-blue-600 text-white p-4 rounded-2xl text-center min-w-22.5 shadow-lg shadow-blue-100">
+                <p class="text-lg font-black">{{ formatHora(cita.FechaHora) }}</p>
+                <p class="text-[9px] font-bold uppercase opacity-80 tracking-widest">Confirmada</p>
+              </div>
+              <div class="text-left">
+                <p class="text-xl font-black text-slate-800">{{ cita.Paciente }}</p>
+                <p class="text-xs font-bold text-slate-400">{{ cita.Motivo }}</p>
+              </div>
+            </div>
+            <!-- Solo el botón de Atender cuando está en confirmadas -->
+            <button @click="startConsultation(cita)" class="px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl shadow-red-200 hover:scale-105 active:scale-95 transition-all">
+              Atender Ahora
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- INDICADORES GLOBALES -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div v-for="(stat, index) in statsCards" :key="index"
+             class="bg-white p-12 rounded-[4rem] shadow-sm border border-slate-50 flex flex-col items-center justify-center gap-6 hover:-translate-y-1.25 transition-all">
+          <div :class="stat.color" class="w-16 h-16 rounded-3xl flex items-center justify-center text-2xl border border-current/10">
+            {{ stat.icon }}
+          </div>
+          <div class="text-center space-y-1">
+            <p class="text-6xl font-black text-slate-800 tracking-tighter">{{ stat.value }}</p>
+            <p class="text-slate-400 font-black uppercase text-[11px] tracking-[0.2em]">{{ stat.label }}</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { DoctorRepository } from '../infrastructure/DoctorRepository';
+import type { DoctorAppointment } from '../domain/DoctorAppointment';
+
+const router = useRouter();
+const repo = new DoctorRepository();
+const doctorName = ref('Médico');
+const appointments = ref<DoctorAppointment[]>([]);
+
+// Clasifica citas pendientes o sin estado en la sección roja[cite: 2]
+const citasUrgentes = computed(() => {
+  return appointments.value.filter(c => !c.EstadoCita || c.EstadoCita === 'Pendiente');
+});
+
+// Clasifica citas confirmadas en la sección azul[cite: 2]
+const citasConfirmadas = computed(() => {
+  return appointments.value.filter(c => c.EstadoCita === 'Confirmada');
+});
+
+const statsCards = computed(() => [
+  { label: 'Citas del Día', value: appointments.value.length, icon: '📅', color: 'bg-blue-50 text-blue-500' },
+  { label: 'Confirmadas', value: citasConfirmadas.value.length, icon: '✅', color: 'bg-green-50 text-green-500' },
+  { label: 'Pendientes', value: citasUrgentes.value.length, icon: '❗', color: 'bg-red-50 text-red-500' }
+]);
+
+const loadDoctorData = async () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  doctorName.value = user.nombre || 'Médico';
+  const userId = user.id || 0;
+
+  if (userId) {
+    try {
+      const data = await repo.getAppointments(userId);
+      appointments.value = data;
+    } catch (error) {
+      console.error("Error cargando el dashboard médico:", error);
+    }
+  }
+};
+
+const startConsultation = (cita: DoctorAppointment) => {
+  localStorage.setItem('current_appointment', JSON.stringify(cita));
+  router.push('/medico/perfil');
+};
+
+const handleLogout = () => {
+  localStorage.clear();
+  router.push('/');
+};
+
+onMounted(loadDoctorData);
+
+const formatHora = (fechaStr: string | undefined | null) => {
+  if (!fechaStr) return '00:00';
+  const partes = fechaStr.split(' ');
+  const horaConMilisegundos = partes[1];
+  return horaConMilisegundos ? horaConMilisegundos.substring(0, 5) : '00:00';
+};
+
+const handleApprove = async (citaId: number) => {
+  try {
+    await repo.approveAppointment(citaId);
+    await loadDoctorData();
+    alert('Cita aprobada correctamente.');
+  } catch (error) {
+    console.error("Error al aprobar:", error);
+    alert('No se pudo aprobar la cita.');
+  }
+};
+
+const handleReject = async (citaId: number) => {
+  const motivo = window.prompt("Ingrese el motivo del rechazo:");
+  if (motivo) {
+    try {
+      await repo.rejectAppointment(citaId, motivo);
+      await loadDoctorData();
+      alert('Cita rechazada con éxito.');
+    } catch (error) {
+      console.error("Error al rechazar:", error);
+      alert('Error al procesar el rechazo.');
+    }
+  }
+};
+</script>

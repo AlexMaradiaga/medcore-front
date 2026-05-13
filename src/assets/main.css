@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@theme {
+  /* Definición de colores corporativos para MedGo */
+  --color-medgo-blue: #0066CC;
+  --color-medgo-teal: #00A3A3;
+  --color-medgo-bg: #F8FAFC;
+
+  /* Un gris un poco más profundo para el fondo general */
+  --color-medgo-bg-soft: #E2E8F0;
+
+  /* Gradiente más vibrante */
+  --background-image-medgo-gradient: linear-gradient(135deg, #005BB8 0%, #009191 100%);
+}
+/* Agrégalo al final del archivo */
+.bg-vibrante {
+  background-color: #E2E8F0 !important; /* Forzamos el gris de fondo */
+}
+
+.circulo-azul {
+  background-color: rgba(0, 102, 204, 0.2) !important;
+}
+
+.circulo-teal {
+  background-color: rgba(0, 163, 163, 0.2) !important;
+}
