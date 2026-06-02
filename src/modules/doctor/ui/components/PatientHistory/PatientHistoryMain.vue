@@ -1,124 +1,178 @@
 <template>
-  <div class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-full animate-fade-in min-h-125">
+  <div class="space-y-6 animate-fade-in text-left">
 
-    <template v-if="!accesoDenegado">
-      <div :class="[
-        'p-6 flex items-center gap-4 border-b transition-colors',
-        tieneAccesoGlobal ? 'bg-green-50 border-green-100' : 'bg-slate-50 border-slate-100'
-      ]">
-        <div :class="[
-          'p-2 rounded-xl text-white text-xs shadow-sm',
-          tieneAccesoGlobal ? 'bg-green-500' : 'bg-slate-400'
-        ]">
-          {{ tieneAccesoGlobal ? '🔒' : '🔓' }}
+    <div class="bg-white rounded-4xl p-8 border border-slate-100 shadow-xs space-y-6">
+      <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3">
+        Información General del Paciente
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs font-bold text-slate-700">
+        <div class="space-y-1">
+          <p class="text-slate-400 font-medium">Nombre Completo:</p>
+          <p class="text-sm font-black text-slate-800 uppercase">{{ patientData.nombre || 'Cargando...' }}</p>
+          <p class="text-slate-400 font-medium pt-2">Alergias Clínicas:</p>
+          <p class="font-black text-rose-600 uppercase">{{ patientData.alergias }}</p>
         </div>
-        <div class="text-left">
-          <h4 :class="[
-            'font-black text-[10px] uppercase tracking-wider',
-            tieneAccesoGlobal ? 'text-green-800' : 'text-slate-600'
-          ]">
-            {{ tieneAccesoGlobal ? 'Autorización Activa' : 'Autorización Parcial' }}
-          </h4>
-          <p :class="[
-            'text-[9px] font-bold',
-            tieneAccesoGlobal ? 'text-green-600' : 'text-slate-400'
-          ]">
-            {{ tieneAccesoGlobal ? 'Acceso completo al historial clínico.' : 'Visualizando únicamente sus consultas propias.' }}
-          </p>
+
+        <div class="space-y-1">
+          <p class="text-slate-400 font-medium">Edad / Género:</p>
+          <p class="text-slate-800 font-black uppercase">{{ patientData.edad_genero }}</p>
+          <p class="text-slate-400 font-medium pt-2">Condiciones / Medicación:</p>
+          <p class="text-slate-700 font-medium uppercase">{{ patientData.cronico }}</p>
+        </div>
+
+        <div class="space-y-1">
+          <p class="text-slate-400 font-medium">Factor Clínico / Sangre:</p>
+          <p class="text-emerald-600 font-black text-sm uppercase">🩸 {{ patientData.sangre }}</p>
+          <p class="text-slate-400 font-medium pt-2">Cobertura Médica:</p>
+          <p class="text-slate-800 font-black uppercase">{{ patientData.seguro }}</p>
         </div>
       </div>
+    </div>
 
-      <nav class="flex border-b border-slate-100 bg-slate-50/50">
+    <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-slate-100 flex flex-col min-h-125">
+
+      <div :class="[
+        'p-4 px-6 flex items-center justify-between text-[10px] font-black uppercase tracking-wider border-b transition-colors',
+        tieneAccesoGlobal ? 'bg-emerald-50/60 border-emerald-100 text-emerald-800' : 'bg-amber-50/60 border-amber-100 text-amber-800'
+      ]">
+        <div class="flex items-center gap-2">
+          <span>{{ tieneAccesoGlobal ? '🔒 Autorización Global Activa' : '⚠️ Autorización Limitada' }}</span>
+          <span class="font-bold normal-case text-slate-400/90">— {{ tieneAccesoGlobal ? 'Historial unificado completo desbloqueado.' : 'Solo estás visualizando tus propias consultas.' }}</span>
+        </div>
+
+        <button
+          v-if="!tieneAccesoGlobal"
+          @click="solicitarAccesoGlobal"
+          class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95 text-[9px] font-black uppercase tracking-widest"
+        >
+          🔑 Autorizar Historial Externo
+        </button>
+      </div>
+
+      <nav class="flex border-b border-slate-100 bg-slate-50/50 p-2 gap-2">
         <button
           v-for="tab in tabs" :key="tab.id"
           @click="activeTab = tab.id"
           :class="[
-            'flex-1 py-4 text-[9px] font-black uppercase tracking-widest transition-all border-b-2',
-            activeTab === tab.id ? 'bg-white text-[#0088cc] border-[#0088cc]' : 'text-slate-400 border-transparent'
+            'flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all',
+            activeTab === tab.id ? 'bg-white text-[#005596] shadow-xs' : 'text-slate-400 hover:text-slate-600'
           ]"
         >
-          {{ tab.label }}
+          {{ tab.icon }} {{ tab.label }}
         </button>
       </nav>
 
-      <div class="flex-1 overflow-y-auto p-6 min-h-125 relative">
+      <div class="flex-1 overflow-y-auto p-8 bg-white relative min-h-100">
         <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-          <span class="text-[10px] font-black text-slate-400 animate-pulse uppercase tracking-widest">Cargando Historial...</span>
+          <span class="text-[10px] font-black text-slate-400 animate-pulse uppercase tracking-widest">Sincronizando Expediente Digital...</span>
         </div>
 
         <ConsultationHistoryTab v-if="activeTab === 'consultas'" :data="history.consultas" />
         <ExamsHistoryTab v-if="activeTab === 'examenes'" :data="history.examenes" />
         <ComparativeStatsTab v-if="activeTab === 'comparativo'" :data="history.comparativos" />
       </div>
-    </template>
-
-    <div v-else class="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-6 animate-fade-in">
-      <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-3xl shadow-inner">
-        🔐
-      </div>
-      <div class="max-w-70">
-        <h3 class="text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Acceso Restringido</h3>
-        <p class="text-[10px] font-bold text-slate-400 leading-relaxed uppercase">
-          No tiene historial previo con este paciente ni autorización global para ver historial externo.
-        </p>
-      </div>
-      <button class="bg-slate-900 text-white text-[9px] font-black px-8 py-3 rounded-2xl uppercase hover:bg-[#0088cc] transition-all shadow-lg active:scale-95">
-        Solicitar Autorización al Paciente
-      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { DoctorRepository } from '../../../infrastructure/DoctorRepository';
 import ConsultationHistoryTab from './ConsultationHistoryTab.vue';
 import ExamsHistoryTab from './ExamsHistoryTab.vue';
 import ComparativeStatsTab from './ComparativeStatsTab.vue';
-import type { PatientHistoryResponse } from '../../../domain/PatientHistory';
+
+import type { HistorialClinicoData } from '../../../domain/PatientHistory';
 
 const props = defineProps<{ pacienteId: number }>();
-
 const repo = new DoctorRepository();
+
 const activeTab = ref('consultas');
 const loading = ref(false);
-const accesoDenegado = ref(false);
-const tieneAccesoGlobal = ref(false); 
+const tieneAccesoGlobal = ref(false);
 
 const tabs = [
-  { id: 'consultas', label: 'Consultas' },
-  { id: 'examenes', label: 'Exámenes' },
-  { id: 'comparativo', label: 'Comparativo' }
+  { id: 'consultas', label: 'Consultas Previas', icon: '📄' },
+  { id: 'examenes', label: 'Exámenes', icon: '🔬' },
+  { id: 'comparativo', label: 'Comparativo', icon: '📈' }
 ];
 
-const history = ref<PatientHistoryResponse['datos']>({
+const patientData = ref({
+  nombre: '', edad_genero: '', alergias: '', cronico: '', sangre: '', seguro: ''
+});
+
+const history = ref<HistorialClinicoData>({
+  paciente: null,
   consultas: [],
   examenes: [],
   comparativos: []
 });
 
-const fetchHistory = async () => {
+const ejecutarCargaHistorial = async (id: number) => {
+  if (!id || id <= 0) return;
   loading.value = true;
-  accesoDenegado.value = false;
   try {
-    const response: PatientHistoryResponse = await repo.getPatientHistory(props.pacienteId);
+    const response = await repo.getPatientHistory(id) as unknown as {
+      estado: string;
+      autorizacionGlobal: boolean;
+      datos: HistorialClinicoData
+    };
 
-    if (response.estado === 'success') {
+    console.log("====================================");
+    console.log("📦 RESPUESTA COMPLETA DEL BACKEND:", response);
+    console.log("📈 DATOS COMPARATIVOS RECIBIDOS:", response?.datos?.comparativos);
+    console.log("====================================");
+
+    if (response && response.estado === 'success') {
       history.value = response.datos;
-
       tieneAccesoGlobal.value = response.autorizacionGlobal;
+
+      if (response.datos.paciente) {
+        const p = response.datos.paciente;
+        patientData.value = {
+          nombre: p.nombre,
+          edad_genero: `${p.Edad || '---'} Años / ${p.Genero === 'M' ? 'Masculino' : 'Femenino'}`,
+          alergias: p.alergias,
+          cronico: p.cronico,
+          sangre: p.sangre,
+          seguro: p.seguro
+        };
+      }
     }
   } catch (error) {
-    console.error('Error al cargar el historial:', error);
-    accesoDenegado.value = true;
+    console.error('Error inyectando expediente:', error);
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(async () => {
-  if (props.pacienteId) {
-    await fetchHistory();
+const solicitarAccesoGlobal = async () => {
+  const pinPaciente = window.prompt("SEGURIDAD CLÍNICA: El sistema requiere el PIN de confirmación del paciente para liberar el expediente unificado. Por favor, ingrese el código de 4 dígitos dictado por el paciente:");
+
+  if (pinPaciente) {
+    try {
+      loading.value = true;
+
+      await repo.grantGlobalAccess(props.pacienteId, pinPaciente);
+
+      alert("¡Código Verificado! Autorización registrada en el sistema con éxito.");
+      await ejecutarCargaHistorial(props.pacienteId);
+    } catch (error: unknown) {
+      let msg = "Error al guardar la autorización clínica.";
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { mensaje?: string } } };
+        msg = axiosError.response?.data?.mensaje || msg;
+      }
+
+      alert(msg);
+    } finally {
+      loading.value = false;
+    }
   }
-});
+};
+
+watch(() => props.pacienteId, async (newId) => { await ejecutarCargaHistorial(newId); });
+onMounted(async () => { await ejecutarCargaHistorial(props.pacienteId); });
 </script>

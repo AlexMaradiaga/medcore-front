@@ -50,3 +50,14 @@ export interface Prescription {
   DetalleMedicamentos: string;
   YaCanjeada: number;
 }
+
+export interface DashboardAppointment {
+    id: number;
+    nombrePaciente: string;
+    fecha: string;
+    hora: string;
+    motivo: string;
+    estado: string;
+    genero: string;
+    edad: number;
+}

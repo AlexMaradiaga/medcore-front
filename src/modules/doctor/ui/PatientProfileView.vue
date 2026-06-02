@@ -93,6 +93,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
+import { useMedicalStore } from '@/stores/medicalStore';
 import type { DoctorAppointment } from '../domain/DoctorAppointment';
 
 interface PatientExam {
@@ -103,19 +104,23 @@ interface PatientExam {
 }
 
 const router = useRouter();
+const medicalStore = useMedicalStore();
 const appointment = ref<DoctorAppointment | null>(null);
 const exams = ref<PatientExam[]>([]);
+
+const startConsultation = () => {
+  medicalStore.setConsultationActive(true);
+  router.push('/medico/consulta');
+};
 
 onMounted(async () => {
   const saved = localStorage.getItem('current_appointment');
   if (saved) {
     appointment.value = JSON.parse(saved) as DoctorAppointment;
-  } else {
-    router.push('/medico/dashboard');
+
+    if (!medicalStore.isConsultationActive) {
+      medicalStore.setConsultationActive(false);
+    }
   }
 });
-
-const startConsultation = () => {
-  router.push('/medico/consulta');
-};
 </script>

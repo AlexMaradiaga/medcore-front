@@ -20,57 +20,76 @@ const router = createRouter({
     {
       path: '/medico/dashboard',
       name: 'doctor-dashboard',
-      component: () => import('@/modules/doctor/ui/DoctorDashboard.vue')
+      component: () => import('@/modules/doctor/ui/DoctorDashboard.vue'),
+      meta: { requiresAuth: true, role: 'Doctor' } // <-- CORREGIDO: Agregado protección
     },
     {
       path: '/medico/consulta',
       name: 'doctor-consultation',
-      component: () => import('@/modules/doctor/ui/ConsultationView.vue')
+      component: () => import('@/modules/doctor/ui/ConsultationView.vue'),
+      meta: { requiresAuth: true, role: 'Doctor' } // <-- CORREGIDO: Agregado protección
     },
     {
       path: '/medico/perfil',
       name: 'patient-profile',
       component: PatientProfileView,
-      meta: { requiresAuth: true, role: 'Doctor' } 
+      meta: { requiresAuth: true, role: 'Doctor' }
     },
     {
       path: '/medico/historial',
       name: 'Historial',
       component: () => import('@/modules/doctor/ui/HistoryPage.vue'),
       meta: { requiresAuth: true, role: 'Doctor' }
+    },
+    {
+      path: '/medico/pacientes',
+      name: 'medico-pacientes',
+      component: () => import('@/modules/doctor/ui/MyPatientsPage.vue'),
+      meta: { requiresAuth: true, role: 'Doctor' }
+    },
+    {
+      path: '/medico/agenda',
+      name: 'Agenda',
+      component: () => import('@/modules/doctor/ui/AgendaPage.vue'),
+      meta: { requiresAuth: true, role: 'Doctor' }
+    },
+    {
+      path: '/medico/receta',
+      name: 'doctor-prescription',
+      component: () => import('@/modules/doctor/ui/PrescriptionPage.vue') 
     }
   ]
 })
 
-router.beforeEach((to, from, next) => {
+// Guard global Senior: Sin parámetros 'next' obsoletos ni variables muertas
+router.beforeEach((to, _from) => {
   const publicPages = ['/', '/register'];
   const authRequired = !publicPages.includes(to.path);
   const loggedIn = localStorage.getItem('token');
 
-  // Obtenemos el usuario y normalizamos el acceso al ID del rol
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const role = user.rol_id || user.RolID; // Soporta ambos por si acaso
+  const role = user.rol_id || user.RolID;
 
-  // 1. Si no está logueado y va a una página privada -> al Login
+  // 1. CONTROL DE AUTENTICACIÓN: Si requiere token y no existe sesión
   if (authRequired && !loggedIn) {
-    return next('/');
+    return '/';
   }
 
-  // 2. Si intenta ir a rutas de médico pero NO tiene el rol 2
+  // 2. CONTROL DE ROLES CLÍNICOS: Bloqueo de rutas médicas perimetrales
   if (to.path.startsWith('/medico') && role !== 2) {
     console.warn("Acceso denegado a ruta médica. Rol actual:", role);
 
-    // Redirección inteligente: si es paciente (3) al directorio, si no al login
-    if (role === 3) return next('/directorio');
-    return next('/');
+    if (role === 3) return '/directorio';
+    return '/';
   }
 
-  // 3. (Opcional) Si el médico intenta entrar al dashboard de Admin (ID 1 o 3 según tu lógica)
+  // 3. REDIRECCIÓN INTELIGENTE DE DASHBOARD CENTRAL SEGÚN ROL
   if (to.path === '/dashboard' && role === 2) {
-    return next('/medico/dashboard');
+    return '/medico/dashboard';
   }
 
-  next();
+  // 4. TRANSICIÓN APROBADA
+  return true;
 });
 
 export default router

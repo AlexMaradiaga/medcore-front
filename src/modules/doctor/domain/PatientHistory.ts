@@ -1,4 +1,5 @@
 export interface ConsultaPrevia {
+    id: number;
     fecha: string;
     medico: string;
     especialidad: string;
@@ -17,7 +18,7 @@ export interface SignoVitalHistorico {
     presion: string;
     pulso: number;
     temperatura: number;
-    oxigeno: number;
+    saturacion: number;
 }
 
 export interface PatientHistoryResponse {
@@ -28,4 +29,40 @@ export interface PatientHistoryResponse {
         examenes: ExamenLaboratorio[];
         comparativos: SignoVitalHistorico[];
     };
+}
+
+export interface PacienteBasal {
+    nombre: string;
+    Edad: number;
+    Genero: string;
+    sangre: string;
+    alergias: string;
+    cronico: string;
+    seguro: string;
+    poliza: string | null;
+}
+
+export interface HistorialClinicoData {
+    paciente: PacienteBasal | null;
+    consultas: ConsultaPrevia[];
+    examenes: ExamenLaboratorio[];
+    comparativos: SignoVitalHistorico[];
+}
+
+export interface DetalleConsultaModal {
+    consultaID: number;
+    citaID: number;
+    diagnostico: string;
+    notasEvolucionSubjetiva: string;
+    estado: string;
+    examenFisico: {
+        examenSistemaID: number;
+        sistema: string;
+        condicion: string;
+        detalle: string;
+        hallazgos: {            
+            hallazgo: string;
+            estadoHallazgo: string;
+        }[];
+    }[];
 }

@@ -1,5 +1,7 @@
 export interface DoctorAppointment {
     CitaID: number;
+    ConsultaID?: number;
+    PacienteID?: string | number;
     Paciente: string;
     FechaHora: string;
     Motivo: string;
@@ -36,4 +38,9 @@ export interface ConsultationPayload {
     signos_vitales: SignosVitales;
     examen_fisico_opciones: HallazgosSistema;
     examen_fisico_notas: Record<string, string>;
+}
+export interface DiagnosticoCIE11 {
+  codigo: string;       // Ej: "1B12" o "DA01.1"
+  descripcion: string;  // Ej: "Faringitis Aguda"
+  sugerido?: boolean;   // Para identificar los destacados de tu captura
 }

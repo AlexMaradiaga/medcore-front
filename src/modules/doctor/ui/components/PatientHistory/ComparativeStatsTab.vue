@@ -1,77 +1,101 @@
 <template>
-  <div class="space-y-8 animate-fade-in">
-    <div v-if="data.length === 0" class="text-center py-10 text-slate-400 text-[10px] font-black uppercase">
-      No hay suficientes datos para generar comparativos.
+  <div class="space-y-6 animate-fade-in text-left">
+
+    <div v-if="parametrosEvolucion.length === 0" class="text-center py-16 bg-slate-50 border border-dashed border-slate-200 rounded-4xl text-slate-400 text-[11px] font-black uppercase tracking-widest">
+      📊 El paciente no cuenta con registros históricos de signos vitales en sus consultas previas.
     </div>
 
-    <div v-else class="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm">
-      <div class="flex justify-between items-center mb-10">
-        <div>
-          <h6 class="text-xs font-black text-slate-700 uppercase tracking-[0.2em]">Presión Arterial (Sistólica)</h6>
-          <p class="text-[9px] font-bold text-slate-400 uppercase mt-1">Evolución en las últimas 6 consultas</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 bg-[#0088cc] rounded-full animate-pulse"></span>
-          <span class="text-[#0088cc] text-[9px] font-black uppercase tracking-widest">Historial</span>
-        </div>
+    <template v-else>
+      <div class="mb-2">
+        <h3 class="text-sm font-black text-slate-700 uppercase tracking-tight">Comparativo Últimos Meses</h3>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Evolución de parámetros clave del paciente</p>
       </div>
 
-      <div class="flex justify-between items-end gap-5 h-48 px-4">
-        <div v-for="(val, i) in data" :key="i" class="flex-1 flex flex-col items-center gap-4 group">
-          <div class="opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 bg-slate-800 text-white text-[9px] font-black p-2 px-3 rounded-xl mb-1 shadow-xl whitespace-nowrap">
-            {{ val.presion || '0/0' }} mmHg
-          </div>
+      <div v-for="param in parametrosEvolucion" :key="param.titulo"
+        class="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xs space-y-4 hover:border-slate-200 transition-all">
 
-          <div
-            class="w-full bg-[#0088cc] rounded-t-3xl transition-all duration-1000 ease-out shadow-lg shadow-blue-50 hover:bg-blue-600 cursor-pointer"
-            :style="{ height: calculateBarHeight(val.presion) + '%' }">
-          </div>
-
-          <span class="text-[8px] font-black text-slate-400 uppercase -rotate-45 mt-6 whitespace-nowrap">
-            {{ formatShortDate(val.periodo) }}
+        <div class="flex justify-between items-center">
+          <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            {{ param.titulo }} <span class="text-emerald-500 text-xs">📈</span>
+          </h4>
+          <span :class="['text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-wider', param.estado === 'Mejorando' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600']">
+            {{ param.estado }}
           </span>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div v-for="(bloque, bIdx) in param.bloques" :key="bIdx"
+            :class="['p-4 rounded-2xl border text-center transition-all', bloque.enfoque ? 'bg-blue-50/40 border-blue-100 shadow-2xs' : 'bg-slate-50/30 border-slate-100/70']">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{ bloque.periodo }}</p>
+            <p :class="['text-sm font-black mt-1', bloque.enfoque ? 'text-[#005596]' : 'text-slate-700']">
+              {{ bloque.valor }}
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { SignoVitalHistorico } from '../../../domain/PatientHistory';
 
-defineProps<{
-  data: SignoVitalHistorico[]
-}>();
+const props = defineProps<{ data: SignoVitalHistorico[] }>();
 
-const formatShortDate = (date: string) => {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('es-HN', {
+const formatFechaBloque = (dateStr: string | undefined | null) => {
+  if (!dateStr) return '---';
+  return new Date(dateStr).toLocaleDateString('es-HN', {
     month: 'short',
     day: 'numeric'
   });
 };
 
-const calculateBarHeight = (presionValue: string | null | undefined): number => {
-  if (!presionValue || typeof presionValue !== 'string') return 10;
+const parametrosEvolucion = computed(() => {
+  console.log("🔍 PROPS.DATA EN COMPARATIVOTAB:", props.data);
+  if (!props.data || props.data.length === 0) return [];
 
-  const partes = presionValue.split('/');
-  const sistolicaStr = partes[0];
+  const registrosReal = [...props.data].slice(0, 3).reverse();
+  console.log("🔬 REGISTRO PROCESADO PARA HISTÓRICO:", registrosReal[0]);
+  const indexMasNuevo = registrosReal.length - 1;
 
-  if (!sistolicaStr) return 10;
-  const num = parseInt(sistolicaStr, 10);
-  if (isNaN(num)) return 10;
-  const porcentaje = (num / 200) * 100;
-  return Math.min(Math.max(porcentaje, 10), 100);
-};
+  return [
+    {
+      titulo: 'Presión Arterial',
+      estado: 'Monitoreo',
+      bloques: registrosReal.map((reg, idx) => ({
+        periodo: idx === indexMasNuevo ? 'Más Reciente' : `Control ${formatFechaBloque(reg.periodo)}`,
+        valor: `${reg.presion || '0/0'} mmHg`,
+        enfoque: idx === indexMasNuevo
+      }))
+    },
+    {
+      titulo: 'Pulso / Frecuencia',
+      estado: 'Monitoreo',
+      bloques: registrosReal.map((reg, idx) => ({
+        periodo: idx === indexMasNuevo ? 'Más Reciente' : `Control ${formatFechaBloque(reg.periodo)}`,
+        valor: reg.pulso ? `${reg.pulso} lpm` : '---',
+        enfoque: idx === indexMasNuevo
+      }))
+    },
+    {
+      titulo: 'Saturación de Oxígeno',
+      estado: 'Monitoreo',
+      bloques: registrosReal.map((reg, idx) => ({
+        periodo: idx === indexMasNuevo ? 'Más Reciente' : `Control ${formatFechaBloque(reg.periodo)}`,
+        valor: reg.saturacion ? `${reg.saturacion}%` : '---',
+        enfoque: idx === indexMasNuevo
+      }))
+    },
+    {
+      titulo: 'Temperatura Corporal',
+      estado: 'Monitoreo',
+      bloques: registrosReal.map((reg, idx) => ({
+        periodo: idx === indexMasNuevo ? 'Más Reciente' : `Control ${formatFechaBloque(reg.periodo)}`,
+        valor: reg.temperatura ? `${reg.temperatura} °C` : '---',
+        enfoque: idx === indexMasNuevo
+      }))
+    }
+  ];
+});
 </script>
-
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>
