@@ -484,12 +484,11 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    // 1. Clonamos el formulario reactivo completo (aquí viajan signos vitales, examen físico, etc.)
+   
     const payload = JSON.parse(JSON.stringify(form.value));
     payload.cita_id = Number(payload.cita_id);
 
-    // 2. 🚀 FORMATEO SEGURO: Convertimos el Array dinámico de strings en un solo String de texto plano
-    // Cada diagnóstico quedará separado por una coma y un espacio, comportándose igual que el textarea original
+
     payload.diagnostico = form.value.diagnostico.join(', ');
 
     // 3. Enviamos el payload completo con todas las secciones de la consulta médica

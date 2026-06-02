@@ -52,11 +52,11 @@ const formatFechaBloque = (dateStr: string | undefined | null) => {
 };
 
 const parametrosEvolucion = computed(() => {
-  console.log("🔍 PROPS.DATA EN COMPARATIVOTAB:", props.data);
+
   if (!props.data || props.data.length === 0) return [];
 
   const registrosReal = [...props.data].slice(0, 3).reverse();
-  console.log("🔬 REGISTRO PROCESADO PARA HISTÓRICO:", registrosReal[0]);
+ 
   const indexMasNuevo = registrosReal.length - 1;
 
   return [

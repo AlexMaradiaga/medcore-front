@@ -56,12 +56,12 @@ const router = createRouter({
     {
       path: '/medico/receta',
       name: 'doctor-prescription',
-      component: () => import('@/modules/doctor/ui/PrescriptionPage.vue') 
+      component: () => import('@/modules/doctor/ui/PrescriptionPage.vue')
     }
   ]
 })
 
-// Guard global Senior: Sin parámetros 'next' obsoletos ni variables muertas
+
 router.beforeEach((to, _from) => {
   const publicPages = ['/', '/register'];
   const authRequired = !publicPages.includes(to.path);
@@ -70,12 +70,12 @@ router.beforeEach((to, _from) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const role = user.rol_id || user.RolID;
 
-  // 1. CONTROL DE AUTENTICACIÓN: Si requiere token y no existe sesión
+
   if (authRequired && !loggedIn) {
     return '/';
   }
 
-  // 2. CONTROL DE ROLES CLÍNICOS: Bloqueo de rutas médicas perimetrales
+
   if (to.path.startsWith('/medico') && role !== 2) {
     console.warn("Acceso denegado a ruta médica. Rol actual:", role);
 
@@ -83,12 +83,12 @@ router.beforeEach((to, _from) => {
     return '/';
   }
 
-  // 3. REDIRECCIÓN INTELIGENTE DE DASHBOARD CENTRAL SEGÚN ROL
+
   if (to.path === '/dashboard' && role === 2) {
     return '/medico/dashboard';
   }
 
-  // 4. TRANSICIÓN APROBADA
+  
   return true;
 });
 

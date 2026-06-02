@@ -203,7 +203,7 @@ const fetchMisPacientes = async () => {
     listaPacientes.value = await repo.getMyPatients();
   } catch (error) {
     console.error('Error al cargar catálogo en UI:', error);
-  } finally { // <-- CORREGIDO AQUÍ: Cambio de final a finally
+  } finally { 
     loading.value = false;
   }
 };

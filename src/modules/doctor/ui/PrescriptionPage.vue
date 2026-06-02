@@ -171,7 +171,7 @@ const imprimirDocumentoReceta = () => {
 .animate-fade-in { animation: fadeIn 0.35s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 🖨️ REGLAS DE IMPRESIÓN LIMPIAS PARA CONTROL CORPORATIVO */
+
 @media print {
   body {
     background-color: #ffffff;

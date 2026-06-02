@@ -105,7 +105,7 @@ const isToday = (dateString: string) => {
 };
 
 const handleCellClick = () => {
-  // Acción para nueva cita (vacío por requerimiento)
+  
 
 };
 

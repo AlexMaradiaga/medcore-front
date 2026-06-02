@@ -119,11 +119,6 @@ const ejecutarCargaHistorial = async (id: number) => {
       datos: HistorialClinicoData
     };
 
-    console.log("====================================");
-    console.log("📦 RESPUESTA COMPLETA DEL BACKEND:", response);
-    console.log("📈 DATOS COMPARATIVOS RECIBIDOS:", response?.datos?.comparativos);
-    console.log("====================================");
-
     if (response && response.estado === 'success') {
       history.value = response.datos;
       tieneAccesoGlobal.value = response.autorizacionGlobal;
