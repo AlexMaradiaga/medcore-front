@@ -86,11 +86,11 @@
               <h3 class="text-xl font-black text-slate-800">Examen Físico por Sistemas</h3>
               <div class="space-y-4">
                 <div v-for="(sistema, index) in sistemasFisicos" :key="index" class="border border-slate-100 rounded-4xl overflow-hidden bg-white">
-                  <button @click="toggleSistema(index)" class="w-full flex justify-between items-center p-6 hover:bg-slate-50 transition-all cursor-pointer">
+                  <button @click="toggleSistema(Number(index))" class="w-full flex justify-between items-center p-6 hover:bg-slate-50 transition-all cursor-pointer">
                     <div class="flex items-center gap-4">
                       <span class="font-black text-slate-700 text-sm uppercase">{{ sistema.nombre }}</span>
-                      <span v-if="countHallazgos(index) > 0 && !sistema.isNormal" class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[8px] font-black uppercase">
-                        {{ countHallazgos(index) }} hallazgos
+                      <span v-if="countHallazgos(Number(index)) > 0 && !sistema.isNormal" class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[8px] font-black uppercase">
+                        {{ countHallazgos(Number(index)) }} hallazgos
                       </span>
                       <span v-else-if="sistema.isNormal" class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[8px] font-black uppercase">Normal</span>
                     </div>
@@ -99,7 +99,7 @@
 
                   <div v-if="sistema.open" class="p-8 bg-white border-t border-slate-50 animate-fade-in space-y-6 text-left">
                     <label class="flex items-center gap-3 cursor-pointer group">
-                      <input type="checkbox" v-model="sistema.isNormal" @change="handleNormalChange(index)" class="w-5 h-5 rounded border-slate-300 text-[#005596]">
+                      <input type="checkbox" v-model="sistema.isNormal" @change="handleNormalChange(Number(index))" class="w-5 h-5 rounded border-slate-300 text-[#005596]">
                       <span class="text-sm font-bold text-slate-600 group-hover:text-slate-800 transition-colors">Normal / Sin hallazgos</span>
                     </label>
 
@@ -184,10 +184,10 @@
                 class="bg-blue-50/40 border border-blue-100/60 rounded-2xl p-6 flex justify-between items-center animate-fade-in"
               >
                 <div class="text-left space-y-1">
-                  <p class="text-[9px] font-black text-[#005596] uppercase tracking-widest">Diagnóstico Establecido #{{ idx + 1 }}</p>
+                  <p class="text-[9px] font-black text-[#005596] uppercase tracking-widest">Diagnóstico Establecido #{{ Number(idx) + 1 }}</p>
                   <p class="text-sm font-black text-slate-800">{{ diagEstablecido }}</p>
                 </div>
-                <button type="button" @click="removerDiagnostico(idx)" class="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-xl transition-all cursor-pointer">
+                <button type="button" @click="removerDiagnostico(Number(idx))" class="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-xl transition-all cursor-pointer">
                   Quitar ✕
                 </button>
               </div>
@@ -245,12 +245,12 @@
                         </td>
                       </tr>
                       <tr v-else v-for="(med, index) in form.detalle_medicamentos" :key="index" class="border-b border-slate-50 hover:bg-slate-50/40 transition-all font-bold text-slate-700 text-xs animate-fade-in">
-                        <td class="py-3.5 px-2 text-center text-slate-400 font-black">{{ index + 1 }}</td>
+                        <td class="py-3.5 px-2 text-center text-slate-400 font-black">{{ Number(index) + 1 }}</td>
                         <td class="py-3.5 px-3 text-slate-900 font-black uppercase text-[11px]">{{ med.NombreMedicamento }}</td>
                         <td class="py-3.5 px-3 text-slate-600 font-semibold">{{ med.Dosis }}</td>
                         <td class="py-3.5 px-3 text-slate-500 font-medium italic leading-relaxed">{{ med.Indicaciones }}</td>
                         <td class="py-3.5 px-2 text-center">
-                          <button @click="removerMedicamentoDelPlan(index)" class="text-slate-300 hover:text-rose-600 font-black p-1 rounded-md hover:bg-rose-50 transition-all cursor-pointer">✕</button>
+                          <button @click="removerMedicamentoDelPlan(Number(index))" class="text-slate-300 hover:text-rose-600 font-black p-1 rounded-md hover:bg-rose-50 transition-all cursor-pointer">✕</button>
                         </td>
                       </tr>
                     </tbody>
@@ -276,8 +276,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
 import { useMedicalStore } from '@/stores/medicalStore';
 import { DoctorRepository } from '../infrastructure/DoctorRepository';
@@ -306,6 +307,7 @@ interface FilaMedicamentoConsulta {
 }
 
 const router = useRouter();
+const toast = useToast();
 const medicalStore = useMedicalStore();
 const repo = new DoctorRepository();
 const appointment = ref<DoctorAppointment | null>(null);
@@ -315,7 +317,6 @@ const isEditingSubjetivo = ref(false);
 const editableSubjetivo = ref('');
 const tempSubjetivo = ref('');
 
-// Control de UI Catálogo CIE-11 de la OMS
 const busquedaDiag = ref('');
 const buscandoAPI = ref(false);
 const mostrarDropdown = ref(false);
@@ -328,19 +329,39 @@ const nuevoMedPlan = ref<FilaMedicamentoConsulta>({
   Indicaciones: ''
 });
 
-const form = ref({
-  cita_id: 0,
-  signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '' } as SignosVitales,
-  examen_fisico_opciones: {
-    general: {}, cardiovascular: {}, respiratorio: {}, abdomen: {}, neurologico: {}
-  } as HallazgosSistema,
-  examen_fisico_notas: {
-    general: '', cardiovascular: '', respiratorio: '', abdomen: '', neurologico: ''
-  } as Record<string, string>,
-  diagnostico: [] as string[],
-  notas_medicas: '',
-  detalle_medicamentos: [] as FilaMedicamentoConsulta[]
-});
+const obtenerBorradorInicial = () => {
+  const borradorGuardado = localStorage.getItem('draft_consulta_actual');
+  if (borradorGuardado) {
+    try {
+      return JSON.parse(borradorGuardado);
+    } catch (e) {
+      console.error("Error al parsear el borrador clínico local:", e);
+    }
+  }
+  return {
+    cita_id: 0,
+    signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '' } as SignosVitales,
+    examen_fisico_opciones: {
+      general: {}, cardiovascular: {}, respiratorio: {}, abdomen: {}, neurologico: {}
+    } as HallazgosSistema,
+    examen_fisico_notas: {
+      general: '', cardiovascular: '', respiratorio: '', abdomen: '', neurologico: ''
+    } as Record<string, string>,
+    diagnostico: [] as string[],
+    notas_medicas: '',
+    detalle_medicamentos: [] as FilaMedicamentoConsulta[]
+  };
+};
+
+const form = ref(obtenerBorradorInicial());
+
+watch(
+  form,
+  (nuevoEstado) => {
+    localStorage.setItem('draft_consulta_actual', JSON.stringify(nuevoEstado));
+  },
+  { deep: true }
+);
 
 const sistemasFisicos = ref([
   { nombre: 'General', id: 'general', open: false, isNormal: false, opciones: ['Palidez', 'Ictericia', 'Deshidratación', 'Cianosis'] },
@@ -357,7 +378,6 @@ const listaCamposSignos = [
   { label: 'Frecuencia Resp.', key: 'respiracion' as keyof SignosVitales }
 ];
 
-// Lógica de Escritura con Debounce Eficiente para la API OMS
 const onBusquedaInput = () => {
   mostrarDropdown.value = true;
   if (debounceTimeout) clearTimeout(debounceTimeout);
@@ -372,7 +392,6 @@ const onBusquedaInput = () => {
   debounceTimeout = setTimeout(async () => {
     try {
       resultadosDiagnosticos.value = await repo.buscarDiagnosticosCIE11(query);
-      console.log('valores', resultadosDiagnosticos);
     } catch (err) {
       console.error(err);
     } finally {
@@ -435,7 +454,15 @@ onMounted(() => {
     return;
   }
   appointment.value = JSON.parse(saved);
-  if (appointment.value) form.value.cita_id = appointment.value.CitaID;
+
+  if (appointment.value) {
+    form.value.cita_id = appointment.value.CitaID;
+
+    if (form.value.notas_medicas) {
+      editableSubjetivo.value = form.value.notas_medicas;
+      tempSubjetivo.value = form.value.notas_medicas;
+    }
+  }
 
   if (!medicalStore.isConsultationActive) {
     medicalStore.setConsultationActive(true);
@@ -457,7 +484,7 @@ const saveSubjetivo = () => {
 
 const agregarMedicamentoAlPlan = (): void => {
   if (!nuevoMedPlan.value.NombreMedicamento || !nuevoMedPlan.value.NombreMedicamento.trim()) {
-    alert("El campo 'Medicamento' es obligatorio para poder anexarlo al plan de tratamiento.");
+    toast.error("El campo 'Medicamento' es obligatorio para poder anexarlo al plan.");
     return;
   }
 
@@ -474,42 +501,54 @@ const removerMedicamentoDelPlan = (index: number) => {
   form.value.detalle_medicamentos.splice(index, 1);
 };
 
-const handleSaveDraft = () => alert('Borrador guardado localmente.');
+const handleSaveDraft = () => {
+  localStorage.setItem('draft_consulta_actual', JSON.stringify(form.value));
+  toast.success('Borrador clínico respaldado de forma segura en el almacenamiento local.');
+};
 
 const handleSubmit = async () => {
   if (form.value.diagnostico.length === 0 || form.value.detalle_medicamentos.length === 0) {
-    alert('Por favor complete el diagnóstico y agregue al menos un medicamento en la pestaña de Plan antes de finalizar.');
+    toast.error('Por favor complete el diagnóstico y agregue al menos un medicamento en la pestaña de Plan antes de finalizar.');
     return;
   }
 
   loading.value = true;
   try {
-   
     const payload = JSON.parse(JSON.stringify(form.value));
     payload.cita_id = Number(payload.cita_id);
-
-
     payload.diagnostico = form.value.diagnostico.join(', ');
 
-    // 3. Enviamos el payload completo con todas las secciones de la consulta médica
     await repo.completeConsultation(payload);
-    alert('¡Consulta finalizada y receta guardada con éxito en MedCore!');
+    toast.success('¡Consulta finalizada con éxito!');
+
+    // 🌟 SEMBRAMOS EL RESUMEN EN LOCALSTORAGE ELIMINANDO VOLATILIDAD DE HISTORIAL
+    const objetoResumen = {
+      paciente: appointment.value?.Paciente || 'Paciente',
+      telefono: appointment.value?.Telefono || '',
+      email: appointment.value?.EmailPaciente || '',
+      edad: appointment.value?.Edad,
+      genero: appointment.value?.Genero,
+      diagnostico: payload.diagnostico,
+      detalle_medicamentos: form.value.detalle_medicamentos
+    };
+
+    localStorage.setItem('medcore_resumen_compartir', JSON.stringify(objetoResumen));
+    localStorage.removeItem('draft_consulta_actual');
 
     medicalStore.setConsultationActive(false);
     medicalStore.clearPatient();
     localStorage.removeItem('current_appointment');
 
-    const citaId = payload.cita_id;
-    router.push(`/medico/receta/${citaId}`);
+    // Navegación directa hacia el resumen final
+    router.push(`/medico/consulta/${payload.cita_id}/resumen`);
   } catch (err) {
-    alert('Error al finalizar la consulta médica.');
+    toast.error('Error crítico al intentar finalizar la consulta médica.');
     console.error(err);
   } finally {
     loading.value = false;
   }
 };
 
-// Directiva Click-Outside Local
 const vClickOutside = {
   mounted(el: HTMLElementWithClickOutside, binding: DirectiveBinding<(event: Event) => void>) {
     el.clickOutsideEvent = (event: Event) => {
@@ -527,28 +566,3 @@ const vClickOutside = {
 };
 </script>
 
-<style scoped>
-.font-premium {
-  font-family: 'Montserrat', 'Inter', system-ui, sans-serif;
-}
-.rounded-4xl {
-  border-radius: 2rem;
-}
-.animate-fade-in { animation: fadeIn 0.3s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f8fafc;
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-</style>

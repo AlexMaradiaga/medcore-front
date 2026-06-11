@@ -27,6 +27,19 @@ export class PatientRepositoryImpl {
       entidad_id: 1
     });
   }
+
+  async registerPublic(patient: PatientDto): Promise<void> {
+    await api.post('/register-patient', {
+      email: patient.email,
+      password: patient.password,
+      dni: patient.DNI,
+      nombre: patient.Nombre,
+      apellido: patient.Apellido,
+      telefono: patient.Telefono,
+      entidad_id: 1
+    });
+  }
+
   async update(id: string, patient: PatientDto): Promise<void> {
     await api.put(`/pacientes/${id}`, {
       email: patient.email,

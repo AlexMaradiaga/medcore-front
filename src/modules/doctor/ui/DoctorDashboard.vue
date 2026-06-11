@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
 import { DoctorRepository } from '../infrastructure/DoctorRepository';
 import type { DoctorAppointment } from '../domain/DoctorAppointment';
@@ -110,6 +111,7 @@ import type { Patient } from '@/modules/patients/domain/entities/Patient';
 const router = useRouter();
 const repo = new DoctorRepository();
 const medicalStore = useMedicalStore();
+const toast = useToast();
 const appointments = ref<DoctorAppointment[]>([]);
 
 const citasUrgentes = computed(() => appointments.value.filter(c => !c.EstadoCita || c.EstadoCita === 'Pendiente'));
@@ -128,8 +130,8 @@ const loadDoctorData = async () => {
   if (userId) {
     try {
       appointments.value = await repo.getAppointments(userId);
-    } catch (error) {
-      console.error("Error cargando el dashboard médico:", error);
+    } catch {
+      toast.error('No se pudieron actualizar las consultas de la agenda del día.');
     }
   }
 };
@@ -149,15 +151,13 @@ const startConsultation = async (cita: DoctorAppointment) => {
         PacienteID: String(pacienteReal.PacienteID),
         Nombre: pacienteReal.Nombre
       } as Partial<Patient> as Patient);
-
     } else {
       medicalStore.setPatient({
         PacienteID: String(cita.CitaID),
         Nombre: cita.Paciente
       } as Partial<Patient> as Patient);
     }
-  } catch (error) {
-    console.error('Error al sincronizar el identificador clínico:', error);
+  } catch {
     medicalStore.setPatient({
       PacienteID: String(cita.CitaID),
       Nombre: cita.Paciente
@@ -166,7 +166,6 @@ const startConsultation = async (cita: DoctorAppointment) => {
     router.push('/medico/perfil');
   }
 };
-
 
 const formatHora = (fechaStr: string | undefined | null) => {
   if (!fechaStr) return '00:00';
@@ -179,9 +178,9 @@ const handleApprove = async (citaId: number) => {
   try {
     await repo.approveAppointment(citaId);
     await loadDoctorData();
-    alert('Cita aprobada correctamente.');
-  } catch (error) {
-    console.error("Error al aprobar:", error);
+    toast.success('Consulta prioritaria aprobada correctamente.');
+  } catch {
+    toast.error('Ocurrió un error al intentar autorizar la consulta médica.');
   }
 };
 
@@ -191,9 +190,9 @@ const handleReject = async (citaId: number) => {
     try {
       await repo.rejectAppointment(citaId, motivo);
       await loadDoctorData();
-      alert('Cita rechazadas con éxito.');
-    } catch (error) {
-      console.error("Error al rechazar:", error);
+      toast.success('Solicitud rechazada con éxito.');
+    } catch {
+      toast.error('No se pudo procesar la cancelación de la consulta.');
     }
   }
 };
@@ -205,3 +204,9 @@ onMounted(async () => {
   await loadDoctorData();
 });
 </script>
+
+<style scoped>
+.rounded-4xl { border-radius: 2rem; }
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>

@@ -151,23 +151,23 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
 import { DoctorRepository, type PacienteCatalogoDTO } from '../infrastructure/DoctorRepository';
 
-// Componentes hijos originales
 import ConsultationHistoryTab from './components/PatientHistory/ConsultationHistoryTab.vue';
 import ExamsHistoryTab from './components/PatientHistory/ExamsHistoryTab.vue';
 import ComparativeStatsTab from './components/PatientHistory/ComparativeStatsTab.vue';
 import type { PatientHistoryResponse } from '../domain/PatientHistory';
 import { useMedicalStore } from '@/stores/medicalStore';
+
 const repo = new DoctorRepository();
+const toast = useToast();
+const medicalStore = useMedicalStore();
 
 const searchQuery = ref('');
 const loading = ref(false);
 const listaPacientes = ref<PacienteCatalogoDTO[]>([]);
-
-
-const medicalStore = useMedicalStore();
 
 const modalAbierto = ref(false);
 const loadingModal = ref(false);
@@ -201,9 +201,9 @@ const fetchMisPacientes = async () => {
   loading.value = true;
   try {
     listaPacientes.value = await repo.getMyPatients();
-  } catch (error) {
-    console.error('Error al cargar catálogo en UI:', error);
-  } finally { 
+  } catch {
+    toast.error('No se pudo sincronizar el catálogo de pacientes atendidos.');
+  } finally {
     loading.value = false;
   }
 };
@@ -221,8 +221,8 @@ const abrirExpedienteModal = async (paciente: PacienteCatalogoDTO) => {
     if (response && response.estado === 'success' && response.datos) {
       historialClinico.value = response.datos;
     }
-  } catch (error) {
-    console.error('Error al inyectar expediente en el catálogo modal:', error);
+  } catch {
+    toast.error('Error al intentar abrir el expediente clínico digitalizado.');
   } finally {
     loadingModal.value = false;
   }
@@ -251,3 +251,14 @@ onMounted(async () => {
   await fetchMisPacientes();
 });
 </script>
+
+<style scoped>
+.font-premium { font-family: 'Montserrat', 'Inter', sans-serif; }
+.rounded-4xl { border-radius: 2rem; }
+.backdrop-blur-md { backdrop-filter: blur(12px); }
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>

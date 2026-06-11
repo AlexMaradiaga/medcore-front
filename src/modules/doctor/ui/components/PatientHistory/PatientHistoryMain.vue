@@ -78,6 +78,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+import { useToast } from 'vue-toastification';
 import { DoctorRepository } from '../../../infrastructure/DoctorRepository';
 import ConsultationHistoryTab from './ConsultationHistoryTab.vue';
 import ExamsHistoryTab from './ExamsHistoryTab.vue';
@@ -87,6 +88,7 @@ import type { HistorialClinicoData } from '../../../domain/PatientHistory';
 
 const props = defineProps<{ pacienteId: number }>();
 const repo = new DoctorRepository();
+const toast = useToast();
 
 const activeTab = ref('consultas');
 const loading = ref(false);
@@ -151,7 +153,7 @@ const solicitarAccesoGlobal = async () => {
 
       await repo.grantGlobalAccess(props.pacienteId, pinPaciente);
 
-      alert("¡Código Verificado! Autorización registrada en el sistema con éxito.");
+      toast.success("¡Código Verificado! Autorización registrada con éxito.");
       await ejecutarCargaHistorial(props.pacienteId);
     } catch (error: unknown) {
       let msg = "Error al guardar la autorización clínica.";
@@ -161,7 +163,7 @@ const solicitarAccesoGlobal = async () => {
         msg = axiosError.response?.data?.mensaje || msg;
       }
 
-      alert(msg);
+      toast.error(msg);
     } finally {
       loading.value = false;
     }

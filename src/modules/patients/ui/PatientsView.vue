@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 import { PatientRepositoryImpl } from '../infraestructure/PatientRepositoryImpl';
 import type { Patient } from '../domain/entities/Patient';
 
 const patientRepo = new PatientRepositoryImpl();
+const toast = useToast();
+
 const patients = ref<Patient[]>([]);
 const loading = ref(true);
 
@@ -22,11 +25,10 @@ const newPatient = ref({
 
 const openEditModal = (patient: Patient) => {
   isEditing.value = true;
-  selectedPatientId.value = patient.PacienteID|| null;
+  selectedPatientId.value = patient.PacienteID || null;
 
   const patientData = patient as unknown as Record<string, string>;
 
-  console.log("Datos del paciente a editar:", patient);
   newPatient.value = {
     Nombre: patient.Nombre || '',
     Apellido: patient.Apellido || '',
@@ -50,29 +52,32 @@ const savePatient = async () => {
   try {
     if (isEditing.value && selectedPatientId.value) {
       await patientRepo.update(selectedPatientId.value, newPatient.value);
-      alert("Paciente actualizado con éxito");
+      toast.success("Paciente actualizado con éxito.");
     } else {
       await patientRepo.create(newPatient.value);
-      alert("Paciente creado con éxito");
+      toast.success("Paciente registrado con éxito.");
     }
 
     resetForm();
     patients.value = await patientRepo.getAll();
-  } catch (error) {
-    alert("Error al procesar la solicitud: " + error);
+  } catch {
+    toast.error("Ocurrió un error al intentar procesar el registro clínico.");
   } finally {
     loading.value = false;
   }
 };
 
 const deletePatient = async (id: string) => {
-  if (confirm('¿Está seguro de desactivar este paciente?')) {
+  if (window.confirm('¿Está seguro de que desea desactivar este paciente en el sistema?')) {
     try {
+      loading.value = true;
       await patientRepo.delete(id);
       patients.value = await patientRepo.getAll();
-      alert("Paciente desactivado con éxito");
+      toast.success("Paciente desactivado con éxito.");
     } catch {
-      alert("No se pudo desactivar al paciente.");
+      toast.error("No se pudo remover el acceso del paciente seleccionado.");
+    } finally {
+      loading.value = false;
     }
   }
 };
@@ -80,8 +85,8 @@ const deletePatient = async (id: string) => {
 onMounted(async () => {
   try {
     patients.value = await patientRepo.getAll();
-  } catch (error) {
-    console.error("Error al cargar pacientes:", error);
+  } catch {
+    toast.error("Error al sincronizar el listado general de pacientes.");
   } finally {
     loading.value = false;
   }
@@ -122,8 +127,8 @@ onMounted(async () => {
                </span>
             </td>
             <td class="p-4 text-center">
-              <button @click="openEditModal(patient)" class="text-medgo-blue hover:underline font-bold mr-3">Editar</button>
-              <button @click="deletePatient(patient.PacienteID!)" class="text-red-500 hover:underline font-bold">Borrar</button>
+              <button @click="openEditModal(patient)" class="text-medgo-blue hover:underline font-bold mr-3 cursor-pointer">Editar</button>
+              <button @click="deletePatient(patient.PacienteID!)" class="text-red-500 hover:underline font-bold cursor-pointer">Borrar</button>
             </td>
           </tr>
 
@@ -151,18 +156,18 @@ onMounted(async () => {
         <input v-model="newPatient.Telefono" placeholder="Teléfono" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-medgo-blue" />
 
         <template v-if="!isEditing">
-          <hr />
+          <hr class="border-slate-100" />
           <input v-model="newPatient.email" type="email" placeholder="Correo Electrónico" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-medgo-blue" />
           <input v-model="newPatient.password" type="password" placeholder="Contraseña de acceso" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-medgo-blue" />
         </template>
       </div>
 
       <div class="flex justify-end mt-8 gap-3">
-        <button @click="resetForm" class="px-4 py-2 text-slate-400 font-bold hover:text-slate-600">Cancelar</button>
+        <button @click="resetForm" class="px-4 py-2 text-slate-400 font-bold hover:text-slate-600 cursor-pointer">Cancelar</button>
         <button
           @click="savePatient"
           :disabled="loading"
-          class="bg-medgo-blue text-white px-6 py-2 rounded-xl font-bold disabled:opacity-50 hover:bg-blue-700 transition"
+          class="bg-medgo-blue text-white px-6 py-2 rounded-xl font-bold disabled:opacity-50 hover:bg-blue-700 transition cursor-pointer"
         >
           {{ loading ? 'Procesando...' : (isEditing ? 'Actualizar' : 'Guardar') }}
         </button>

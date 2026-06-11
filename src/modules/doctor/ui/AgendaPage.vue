@@ -60,6 +60,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
 import WeeklyCalendar from './components/calendar/WeeklyCalendar.vue';
 import { useMedicalStore } from '@/stores/medicalStore';
@@ -68,6 +69,7 @@ import type { DashboardAppointment } from '@/modules/appointments/domain/Appoint
 
 const medicalStore = useMedicalStore();
 const repo = new DoctorRepository();
+const toast = useToast();
 
 const fechaSeleccionada = ref(new Date());
 const misCitas = ref<DashboardAppointment[]>([]);
@@ -119,8 +121,8 @@ const cargarCitas = async () => {
     misCitas.value = [...filtradas];
     calendarKey.value++;
 
-  } catch (error) {
-    console.error('Error al cargar citas:', error);
+  } catch {
+    toast.error('No se pudo sincronizar la agenda médica semanal.');
   }
 };
 
@@ -148,3 +150,8 @@ onMounted(async () => {
   await cargarCitas();
 });
 </script>
+
+<style scoped>
+.font-premium { font-family: 'Montserrat', 'Inter', sans-serif; }
+.rounded-4xl { border-radius: 2rem; }
+</style>

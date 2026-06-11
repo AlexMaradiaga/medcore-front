@@ -73,11 +73,13 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 import { PatientRepositoryImpl } from '@/modules/patients/infraestructure/PatientRepositoryImpl';
 import type { Patient } from '@/modules/patients/domain/entities/Patient';
 
 const router = useRouter();
 const patientRepo = new PatientRepositoryImpl();
+const toast = useToast();
 const loading = ref(false);
 
 const form = reactive({
@@ -99,15 +101,16 @@ const handleRegister = async () => {
       email: form.email,
       password: form.password,
       Telefono: form.telefono,
-      entidad_id: 1 
+      entidad_id: 1
     };
 
-    await patientRepo.create(newPatient);
+    //await patientRepo.create(newPatient);
+    await patientRepo.registerPublic(newPatient);
 
-    alert("¡Registro exitoso! Ya puedes ingresar.");
+    toast.success("¡Registro exitoso! Ya puedes ingresar al sistema.");
     router.push('/');
   } catch (error: unknown) {
-    let errorMessage = "Error desconocido";
+    let errorMessage = "Ocurrió un problema al procesar su solicitud.";
 
     if (error instanceof Error) {
       errorMessage = error.message;
@@ -116,7 +119,7 @@ const handleRegister = async () => {
       errorMessage = axiosError.response.data.message || errorMessage;
     }
 
-    alert("Error al registrarse: " + errorMessage);
+    toast.error(errorMessage);
   } finally {
     loading.value = false;
   }

@@ -21,13 +21,13 @@ const router = createRouter({
       path: '/medico/dashboard',
       name: 'doctor-dashboard',
       component: () => import('@/modules/doctor/ui/DoctorDashboard.vue'),
-      meta: { requiresAuth: true, role: 'Doctor' } // <-- CORREGIDO: Agregado protección
+      meta: { requiresAuth: true, role: 'Doctor' }
     },
     {
       path: '/medico/consulta',
       name: 'doctor-consultation',
       component: () => import('@/modules/doctor/ui/ConsultationView.vue'),
-      meta: { requiresAuth: true, role: 'Doctor' } // <-- CORREGIDO: Agregado protección
+      meta: { requiresAuth: true, role: 'Doctor' }
     },
     {
       path: '/medico/perfil',
@@ -54,9 +54,15 @@ const router = createRouter({
       meta: { requiresAuth: true, role: 'Doctor' }
     },
     {
-      path: '/medico/receta',
+      path: '/medico/receta/:id?',
       name: 'doctor-prescription',
       component: () => import('@/modules/doctor/ui/PrescriptionPage.vue')
+    },
+    {
+      path: '/medico/consulta/:id/resumen',
+      name: 'consulta-resumen',
+      component: () => import('@/modules/doctor/ui/ConsultaResumenView.vue'),
+      meta: { requiresAuth: true, role: 'Doctor' }
     }
   ]
 })
@@ -75,7 +81,6 @@ router.beforeEach((to, _from) => {
     return '/';
   }
 
-
   if (to.path.startsWith('/medico') && role !== 2) {
     console.warn("Acceso denegado a ruta médica. Rol actual:", role);
 
@@ -83,12 +88,11 @@ router.beforeEach((to, _from) => {
     return '/';
   }
 
-
   if (to.path === '/dashboard' && role === 2) {
     return '/medico/dashboard';
   }
 
-  
+
   return true;
 });
 

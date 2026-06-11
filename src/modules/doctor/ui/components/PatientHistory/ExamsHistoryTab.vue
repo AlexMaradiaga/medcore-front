@@ -39,9 +39,12 @@
 </template>
 
 <script setup lang="ts">
+import { useToast } from 'vue-toastification';
 import type { ExamenLaboratorio } from '../../../domain/PatientHistory';
 
 defineProps<{ data: ExamenLaboratorio[] }>();
+
+const toast = useToast();
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '---';
@@ -49,7 +52,10 @@ const formatDate = (dateStr: string) => {
 };
 
 const handleDownload = (exam: ExamenLaboratorio) => {
-  if (exam.url_pdf) window.open(exam.url_pdf, '_blank');
-  else alert('Archivo adjunto consolidado en la infraestructura de datos.');
+  if (exam.url_pdf) {
+    window.open(exam.url_pdf, '_blank');
+  } else {
+    toast.warning('Archivo adjunto consolidado en la infraestructura de datos.');
+  }
 };
 </script>

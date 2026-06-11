@@ -25,30 +25,44 @@ export interface Appointment {
   Alergias: string;
   MedicamentosActuales: string;
 }
+
 export interface MedicalRecord {
-  ConsultaID: number;
+  CitaID: string;
   FechaHora: string;
+  EstadoCita: string;
+  Motivo: string;
+  Sintomas: string;
   Doctor: string;
   Clinica: string;
-  Especialidad: string;
-  Diagnostico: string;
-  NotasMedicas?: string;
+  Especialidad?: string;
+  Edad: string;
+  Genero: string;
+  Alergias: string;
+  MedicamentosActuales: string;
 }
 
 export interface Exam {
-  ExamenID: number;
-  Titulo: string;
-  Fecha: string;
-  ArchivoUrl: string;
+  ExamenSistemaID: number;
+  CitaID: string;
+  ConsultaID: number;
+  FechaHora: string;
   Doctor: string;
+  SistemaID: string;
+  EsNormal: number;
+  NotasAdicionales: string | null;
 }
 
 export interface Prescription {
   RecetaID: number;
-  Fecha: string;
-  Doctor: string;
-  DetalleMedicamentos: string;
+  ConsultaID: number;
+  CodigoCanje: string;
+  NombreMedicamento: string;
+  Dosis: string;
+  Indicaciones: string;
   YaCanjeada: number;
+  Estado: number;
+  FechaEmision: string;
+  Doctor?: string;
 }
 
 export interface DashboardAppointment {

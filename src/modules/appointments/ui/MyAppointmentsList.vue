@@ -113,6 +113,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 import { AppointmentRepository } from '../infrastructure/AppointmentRepo';
 import type { Appointment } from '../domain/Appointment';
 
@@ -123,9 +124,10 @@ const props = defineProps<{
 defineEmits(['goToDirectory']);
 
 const appointmentRepo = new AppointmentRepository();
+const toast = useToast();
+
 const appointments = ref<Appointment[]>([]);
 const loading = ref(false);
-
 const showModal = ref(false);
 const selectedCita = ref<Appointment | null>(null);
 
@@ -167,14 +169,22 @@ const statusClass = (status: string) => {
 };
 
 const handleCancel = async (citaId: number) => {
-  if (confirm('¿Está seguro de que desea cancelar esta cita?')) {
+  if (window.confirm('¿Está seguro de que desea cancelar esta cita de forma definitiva?')) {
     try {
+      loading.value = true;
       await appointmentRepo.cancel(citaId);
-      alert('Cita cancelada exitosamente');
-      loadCitas();
+      toast.success('Cita médica cancelada de forma exitosa.');
+      await loadCitas();
     } catch {
-      alert('Error al cancelar la cita');
+      toast.error('Error al intentar dar de baja la cita médica.');
+    } finally {
+      loading.value = false;
     }
   }
 };
 </script>
+
+<style scoped>
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>

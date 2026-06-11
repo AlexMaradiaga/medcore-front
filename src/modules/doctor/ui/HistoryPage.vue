@@ -48,7 +48,6 @@ const pacienteId = computed(() => {
     return Number(medicalStore.selectedPatient.PacienteID);
   }
 
-  // Resguardo para el flujo desde "Mis Pacientes"
   const selected = JSON.parse(localStorage.getItem('selectedPatient') || '{}');
   return Number(selected.PacienteID || selected.id || 0);
 });

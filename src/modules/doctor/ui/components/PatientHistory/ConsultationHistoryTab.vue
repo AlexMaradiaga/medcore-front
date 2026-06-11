@@ -44,15 +44,9 @@
         </div>
 
         <div v-else-if="detalle" class="flex-1 overflow-y-auto pr-2 space-y-6 text-left">
-          <div class="space-y-2">
-            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Evolución Subjetiva / Notas Médicas:</h4>
-            <div class="bg-slate-50/60 p-5 rounded-3xl border border-slate-100 text-xs font-bold text-slate-700 italic leading-relaxed">
-              "{{ detalle.notasEvolucionSubjetiva || 'No se registraron notas subjetivas o evoluciones basales.' }}"
-            </div>
-          </div>
 
           <div class="space-y-3">
-            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Examen Físico de Sistemas (Data SQL Real):</h4>
+            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Examen Físico de Sistemas:</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div v-for="item in detalle.examenFisico" :key="item.examenSistemaID" class="p-5 bg-slate-50/40 border border-slate-100/80 rounded-3xl space-y-2 flex flex-col justify-between">
                 <div>
@@ -88,11 +82,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 import { DoctorRepository } from '../../../infrastructure/DoctorRepository';
 import type { ConsultaPrevia, DetalleConsultaModal } from '../../../domain/PatientHistory';
 
 defineProps<{ data: ConsultaPrevia[] }>();
 const repo = new DoctorRepository();
+const toast = useToast();
 
 const modalAbierto = ref<boolean>(false);
 const cargandoDetalle = ref<boolean>(false);
@@ -112,8 +108,8 @@ const abrirExamenModal = async (consultaId: number) => {
     if (res.estado === 'success') {
       detalle.value = res.datos;
     }
-  } catch (error) {
-    console.error(error);
+  } catch {
+    toast.error('No se pudo recuperar el expediente detallado de la consulta.');
   } finally {
     cargandoDetalle.value = false;
   }
@@ -122,6 +118,6 @@ const abrirExamenModal = async (consultaId: number) => {
 
 <style scoped>
 .font-premium { font-family: 'Montserrat', 'Inter', sans-serif; }
-.rounded-\[2rem\] { border-radius: 2rem; }
+.rounded-4xl { border-radius: 2rem; }
 .backdrop-blur-xs { backdrop-filter: blur(2px); }
 </style>

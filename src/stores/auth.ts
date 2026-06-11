@@ -25,12 +25,14 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('user', JSON.stringify(user));
 
         return { success: true };
-      } catch (error) {
-        console.error('Error capturado en el Store:', error);
+      } catch (error: unknown) {
+        let message = 'Credenciales inválidas.';
 
-        return { success: false, message: 'Error en login' };
-      } finally {
-        this.loading = false;
+        if (error && typeof error === 'object' && 'message' in error) {
+          message = String((error as { message: unknown }).message);
+        }
+
+        return { success: false, message };
       }
     },
 

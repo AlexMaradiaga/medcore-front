@@ -141,6 +141,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 import { AppointmentRepository } from '../infrastructure/AppointmentRepo';
 import type { AppointmentRequest } from '../domain/Appointment';
 import {
@@ -163,7 +164,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['cancel']);
 const appointmentRepo = new AppointmentRepository();
-const userData = ref({id: 0, nombre: '', email: '' });
+const toast = useToast();
+const userData = ref({ id: 0, nombre: '', email: '' });
 
 const form = reactive({
   fecha: '',
@@ -202,7 +204,7 @@ const confirmAppointment = async () => {
     motivo: form.motivo,
     sintomas: form.sintomas,
     alergias: form.alergias,
-    edad: Number(form.edad), // Viene del nuevo input del formulario
+    edad: Number(form.edad),
     genero: form.genero,
     aseguradora: form.aseguradora,
     numero_poliza: form.poliza,
@@ -213,12 +215,22 @@ const confirmAppointment = async () => {
 
   try {
     await appointmentRepo.create(payload);
-    alert("Cita agendada correctamente");
+    toast.success("¡Cita agendada correctamente!");
     emit('cancel');
   } catch (error: unknown) {
-    alert(error);
+    let msg = "Error al agendar la cita médica.";
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: { mensaje?: string } } };
+      msg = axiosError.response?.data?.mensaje || msg;
+    } else if (error instanceof Error) {
+      msg = error.message;
+    } else if (typeof error === 'string') {
+      msg = error;
+    }
+    toast.error(msg);
   }
 };
+
 const closeTimePicker = (event: Event) => {
   const input = event.target as HTMLInputElement;
   input.blur();

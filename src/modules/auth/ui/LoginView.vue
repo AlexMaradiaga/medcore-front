@@ -104,11 +104,13 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
+import { useToast } from 'vue-toastification';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const toast = useToast();
 
 const userType = ref('paciente');
 const loading = ref(false);
@@ -122,40 +124,36 @@ const handleLogin = async () => {
   if (!form.email || !form.password) return;
   loading.value = true;
 
-  try {
-    const result = await authStore.login(form);
+  toast.clear();
 
-    if (result.success) {
+  try {
+    const result = await authStore.login(form);;
+
+    if (result && result.success) {
       const user = authStore.user;
       const role = user?.rol_id;
 
-      console.log("Login exitoso. Rol detectado:", role);
-
       switch (role) {
-        case 1: // Si en tu DB el 1 es el Admin
-          router.push('/dashboard');
-          break;
-
-        case 2: // Si en tu DB el 2 es el DOCTOR
-          router.push('/medico/dashboard');
-          break;
-
-        case 3: // Si en tu DB el 3 es el Paciente
-          router.push('/directorio');
-          break;
-
-        default:
-          console.warn("Rol no reconocido, enviando a inicio");
-          router.push('/');
-          break;
+        case 1: router.push('/dashboard'); break;
+        case 2: router.push('/medico/dashboard'); break;
+        case 3: router.push('/directorio'); break;
+        default: router.push('/'); break;
       }
     } else {
-      alert(result.message);
+      const msg = result?.message || 'Credenciales incorrectas.';
+
+      setTimeout(() => {
+        toast.error(msg, { timeout: 4000 });
+      }, 100);
     }
-  } catch (error) {
-    console.error("Error en redirección:", error);
+  } catch {
+    setTimeout(() => {
+      toast.error('Credenciales inválidas. Intente de nuevo.', { timeout: 4000 });
+    }, 100);
   } finally {
-    loading.value = false;
+    setTimeout(() => {
+      loading.value = false;
+    }, 150);
   }
 };
 </script>
