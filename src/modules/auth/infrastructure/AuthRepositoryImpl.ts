@@ -15,11 +15,14 @@ export class AuthRepositoryImpl implements AuthRepository {
                 throw new Error('La respuesta del servidor no tiene el formato esperado.');
             }
 
+            // 🌟 Construimos la entidad mapeando el nuevo campo dinámico de la base de datos
             const user: User = {
                 id: rawUser.id,
                 nombre: rawUser.nombre || rawUser.email.split('@')[0],
                 email: rawUser.email,
-                rol_id: rawUser.rol_id
+                rol_id: rawUser.rol_id,
+                entidadId: rawUser.entidad_id,
+                tipo_entidad: rawUser.tipo_entidad || rawUser.TipoEntidad
             };
 
             return { user, token };

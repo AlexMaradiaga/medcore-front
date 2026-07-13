@@ -1,4 +1,6 @@
 export interface Doctor {
+  EntidadID: number;
+  FotoPath: unknown;
   DoctorID: number;
   Nombre: string;
   Apellido: string;
@@ -8,5 +10,8 @@ export interface Doctor {
   Foto?: string;
   Disponible: boolean;
   Estado: string;
-  EsVerificado: string
+  EsVerificado: string;
+
+  EspecialidadID?: number;
+  especialidad_id?: number;
 }

@@ -1,9 +1,9 @@
 import api from '@/shared/infrastructure/api';
-import type { Appointment, AppointmentRequest, Exam, MedicalRecord, Prescription } from '../domain/Appointment';
+import type { Appointment, AppointmentRequest, Exam, MedicalRecord, Prescription, AppointmentResponse } from '../domain/Appointment';
 
 export class AppointmentRepository {
-  async create(data: AppointmentRequest): Promise<void> {
-    const response = await api.post('citas', data);
+  async create(data: AppointmentRequest): Promise<AppointmentResponse> {
+    const response = await api.post<AppointmentResponse>('citas', data);
     return response.data;
   }
   async getHistory(usuarioId: number): Promise<Appointment[]> {

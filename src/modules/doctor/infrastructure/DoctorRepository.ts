@@ -1,5 +1,5 @@
 import api from '@/shared/infrastructure/api';
-import type { DoctorAppointment, DoctorStats, ConsultationPayload, DiagnosticoCIE11} from '../domain/DoctorAppointment';
+import type { DoctorAppointment, DoctorStats, ConsultationPayload, DiagnosticoCIE11, SistemaExamenUI} from '../domain/DoctorAppointment';
 import type { PatientHistoryResponse, DetalleConsultaModal } from '../domain/PatientHistory';
 import type { DashboardAppointment } from '@/modules/appointments/domain/Appointment';
 
@@ -31,7 +31,19 @@ import type { DashboardAppointment } from '@/modules/appointments/domain/Appoint
   Dosis: string;
   Indicaciones: string;
   CodigoCanje?: string;
-}
+  }
+
+  export interface HallazgoCatalogo {
+  HallazgoID: number;
+  NombreHallazgo: string;
+  }
+
+  export interface SistemaCatalogo {
+    SistemaID: number;
+    NombreSistema: string;
+    Hallazgos: string;
+  }
+
 export class DoctorRepository {
 
   async getAppointments(doctorId: number): Promise<DoctorAppointment[]> {
@@ -58,7 +70,6 @@ export class DoctorRepository {
     const response = await api.get(`/doctor/paciente/${pacienteId}/historial-completo`);
     return response.data;
   }
-
 
   async getDashboardAppointments(doctorId: number, fecha: string): Promise<DashboardAppointment[]> {
     try {
@@ -120,5 +131,35 @@ export class DoctorRepository {
       console.error("Error al consultar catálogo de diagnósticos:", error);
       return [];
     }
+  }
+
+  async getCatalogoExamenFisico(): Promise<SistemaExamenUI[]> {
+    interface ApiItem {
+      SistemaID?: number | string;
+      id?: number | string;
+      NombreSistema?: string;
+      nombre?: string;
+      Hallazgos?: string | { NombreHallazgo?: string }[];
+    }
+
+    const response = await api.get<ApiItem[]>('/doctor/catalogo-examen-fisico');
+
+    return response.data.map((item): SistemaExamenUI => {
+      let hallazgosArray: { NombreHallazgo?: string }[] = [];
+
+      if (typeof item.Hallazgos === 'string') {
+        hallazgosArray = JSON.parse(item.Hallazgos || '[]') as { NombreHallazgo?: string }[];
+      } else if (Array.isArray(item.Hallazgos)) {
+        hallazgosArray = item.Hallazgos as { NombreHallazgo?: string }[];
+      }
+
+      return {
+        id: String(item.SistemaID ?? item.id ?? ''),
+        nombre: String(item.NombreSistema ?? item.nombre ?? ''),
+        open: false,
+        isNormal: false,
+        opciones: hallazgosArray.map((h) => h.NombreHallazgo ? String(h.NombreHallazgo) : String(h))
+      };
+    });
   }
 }

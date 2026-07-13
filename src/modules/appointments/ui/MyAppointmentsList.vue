@@ -24,9 +24,7 @@
             <p class="text-blue-600 font-black text-xs uppercase tracking-widest mt-1">{{ cita.Clinica }}</p>
 
             <div class="flex items-center gap-2 mt-3 text-slate-400">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <v-icon name="hi-clock" class="h-4 w-4" />
               <span class="text-sm font-bold capitalize">{{ formatDate(cita.FechaHora) }}</span>
             </div>
           </div>
@@ -73,9 +71,7 @@
               <p class="text-blue-600 font-bold mt-1 uppercase text-xs tracking-widest">Información proporcionada por el paciente</p>
             </div>
             <button @click="showModal = false" class="p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <v-icon name="hi-x-mark" class="h-6 w-6" />
             </button>
           </div>
 

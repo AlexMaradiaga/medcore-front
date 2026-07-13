@@ -13,6 +13,7 @@ export interface DoctorAppointment {
     EmailPaciente?: string;
     Alergias?: string;
     MedicamentosActuales?: string;
+    EspecialidadID?: number;
 }
 
 export interface DoctorStats {
@@ -40,7 +41,44 @@ export interface ConsultationPayload {
     examen_fisico_notas: Record<string, string>;
 }
 export interface DiagnosticoCIE11 {
-  codigo: string;       // Ej: "1B12" o "DA01.1"
-  descripcion: string;  // Ej: "Faringitis Aguda"
-  sugerido?: boolean;   // Para identificar los destacados de tu captura
+  codigo: string;
+  descripcion: string;
+  sugerido?: boolean;
+}
+
+export interface HallazgoCatalogo {
+  HallazgoID: number;
+  NombreHallazgo: string;
+}
+
+export interface SistemaCatalogo {
+  SistemaID: number;
+  NombreSistema: string;
+  Hallazgos: HallazgoCatalogo[];
+}
+
+ export interface SistemaExamenUI {
+    id: string;
+    nombre: string;
+    open: boolean;
+    isNormal: boolean;
+    opciones: string[];
+  }
+
+  export interface DentalExamData {
+  encias: 'Normal' | 'Inflamadas' | 'Sangrantes';
+  condiciones: {
+    placa: boolean;
+    calculo: boolean;
+    sensibilidad: boolean;
+    movilidad: boolean;
+  };
+  oclusion: 'Normal' | 'Alterada';
+  notas: string;
+}
+
+export interface OdontologyPayload {
+  totalPresupuesto: number;
+  odontograma: Record<number, Record<string, string>>;
+  examenesBase: DentalExamData;
 }

@@ -5,6 +5,11 @@ export interface ConsultaPrevia {
     especialidad: string;
     diagnostico: string;
     tratamiento: string;
+    EspecialidadID?: number;
+    PresupuestoTotal?: number;
+    OdontogramaAdultoJson?: string | Record<string, unknown>;
+    ExamenesOdontologicosJson?: string | Record<string, unknown>[];
+    DetalleTratamiento?: string;
 }
 
 export interface ExamenLaboratorio {
@@ -60,7 +65,7 @@ export interface DetalleConsultaModal {
         sistema: string;
         condicion: string;
         detalle: string;
-        hallazgos: {            
+        hallazgos: {
             hallazgo: string;
             estadoHallazgo: string;
         }[];

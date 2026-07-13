@@ -166,7 +166,6 @@ const crearEspecialidad = async () => {
 
 const crearEntidad = async () => {
   try {
-    // LLamado exacto requiriendo 'nombre' como pide la validación Laravel
     await api.post('/clinicas', {
       nombre: nuevaEntidad.NombreEntidad,
       tipo_entidad: nuevaEntidad.TipoEntidad,
@@ -198,7 +197,6 @@ const deshabilitarEntidad = async (id: number | undefined) => {
   if (id === undefined) return;
   if (!confirm('¿Estás seguro de dar de baja esta entidad?')) return;
   try {
-    // Ojo: esta ruta '/clinicas/{id}/desactivar' debe estar mapeada en routes/api.php antes del apiResource
     await api.put(`/clinicas/${id}/desactivar`, { Estado: 0 });
     toast.success("Entidad dada de baja correctamente.");
     await cargarEntidades();

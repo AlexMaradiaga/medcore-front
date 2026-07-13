@@ -1,3 +1,15 @@
+export type ProviderType = 'medico' | 'enfermero' | 'laboratorio' | 'clinica';
+
+export interface SchedulableProvider {
+  ProviderID: number;
+  EntidadID: number;
+  Tipo: ProviderType;
+  NombrePrincipal: string;
+  NombreSecundario?: string; 
+  Especialidad_Servicio: string;
+  Costo: number;
+}
+
 export interface AppointmentRequest {
   UsuarioID: number;
   doctor_id: number;
@@ -13,6 +25,7 @@ export interface AppointmentRequest {
   nombre_contacto_emergencia?: string;
   telefono_contacto_emergencia?: string;
   medicamentos_actuales?: string;
+  cronicas_ids: number[];
 }
 export interface Appointment {
   CitaID: number;
@@ -74,4 +87,28 @@ export interface DashboardAppointment {
     estado: string;
     genero: string;
     edad: number;
+}
+
+export interface EnfermedadCronica {
+  EnfermedadID: number;
+  NombreEnfermedad: string;
+  Estado: number;
+}
+
+export interface MedicamentoBase {
+  MedicamentoID: number;
+  NombreComercial: string;
+  ComponenteActivo: string | null;
+  Presentacion: string | null;
+  Estado: number;
+}
+export interface AlergiaBase {
+  AlergiaID: number;
+  NombreAlergia: string;
+  Categoria: string;
+  Estado: number;
+}
+export interface AppointmentResponse {
+  CitaID: number;
+  Mensaje?: string;
 }
