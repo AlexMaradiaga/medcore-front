@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#F5F2EB] flex font-sans selection:bg-sky-500/10 text-left">
+  <div class="min-h-screen bg-slate-100 flex font-sans selection:bg-sky-500/10 text-left">
 
     <aside class="w-72 bg-white border-r border-slate-100 flex flex-col justify-between p-6 sticky top-0 h-screen z-30 shrink-0 shadow-xs">
       <div class="space-y-8">
@@ -219,19 +219,63 @@
           </div>
         </section>
 
+        <!-- SECCIÓN DIRECTORIO: RESTAURADA CON LA BARRA DE FILTROS ORIGINAL COMPLETA -->
         <section v-if="activeTab === 'directory'" class="space-y-8 animate-fade-in">
           <div>
             <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Mis Médicos</h2>
             <p class="text-slate-400 font-bold text-xs mt-1">Directorio de médicos verificados en Roatán</p>
           </div>
+
           <div class="bg-white rounded-[2.5rem] p-8 shadow-xs border border-slate-100 space-y-5">
+            <!-- Fila 1: Input de Búsqueda -->
             <div class="flex flex-col lg:flex-row gap-4 items-center">
               <div class="flex-1 w-full relative">
                 <input v-model="filters.search" type="text" placeholder="Buscar por nombre o especialidad..." class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4.5 px-6 pl-14 outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-400 focus:bg-white transition-all text-slate-700 font-bold placeholder:text-slate-300 text-sm" />
                 <v-icon name="bi-search" class="h-5 w-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
+
+            <!-- Fila 2: Desplegables de Selección (Especialidades y Ordenamiento) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <select v-model="filters.especialidad" class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-400 text-slate-700 font-bold text-xs cursor-pointer">
+                <option value="">Todas las especialidades</option>
+                <option v-for="spec in specialties" :key="spec.EspecialidadID" :value="spec.NombreEspecialidad">
+                  {{ spec.NombreEspecialidad }}
+                </option>
+              </select>
+
+              <select v-model="filters.ordenar" class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-400 text-slate-700 font-bold text-xs cursor-pointer">
+                <option value="cercania">Más cercano</option>
+                <option value="precio-bajo">Precio: menor a mayor</option>
+                <option value="precio-alto">Precio: mayor a menor</option>
+              </select>
+            </div>
+
+            <!-- Fila 3: Switches de Filtros (Disponible ahora e Idioma Inglés) -->
+            <div class="flex items-center gap-6 pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <div class="relative">
+                  <input type="checkbox" v-model="filters.inmediata" class="sr-only peer" />
+                  <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-sky-300 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
+                </div>
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                  <v-icon name="bi-clock" class="h-3.5 w-3.5 text-sky-500" /> Disponible ahora
+                </div>
+              </label>
+
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <div class="relative">
+                  <input type="checkbox" v-model="filters.ingles" class="sr-only peer" />
+                  <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-sky-300 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
+                </div>
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                  <v-icon name="bi-translate" class="h-3.5 w-3.5 text-sky-500" /> Habla inglés
+                </div>
+              </label>
+            </div>
           </div>
+
+          <!-- Listado de Doctores Filtrados -->
           <div v-if="doctors.length > 0" class="space-y-4">
             <div v-for="doctor in doctors" :key="doctor.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all hover:border-sky-200/60">
               <div class="flex items-center gap-6 w-full md:flex-1">
@@ -273,7 +317,35 @@
         </section>
 
         <section v-if="activeTab === 'schedule'" class="animate-fade-in space-y-6">
-          <BookingView v-if="selectedDoctor" :selectedDoctor="selectedDoctor" :patientProfile="(userData as unknown as PatientExtendedProfile)" :idioma="locale" @cancel="resetBooking" />
+          <div v-if="!selectedDoctor" class="space-y-6 w-full text-left">
+            <div>
+              <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Agendar Nueva Cita</h2>
+              <p class="text-slate-400 font-bold text-xs mt-1">Seleccione médico, fecha y hora</p>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] p-16 text-center border border-slate-100 shadow-xs flex flex-col items-center justify-center space-y-4 min-h-87.5">
+              <div class="text-slate-300 flex items-center justify-center">
+                <v-icon name="bi-person" scale="3.5" class="text-slate-300" />
+              </div>
+              <h3 class="text-xl font-black text-slate-800 tracking-tight mt-2">No hay médico seleccionado</h3>
+              <p class="text-sm font-bold text-slate-400">Por favor selecciona un médico del directorio primero</p>
+
+              <button
+                @click="activeTab = 'directory'"
+                class="mt-4 bg-[#005596] hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer active:scale-95"
+              >
+                Volver al Directorio
+              </button>
+            </div>
+          </div>
+
+          <BookingView
+            v-else
+            :selectedDoctor="selectedDoctor"
+            :patientProfile="(userData as unknown as PatientExtendedProfile)"
+            :idioma="locale"
+            @cancel="resetBooking"
+          />
         </section>
 
         <section v-if="activeTab === 'laboratory'" class="animate-fade-in"><PatientLabView /></section>
@@ -608,7 +680,6 @@ const loadUser = async () => {
   }
 };
 
-// CORRECCIÓN CLAVE: SE INCLUYÓ LA PALABRA CLAVE 'const'
 const handleLogout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');

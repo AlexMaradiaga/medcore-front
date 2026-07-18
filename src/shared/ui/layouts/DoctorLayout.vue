@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#f8fafc] text-left font-sans relative pb-16">
+  <div class="min-h-screen bg-slate-100 text-left font-sans relative pb-16">
 
     <header class="bg-linear-to-r from-[#005596] to-[#00345c] text-white px-8 py-3 flex justify-between items-center shadow-lg border-b border-white/5">
       <div class="flex items-center gap-4">

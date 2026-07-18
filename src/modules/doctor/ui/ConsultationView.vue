@@ -2,6 +2,7 @@
   <DoctorLayout>
     <main class="h-screen max-h-screen bg-slate-50/50 font-premium selection:bg-[#005596]/10 flex flex-col overflow-hidden">
 
+      <!-- Cabecera de Paciente -->
       <div class="bg-linear-to-r from-[#005596] via-[#004b84] to-[#00345c] text-white px-12 py-5 flex flex-col md:flex-row justify-between items-start md:items-center shadow-lg relative overflow-hidden shrink-0">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-blue-400/20 via-transparent to-transparent pointer-events-none"></div>
 
@@ -27,6 +28,7 @@
         </div>
       </div>
 
+      <!-- Pestañas de Navegación del Historial -->
       <nav class="bg-white border-b border-slate-200/80 px-12 flex justify-center shadow-xs shrink-0 z-30 backdrop-blur-md">
         <div class="flex gap-3 py-3 w-full max-w-2xl justify-center">
           <button
@@ -45,9 +47,11 @@
         </div>
       </nav>
 
+      <!-- Cuerpo Principal Asíncrono -->
       <div class="flex-1 overflow-y-auto p-8 max-w-7xl w-full mx-auto animate-fade-in custom-scrollbar pb-32">
         <div class="bg-white border border-slate-200/60 rounded-[2.5rem] p-10 shadow-xl min-h-125 relative overflow-hidden">
 
+          <!-- PESTAÑA: SUBJETIVO -->
           <div v-if="activeTab === 'Subjetivo'" class="space-y-8 animate-fade-in text-left">
             <div class="border-b border-slate-100 pb-3">
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Datos Subjetivos del Paciente</h3>
@@ -88,6 +92,8 @@
               </div>
             </div>
           </div>
+
+          <!-- PESTAÑA: OBJETIVO -->
           <div v-if="activeTab === 'Objetivo'" class="space-y-8 animate-fade-in text-left">
             <section class="space-y-4">
               <div class="border-b border-slate-100 pb-2">
@@ -128,9 +134,12 @@
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Exploración segmentaria y hallazgos patológicos</p>
               </div>
 
+              <!-- CONTENEDOR DE SISTEMAS FÍSICOS REESTRUCTURADO SIN ANIDACIÓN EN BUTTON -->
               <div class="space-y-3.5">
                 <div v-for="(sistema, index) in sistemasFisicos" :key="sistema.id" class="border border-slate-200 rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all duration-200">
-                  <button @click="toggleSistema(index)" class="w-full flex justify-between items-center p-4 hover:bg-slate-50/70 transition-all cursor-pointer text-left">
+
+                  <!-- Cabecera Clickable (Div en lugar de button evita que se cierre al pulsar dentro del contenido expuesto) -->
+                  <div @click="toggleSistema(index)" class="w-full flex justify-between items-center p-4 hover:bg-slate-50/70 transition-all cursor-pointer text-left select-none">
                     <div class="flex items-center gap-4">
                       <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border shadow-3xs', getSistemaStyles(sistema.nombre).bgClass]">
                         <v-icon :name="getSistemaStyles(sistema.nombre).icon" scale="0.9" />
@@ -144,15 +153,17 @@
                       </span>
                     </div>
                     <v-icon name="bi-chevron-down" :class="['text-slate-400 transition-transform duration-200 mr-2', sistema.open ? 'rotate-180' : '']" scale="0.8" />
-                  </button>
+                  </div>
 
+                  <!-- Bloque Opciones Desplegable -->
                   <div v-if="sistema.open" class="p-6 bg-slate-50/40 border-t border-slate-100 animate-fade-in space-y-5 text-left">
                     <label class="flex items-center gap-3 cursor-pointer group bg-white p-3.5 rounded-xl border border-slate-100 shadow-3xs w-fit">
                       <input type="checkbox" v-model="sistema.isNormal" @change="handleNormalChange(index)" class="w-4 h-4 rounded border-slate-300 text-[#005596] focus:ring-0">
                       <span class="text-xs font-black uppercase tracking-wide text-slate-600 group-hover:text-slate-900 transition-colors">Marcar Sistema como Sano / Normal</span>
                     </label>
 
-                    <div v-if="!sistema.isNormal" class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-3xs animate-fade-in">
+                    <!-- SE ENRIQUECE CON v-if PARA EVITAR CRASHES DURANTE CARGA ASÍNCRONA -->
+                    <div v-if="!sistema.isNormal && form.examen_fisico_opciones[sistema.id]" class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-3xs animate-fade-in">
                       <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Catálogo Clínico de Hallazgos Auxiliares:</p>
                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                         <label v-for="opcion in sistema.opciones" :key="opcion" class="flex items-center gap-3 cursor-pointer group bg-slate-50/50 hover:bg-blue-50/40 border border-slate-100 hover:border-blue-200 p-3 rounded-xl transition-all">
@@ -167,11 +178,13 @@
                       <textarea v-model="form.examen_fisico_notes[sistema.id]" placeholder="Describa la anomalía con sus especificaciones clínicas..." class="w-full bg-white border border-slate-200 rounded-xl p-4 outline-hidden focus:border-blue-400 font-bold text-slate-700 min-h-20 transition-all text-xs shadow-inner"></textarea>
                     </div>
                   </div>
+
                 </div>
               </div>
             </section>
           </div>
 
+          <!-- PESTAÑA: EVALUACIÓN -->
           <div v-if="activeTab === 'Evaluación'" class="space-y-6 animate-fade-in text-left">
             <div class="border-b border-slate-100 pb-2">
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Juicio Diagnóstico de la Sesión</h3>
@@ -224,6 +237,7 @@
             </div>
           </div>
 
+          <!-- PESTAÑA: PLAN -->
           <div v-if="activeTab === 'Plan'" class="space-y-6 animate-fade-in text-left font-premium">
             <div class="border-b border-slate-100 pb-3">
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Plan de Tratamiento Estructurado</h3>
@@ -296,6 +310,7 @@
         </div>
       </div>
 
+      <!-- Barra Inferior de Guardado -->
       <footer class="fixed bottom-0 left-0 right-0 bg-white/90 border-t border-slate-200 p-5 flex justify-center gap-4 z-40 backdrop-blur-md shadow-[0_-10px_30px_rgba(0,0,0,0.04)] shrink-0">
         <div class="max-w-7xl w-full flex justify-end gap-4">
           <button @click="handleSaveDraft" class="flex items-center gap-2 px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-black uppercase text-[10px] tracking-wider transition-all shadow-3xs cursor-pointer active:scale-95">
@@ -440,20 +455,38 @@ const getSistemaStyles = (nombre: string): { icon: string; bgClass: string } => 
 };
 
 const obtenerBorradorInicial = () => {
-  const borradorGuardado = localStorage.getItem('draft_consulta_actual');
-  if (borradorGuardado) {
-    try { return JSON.parse(borradorGuardado); } catch (e) { console.error(e); }
-  }
-  return {
+  // Estructura limpia y segura por defecto
+  const defaultForm = {
     cita_id: 0,
     signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '' } as SignosVitales,
     examen_fisico_opciones: {} as Record<string, Record<string, boolean>>,
-    examen_fisico_notas: {} as Record<string, string>,
+    examen_fisico_notes: {} as Record<string, string>,
     diagnostico: [] as string[],
     diagnostico_extenso: '',
     notas_medicas: '',
     detalle_medicamentos: [] as FilaMedicamentoConsulta[]
   };
+
+  const borradorGuardado = localStorage.getItem('draft_consulta_actual');
+  if (borradorGuardado) {
+    try {
+      const parsed = JSON.parse(borradorGuardado);
+      // Fusionamos el borrador para asegurar la existencia de propiedades internas críticas
+      return {
+        cita_id: parsed.cita_id ?? defaultForm.cita_id,
+        signos_vitales: { ...defaultForm.signos_vitales, ...parsed.signos_vitales },
+        examen_fisico_opciones: parsed.examen_fisico_opciones || {},
+        examen_fisico_notes: parsed.examen_fisico_notes || {},
+        diagnostico: parsed.diagnostico || [],
+        diagnostico_extenso: parsed.diagnostico_extenso || '',
+        notas_medicas: parsed.notas_medicas || '',
+        detalle_medicamentos: parsed.detalle_medicamentos || []
+      };
+    } catch (e) {
+      console.error("Error al parsear borrador clínico:", e);
+    }
+  }
+  return defaultForm;
 };
 
 const form = ref(obtenerBorradorInicial());
@@ -491,13 +524,18 @@ const seleccionarDiagnostico = (diag: DiagnosticoCIE11) => {
 
 const removerDiagnostico = (index: number) => { form.value.diagnostico.splice(index, 1); };
 const cerrarDropdown = () => { setTimeout(() => { mostrarDropdown.value = false; }, 250); };
-const toggleSistema = (index: number) => { const s = sistemasFisicos.value[index]; if (s) s.open = !s.open; };
+const toggleSistema = (index: number) => {
+  const s = sistemasFisicos.value[index];
+  if (s) {
+    s.open = !s.open;
+  }
+};
 
 const handleNormalChange = (index: number) => {
   const s = sistemasFisicos.value[index];
   if (s && s.isNormal) {
     form.value.examen_fisico_opciones[s.id] = {};
-    form.value.examen_fisico_notas[s.id] = '';
+    form.value.examen_fisico_notes[s.id] = '';
   }
 };
 
@@ -521,15 +559,31 @@ const capturarDataEspecialidad = (data: OdontologyPayload) => {
 
 onMounted(async () => {
   try {
-    sistemasFisicos.value = await repo.getCatalogoExamenFisico();
+    const catalogoCrudo = await repo.getCatalogoExamenFisico();
+
+    sistemasFisicos.value = catalogoCrudo.map((sistema) => ({
+      ...sistema,
+      open: false,
+      isNormal: true
+    }));
+
     sistemasFisicos.value.forEach((sistema) => {
-      if (!form.value.examen_fisico_opciones[sistema.id]) form.value.examen_fisico_opciones[sistema.id] = {};
-      if (!form.value.examen_fisico_notes[sistema.id]) form.value.examen_fisico_notes[sistema.id] = '';
+      if (!form.value.examen_fisico_opciones[sistema.id]) {
+        form.value.examen_fisico_opciones[sistema.id] = {};
+      }
+      if (!form.value.examen_fisico_notes[sistema.id]) {
+        form.value.examen_fisico_notes[sistema.id] = '';
+      }
     });
-  } catch (err) { console.error(err); }
+  } catch (err) {
+    console.error("Error al cargar examen físico:", err);
+  }
 
   const saved = localStorage.getItem('current_appointment');
-  if (!saved) { router.push('/medico/dashboard'); return; }
+  if (!saved) {
+    router.push('/medico/dashboard');
+    return;
+  }
   appointment.value = JSON.parse(saved);
 
   if (appointment.value) {
@@ -539,7 +593,9 @@ onMounted(async () => {
       tempSubjetivo.value = form.value.notas_medicas;
     }
   }
-  if (!medicalStore.isConsultationActive) medicalStore.setConsultationActive(true);
+  if (!medicalStore.isConsultationActive) {
+    medicalStore.setConsultationActive(true);
+  }
 });
 
 const startEditingSubjetivo = () => {
@@ -653,8 +709,8 @@ const handleSubmit = async () => {
         medicamentos: appointment.value?.MedicamentosActuales || 'Ninguno'
       },
       sintomas: {
-        motivo: appointment.value?.Motivo || form.value.motivo_consulta || payload.motivo_consulta || 'Consulta de seguimiento',
-        dolor: form.value.notas_medicas || editableSubjetivo.value || form.value.tipo_dolor || (appointment.value ? (appointment.value.Motivo + ' - ' + (appointment.value.Sintomas || 'Sin síntomas registrados')) : 'Sin síntomas registrados')
+        motivo: appointment.value?.Motivo  || payload.motivo_consulta || 'Consulta de seguimiento',
+        dolor: form.value.notas_medicas || editableSubjetivo.value  || (appointment.value ? (appointment.value.Motivo + ' - ' + (appointment.value.Sintomas || 'Sin síntomas registrados')) : 'Sin síntomas registrados')
       },
       hallazgos_examen_fisico: hallazgosExamenFisico
     };
@@ -698,24 +754,6 @@ const vClickOutside = {
 .custom-scrollbar::-webkit-scrollbar { height: 5px; width: 5px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-:deep(div[class*="fixed"]),
-:deep(div[class*="sticky"]),
-:deep(div[style*="position: fixed"]),
-:deep(div[style*="position:fixed"]),
-:deep(.fixed),
-:deep(.sticky),
-:deep(button[class*="rounded-full"]),
-:deep(.bg-gradient-to-tr.from-purple-500),
-:deep(.bg-amber-400),
-:deep(.bg-yellow-400) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  width: 0 !important;
-}
 
 @media print {
   * {

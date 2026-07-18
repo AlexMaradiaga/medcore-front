@@ -1,6 +1,7 @@
 <template>
   <div class="space-y-6 animate-fade-in text-left">
 
+    <!-- Información General del Paciente -->
     <div class="bg-white rounded-4xl p-8 border border-slate-100 shadow-xs space-y-6">
       <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3">
         Información General del Paciente
@@ -30,6 +31,7 @@
       </div>
     </div>
 
+    <!-- SECCIÓN DE ACCESO & EXPEDIENTE -->
     <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-slate-100 flex flex-col min-h-125">
 
       <div :class="[
@@ -73,6 +75,33 @@
         <ComparativeStatsTab v-if="activeTab === 'comparativo'" :data="history.comparativos" />
       </div>
     </div>
+
+    <!-- MODAL DE PIN PERSONALIZADO -->
+    <div v-if="showPinModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl border border-slate-100 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <v-icon name="bi-lock-fill" class="text-amber-500" scale="1.2" />
+          </div>
+          <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Confirmación de PIN</h3>
+          <p class="text-[11px] font-bold text-slate-400">Ingrese el código de 4 dígitos dictado por el paciente para desbloquear su historial.</p>
+        </div>
+
+        <input
+          v-model="pinInput"
+          type="password"
+          maxlength="4"
+          placeholder="0000"
+          class="w-full text-center text-2xl font-black tracking-[0.5em] py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50 transition-all"
+          @keyup.enter="procesarAcceso"
+        />
+
+        <div class="flex gap-3">
+          <button @click="showPinModal = false" class="flex-1 py-3 text-[10px] font-black uppercase text-slate-400 hover:text-slate-600 transition">Cancelar</button>
+          <button @click="procesarAcceso" class="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black uppercase text-[10px] shadow-lg shadow-amber-900/10 active:scale-95 transition">Validar PIN</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -93,6 +122,9 @@ const toast = useToast();
 const activeTab = ref('consultas');
 const loading = ref(false);
 const tieneAccesoGlobal = ref(false);
+
+const showPinModal = ref(false);
+const pinInput = ref('');
 
 const tabs = [
   { id: 'consultas', label: 'Consultas Previas', icon: '📄' },
@@ -144,29 +176,30 @@ const ejecutarCargaHistorial = async (id: number) => {
   }
 };
 
-const solicitarAccesoGlobal = async () => {
-  const pinPaciente = window.prompt("SEGURIDAD CLÍNICA: El sistema requiere el PIN de confirmación del paciente para liberar el expediente unificado. Por favor, ingrese el código de 4 dígitos dictado por el paciente:");
+const solicitarAccesoGlobal = () => {
+  pinInput.value = '';
+  showPinModal.value = true;
+};
 
-  if (pinPaciente) {
-    try {
-      loading.value = true;
+const procesarAcceso = async () => {
+  if (!pinInput.value || pinInput.value.length < 4) {
+    toast.warning("Por favor ingrese los 4 dígitos del PIN.");
+    return;
+  }
 
-      await repo.grantGlobalAccess(props.pacienteId, pinPaciente);
+  try {
+    loading.value = true;
+    await repo.grantGlobalAccess(props.pacienteId, pinInput.value);
 
-      toast.success("¡Código Verificado! Autorización registrada con éxito.");
-      await ejecutarCargaHistorial(props.pacienteId);
-    } catch (error: unknown) {
-      let msg = "Error al guardar la autorización clínica.";
+    toast.success("¡Código Verificado! Autorización registrada con éxito.");
+    showPinModal.value = false;
+    pinInput.value = '';
+    await ejecutarCargaHistorial(props.pacienteId);
+  } catch {
 
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { mensaje?: string } } };
-        msg = axiosError.response?.data?.mensaje || msg;
-      }
-
-      toast.error(msg);
-    } finally {
-      loading.value = false;
-    }
+    toast.error("Error al gestionar la autorización clínica.");
+  } finally {
+    loading.value = false;
   }
 };
 

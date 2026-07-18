@@ -287,7 +287,7 @@ const codigoCanjeReal = computed(() => medicamentosPrescritos.value[0]?.CodigoCa
 const segmentoRxSeguridad = computed(() => codigoCanjeReal.value.split('-').pop() || 'RX-SEC');
 
 const urlQrVista = computed(() => {
-  const payloadTexto = `MEDCORE GLOBAL\nMedico: ${nombreDoctor.value}\nColegiacion: ${numeroColegiadoDoctor.value}\nRecetaID: ${codigoCanjeReal.value}`;
+  const payloadTexto = `MedGo+\nMedico: ${nombreDoctor.value}\nColegiacion: ${numeroColegiadoDoctor.value}\nRecetaID: ${codigoCanjeReal.value}`;
   return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(payloadTexto)}&ecc=M`;
 });
 
@@ -374,7 +374,7 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
 onMounted(async () => {
   try {
     const idUrl = Number(route.params.id);
-    const resGuardado = localStorage.getItem('medcore_resumen_compartir');
+    const resGuardado = localStorage.getItem('MedGo+_resumen_compartir');
 
     if (resGuardado) {
       const d = JSON.parse(resGuardado);
@@ -430,7 +430,7 @@ const compartirDocumentoFisico = async () => {
     ).join('\n\n');
 
     const textoCompartir =
-      `🏥 *MEDCORE GLOBAL* \n*PRESCRIPCIÓN MÉDICA AUTORIZADA*\n\n` +
+      `🏥 *MedGo+* \n*PRESCRIPCIÓN MÉDICA AUTORIZADA*\n\n` +
       `👤 *Paciente:* ${nombrePaciente.value}\n👨‍⚕️ *Doctor:* ${nombreDoctor.value}\n📅 *Fecha:* ${fechaActual.value}\n\n` +
       `📋 *MEDICAMENTOS:* \n\n${listadoMedicamentos}\n\n` +
       `------------------------------------------\n` +
@@ -462,7 +462,7 @@ const finalizarYIrAlPago = () => {
     return;
   }
 
-  window.localStorage.setItem('medcore_current_consulta_id', idConsultaActual);
+  window.localStorage.setItem('MedGo+_current_consulta_id', idConsultaActual);
 
   toast.success("Prescripción guardada. Procediendo al cierre de consulta.");
 

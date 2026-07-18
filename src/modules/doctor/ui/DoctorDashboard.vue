@@ -17,12 +17,13 @@
 
       <section class="bg-red-50/20 border border-red-100/50 rounded-[3rem] p-10 text-left">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+          <div class="w-12 h-12  bg-blue-400 rounded-2xl flex items-center justify-center text-white shadow-md">
             <v-icon name="bi-exclamation-octagon-fill" scale="1.1" />
           </div>
+
           <div class="text-left">
-            <h3 class="text-xl font-black text-red-900">Consulta Inmediata ({{ citasUrgentes.length }})</h3>
-            <p class="text-red-500/70 text-[10px] font-black uppercase tracking-[0.2em]">Solicitudes de atención urgente</p>
+            <h3 class="text-xl font-black text-slate-800">Consulta Pendiente ({{ citasUrgentes.length }})</h3>
+            <p class="px-10 py-4 bg-blue-200 text-Black-600 border border-blue-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em]">Solicitudes de atención pendiente</p>
           </div>
         </div>
 
@@ -35,28 +36,40 @@
                class="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100 flex justify-between items-center hover:shadow-xl transition-all group">
             <div class="text-left space-y-3">
               <div class="flex items-center gap-3">
-                <span class="bg-red-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter">Prioridad</span>
-                <span class="text-slate-400 text-[10px] font-bold flex items-center gap-1.5">
-                  <v-icon name="bi-clock-history" scale="0.75" /> {{ formatHora(cita.FechaHora) }}
+                <span class="bg-blue-200 text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em]">Prioridad</span>
+                <span class="px-2 py-1 bg-slate-100 border border-slate-200/60 text-slate-700 text-[10px] font-black uppercase rounded-lg flex items-center gap-1.5 shadow-sm">
+                  <v-icon name="bi-clock-history" scale="0.75" class="text-slate-500" />
+                  {{ formatHora(cita.FechaHora) }}
                 </span>
               </div>
               <h4 class="text-2xl font-black text-slate-800">{{ cita.Paciente }}</h4>
               <p class="text-sm font-bold text-slate-500">{{ cita.Motivo }}</p>
             </div>
             <div class="flex gap-4">
-              <button @click="handleApprove(cita.CitaID)" class="px-8 py-4 bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase shadow-lg hover:bg-green-600 transition-all cursor-pointer">Aprobar</button>
-              <button @click="handleReject(cita.CitaID)" class="px-8 py-4 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase shadow-lg hover:bg-red-600 transition-all cursor-pointer">Rechazar</button>
-            </div>
+              <button
+                @click="handleApprove(cita.CitaID)"
+                class="px-10 py-4 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                Aprobar
+              </button>
+
+              <button
+                @click="handleReject(cita.CitaID)"
+                class="px-10 py-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                Rechazar
+              </button>
+          </div>
           </div>
         </div>
       </section>
 
       <section class="bg-blue-50/30 border border-blue-100 rounded-[3rem] p-10 text-left">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+          <div class="w-12 h-12  bg-blue-400 rounded-2xl flex items-center justify-center text-white shadow-md">
             <v-icon name="bi-clock-history" scale="1.1" />
           </div>
-          <h3 class="text-xl font-black text-blue-900">Citas Confirmadas del Día ({{ citasConfirmadas.length }})</h3>
+          <h3 class="text-xl font-black text-blue-600">Citas Confirmadas del Día ({{ citasConfirmadas.length }})</h3>
         </div>
 
         <div v-if="citasConfirmadas.length === 0" class="p-10 text-center border-2 border-dashed border-blue-100 rounded-4xl text-slate-400 font-bold bg-white">
@@ -67,16 +80,19 @@
           <div v-for="cita in citasConfirmadas" :key="cita.CitaID"
                class="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex justify-between items-center shadow-sm hover:shadow-md transition-all">
             <div class="flex items-center gap-6">
-              <div class="bg-blue-600 text-white p-4 rounded-2xl text-center min-w-22.5 shadow-lg flex flex-col items-center justify-center">
+              <div class="bg-blue-400 text-black p-4 rounded-2xl text-center min-w-22.5 shadow-lg flex flex-col items-center justify-center">
                 <p class="text-lg font-black">{{ formatHora(cita.FechaHora) }}</p>
                 <p class="text-[9px] font-bold uppercase opacity-80 tracking-widest">Confirmada</p>
               </div>
               <div class="text-left">
                 <p class="text-xl font-black text-slate-800">{{ cita.Paciente }}</p>
-                <p class="text-xs font-bold text-slate-400">{{ cita.Motivo }}</p>
+                <p class="text-xs font-bold text-slate-600">{{ cita.Motivo }}</p>
               </div>
             </div>
-            <button @click="startConsultation(cita)" class="px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer">
+            <button
+              @click="startConsultation(cita)"
+              class="px-10 py-4 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
               Atender Ahora
             </button>
           </div>

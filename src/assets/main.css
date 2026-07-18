@@ -1,25 +1,120 @@
 @import "tailwindcss";
+
 @theme {
-  /* Definición de colores corporativos para MedGo */
-  --color-medgo-blue: #0066CC;
-  --color-medgo-teal: #00A3A3;
-  --color-medgo-bg: #F8FAFC;
+  /* 1. Paleta de Colores Oficial MedGo+ (Identidad de Marca) */
+  --color-medgo-blue: #3F6FD9;          /* Azul primario oficial */
+  --color-medgo-medium: #4F8FD4;        /* Azul medio corporativo */
+  --color-medgo-teal: #57C1BE;          /* Verde agua / acentos */
+  --color-medgo-bg: #F8FAFC;            /* Slate-50: Fondo general clínico ultra-limpio */
 
-  /* Un gris un poco más profundo para el fondo general */
-  --color-medgo-bg-soft: #E2E8F0;
+  /* Sistema de Neutros Altamente Legibles */
+  --color-medgo-text: #1E293B;          /* Slate-800: Texto principal de alto contraste */
+  --color-medgo-muted: #64748B;         /* Slate-500: Texto secundario/desactivado */
+  --color-medgo-bg-soft: #F1F5F9;       /* Slate-100: Contenedores secundarios */
 
-  /* Gradiente más vibrante */
-  --background-image-medgo-gradient: linear-gradient(135deg, #005BB8 0%, #009191 100%);
+  /* Semántica Médica Accesible */
+  --color-medgo-alert: #EF4444;         /* Rojo de alerta con contraste clínico */
+  --color-medgo-success: #10B981;       /* Verde de éxito clínico equilibrado */
+
+  /* Capa UI/UX para Componentes Oscuros (Garantía de Legibilidad) */
+  --color-medgo-header-bg: #0A2540;     /* Azul marino profundo estructural */
+  --color-medgo-on-dark: #FFFFFF;        /* Blanco puro para textos sobre azul/oscuros */
+  --color-medgo-on-dark-muted: #93C5FD;  /* Azul cielo suave para subtítulos en fondos oscuros */
+
+  /* 2. Degradados Oficiales */
+  --background-image-medgo-gradient: linear-gradient(135deg, #3F6FD9 0%, #57C1BE 100%);
+  --background-image-header-gradient: linear-gradient(90deg, #005596 0%, #00345c 100%);
 }
-/* Agrégalo al final del archivo */
+
+/* ==========================================================================
+   ESTILOS GLOBALES Y ARQUITECTURA DE ESPECIFICIDAD (UI/UX)
+   ========================================================================== */
+
+/* Inicialización del canvas clínico */
+body, html, #app {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  background-color: var(--color-medgo-bg) !important;
+  color: var(--color-medgo-text) !important;
+}
+
+/* Jerarquía de Títulos (Se quita el !important de color para permitir herencia adaptativa) */
+h1, h2, h3, h4, h5, h6,
+.font-premium,
+[class*="text-2xl"],
+[class*="text-3xl"],
+[class*="text-4xl"] {
+  font-family: 'Poppins', 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  color: inherit; /* Permite que las clases text-white o gradientes funcionen nativamente */
+}
+
+/* Color base por defecto para títulos en secciones claras */
+main h1, main h2, main h3, .card h1, .card h2, .card h3 {
+  color: var(--color-medgo-text);
+}
+
+/* ==========================================================================
+   SOLUCIÓN DE CONTRASTE PARA ENTORNOS OSCUROS (Header / Layouts)
+   ========================================================================== */
+
+/* Interceptamos el Header y clases oscuras antiguas para forzar contraste blanco */
+header,
+.bg-linear-to-r.from-\[\#005596\],
+.bg-medgo-blue {
+  color: var(--color-medgo-on-dark) !important;
+}
+
+/* Forzar legibilidad absoluta de textos internos en la cabecera */
+header h1, header h2, header h3,
+.bg-linear-to-r.from-\[\#005596\] h1,
+.bg-linear-to-r.from-\[\#005596\] h2 {
+  color: var(--color-medgo-on-dark) !important;
+}
+
+/* Ajuste fino para subtítulos y textos muted sobre fondo oscuro (ej: Nombre del Doctor) */
+header p,
+.text-cyan-200,
+.text-blue-100 {
+  color: var(--color-medgo-on-dark-muted) !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   ELEMENTOS DE INTERFAZ DE ALTA GAMA (Bordes, Sombras e Inputs)
+   ========================================================================== */
+
+/* Bordes suavizados modernos de nivel institucional */
+div[class*="rounded-"],
+aside,
+main section,
+.card {
+  border-radius: 16px !important;
+}
+
+/* Ajuste micro para Inputs y Botones Interactivos */
+button, input, select, textarea {
+  border-radius: 10px !important;
+}
+
+/* Sombras suavizadas de profundidad médica (Look limpio sin ruido visual) */
+div[class*="shadow-"], .shadow-sm, .shadow-md, .shadow-lg {
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02) !important;
+}
+
+/* Retrocompatibilidad de clases duras del sistema viejo */
+.bg-\[\#005596\] { background-color: #005596 !important; }
+.text-\[\#005596\] { color: #005596 !important; }
+.border-\[\#005596\] { border-color: #005596 !important; }
+
+/* Clases Utilitarias de Apoyo UX */
 .bg-vibrante {
-  background-color: #E2E8F0 !important; /* Forzamos el gris de fondo */
+  background-color: var(--color-medgo-bg-soft) !important;
 }
 
 .circulo-azul {
-  background-color: rgba(0, 102, 204, 0.2) !important;
+  background-color: rgba(63, 111, 217, 0.12) !important;
 }
 
 .circulo-teal {
-  background-color: rgba(0, 163, 163, 0.2) !important;
+  background-color: rgba(87, 193, 190, 0.12) !important;
 }
