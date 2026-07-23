@@ -24,7 +24,8 @@
         <div class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-500/30 flex items-center gap-2 tracking-wider uppercase shadow-[0_0_10px_rgba(16,185,129,0.1)]">
           <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span> Verificado
         </div>
-        <button @click="handleLogout" class="px-4 py-2 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 rounded-xl text-xs font-bold transition-all duration-300 border border-white/10 flex items-center gap-2 cursor-pointer active:scale-95">
+        <!-- Modificado @click para llamar a preLogout -->
+        <button @click="preLogout" class="px-4 py-2 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 rounded-xl text-xs font-bold transition-all duration-300 border border-white/10 flex items-center gap-2 cursor-pointer active:scale-95">
           <VIcon name="bi-box-arrow-right" scale="0.95" /> Salir
         </button>
       </div>
@@ -97,6 +98,56 @@
 
     <PlanesView v-if="showPlans" @close="showPlans = false" />
 
+    <!-- MODAL DE CONFIRMACIÓN DE CIERRE DE SESIÓN PREMIUM -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <div v-if="showLogoutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Fondo oscuro difuminado -->
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="showLogoutModal = false"></div>
+
+        <!-- Tarjeta del Modal -->
+        <div class="bg-white rounded-3xl p-7 max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-100 relative z-10 text-center space-y-5 transform transition-all">
+
+          <!-- Icono de Advertencia Estilizado -->
+          <div class="mx-auto w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-xs border border-rose-100">
+            <VIcon name="bi-box-arrow-right" scale="1.8" class="animate-pulse" />
+          </div>
+
+          <!-- Texto Informativo -->
+          <div class="space-y-2">
+            <h3 class="text-xl font-black text-slate-800 tracking-tight uppercase">
+              ¿Cerrar Sesión Activa?
+            </h3>
+            <p class="text-slate-500 text-xs font-medium leading-relaxed px-2">
+              Está a punto de salir de la plataforma clínica. Deberá introducir de nuevo sus credenciales de acceso para gestionar sus consultas.
+            </p>
+          </div>
+
+          <!-- Botones de Acción de Alta Gama -->
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <button
+              @click="showLogoutModal = false"
+              class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer active:scale-95"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="confirmarLogout"
+              class="px-5 py-3 bg-linear-to-r from-rose-500 to-red-600 hover:brightness-110 text-white text-[11px] font-black uppercase tracking-wider rounded-xl shadow-md shadow-rose-500/20 transition-all cursor-pointer active:scale-95"
+            >
+              Sí, Salir
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
   </div>
 </template>
 
@@ -130,6 +181,8 @@ const currentPath = computed(() => route.path);
 const { isConsultationActive } = storeToRefs(medicalStore);
 
 const showPlans = ref(false);
+
+const showLogoutModal = ref(false);
 
 const obtenerRolUsuario = computed<number>(() => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -239,8 +292,13 @@ const handleNavigation = (path: string) => {
   }
 };
 
-const handleLogout = () => {
-  if (!confirm('¿Está seguro que desea cerrar la sesión de la plataforma clínica?')) return;
+const preLogout = () => {
+  showLogoutModal.value = true;
+};
+
+const confirmarLogout = () => {
+  showLogoutModal.value = false;
+  authStore.logout();
   localStorage.clear();
   router.push('/');
 };
@@ -263,12 +321,8 @@ const handleLogout = () => {
   animation: bounce-gentle 2s ease-in-out infinite;
 }
 
-/* ========================================================
-   ESTILOS DE ALTA GAMA PARA EL LOGO 3D EN EL HEADER
-   ======================================================== */
-
 .contenedor-header-icono-3d {
-  width: 42px; /* Tamaño optimizado para la barra superior */
+  width: 42px;
   height: 42px;
   perspective: 600px;
   animation: headerFlotar 4s ease-in-out infinite;
@@ -285,13 +339,10 @@ const handleLogout = () => {
   justify-content: center;
   color: white;
   font-family: sans-serif;
-
-  /* Sombras ultra-nítidas para simular volumen y oclusión en espacios pequeños */
   box-shadow:
     0 4px 10px rgba(0, 0, 0, 0.3),
     inset 0 1.5px 3px rgba(255, 255, 255, 0.5),
     inset 0 -2.5px 5px rgba(0, 0, 0, 0.2);
-
   transform: rotateX(8deg) rotateY(-4deg);
   transform-style: preserve-3d;
 }
@@ -312,33 +363,9 @@ const handleLogout = () => {
   text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-/* Micro-etiqueta "Nuevo" adaptada a la cabecera */
-.etiqueta-header-nuevo {
-  top: -4px;
-  right: -5px;
-  background-color: #002d54; /* Contraste profundo */
-  color: white;
-  font-size: 5.5px;
-  font-weight: 950;
-  text-transform: uppercase;
-  padding: 1.5px 4.5px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-  letter-spacing: 0.06em;
-  z-index: 10;
-  transform: rotateZ(6deg);
-}
-
-/* Oscilación balanceada para no irrumpir la lectura de los títulos de la cabecera */
 @keyframes headerFlotar {
-  0% {
-    transform: translateY(0px) rotateX(8deg) rotateY(-4deg);
-  }
-  50% {
-    transform: translateY(-3.5px) rotateX(10deg) rotateY(0deg);
-  }
-  100% {
-    transform: translateY(0px) rotateX(8deg) rotateY(-4deg);
-  }
+  0% { transform: translateY(0px) rotateX(8deg) rotateY(-4deg); }
+  50% { transform: translateY(-3.5px) rotateX(10deg) rotateY(0deg); }
+  100% { transform: translateY(0px) rotateX(8deg) rotateY(-4deg); }
 }
 </style>

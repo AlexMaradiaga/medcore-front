@@ -47,11 +47,9 @@
         </div>
       </nav>
 
-      <!-- Cuerpo Principal Asíncrono -->
       <div class="flex-1 overflow-y-auto p-8 max-w-7xl w-full mx-auto animate-fade-in custom-scrollbar pb-32">
         <div class="bg-white border border-slate-200/60 rounded-[2.5rem] p-10 shadow-xl min-h-125 relative overflow-hidden">
 
-          <!-- PESTAÑA: SUBJETIVO -->
           <div v-if="activeTab === 'Subjetivo'" class="space-y-8 animate-fade-in text-left">
             <div class="border-b border-slate-100 pb-3">
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Datos Subjetivos del Paciente</h3>
@@ -134,35 +132,29 @@
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Exploración segmentaria y hallazgos patológicos</p>
               </div>
 
-              <!-- CONTENEDOR DE SISTEMAS FÍSICOS REESTRUCTURADO SIN ANIDACIÓN EN BUTTON -->
               <div class="space-y-3.5">
                 <div v-for="(sistema, index) in sistemasFisicos" :key="sistema.id" class="border border-slate-200 rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all duration-200">
 
-                  <!-- Cabecera Clickable (Div en lugar de button evita que se cierre al pulsar dentro del contenido expuesto) -->
                   <div @click="toggleSistema(index)" class="w-full flex justify-between items-center p-4 hover:bg-slate-50/70 transition-all cursor-pointer text-left select-none">
                     <div class="flex items-center gap-4">
                       <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border shadow-3xs', getSistemaStyles(sistema.nombre).bgClass]">
                         <v-icon :name="getSistemaStyles(sistema.nombre).icon" scale="0.9" />
                       </div>
                       <span class="font-black text-slate-800 text-xs uppercase tracking-wider">{{ sistema.nombre }}</span>
-                      <span v-if="countHallazgos(index) > 0 && !sistema.isNormal" class="bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-3xs animate-pulse flex items-center gap-1">
-                        <v-icon name="bi-exclamation-triangle-fill" scale="0.7" /> {{ countHallazgos(index) }} hallazgos
-                      </span>
-                      <span v-else-if="sistema.isNormal" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-3xs flex items-center gap-1">
-                        <v-icon name="bi-check-circle-fill" scale="0.7" /> Normal
+                      <span class="text-[9px] font-black uppercase tracking-wider shadow-3xs border px-2.5 py-1 rounded-md flex items-center gap-1" :class="sistema.isNormal ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-amber-50 text-amber-700 border-amber-200/60'">
+                        <v-icon v-if="!sistema.isNormal" name="bi-exclamation-triangle-fill" scale="0.7" />
+                        {{ sistema.isNormal ? 'Normal' : (countHallazgos(index) > 0 ? `${countHallazgos(index)} Hallazgos` : 'Hallazgos Detectados') }}
                       </span>
                     </div>
                     <v-icon name="bi-chevron-down" :class="['text-slate-400 transition-transform duration-200 mr-2', sistema.open ? 'rotate-180' : '']" scale="0.8" />
                   </div>
 
-                  <!-- Bloque Opciones Desplegable -->
                   <div v-if="sistema.open" class="p-6 bg-slate-50/40 border-t border-slate-100 animate-fade-in space-y-5 text-left">
                     <label class="flex items-center gap-3 cursor-pointer group bg-white p-3.5 rounded-xl border border-slate-100 shadow-3xs w-fit">
                       <input type="checkbox" v-model="sistema.isNormal" @change="handleNormalChange(index)" class="w-4 h-4 rounded border-slate-300 text-[#005596] focus:ring-0">
                       <span class="text-xs font-black uppercase tracking-wide text-slate-600 group-hover:text-slate-900 transition-colors">Marcar Sistema como Sano / Normal</span>
                     </label>
 
-                    <!-- SE ENRIQUECE CON v-if PARA EVITAR CRASHES DURANTE CARGA ASÍNCRONA -->
                     <div v-if="!sistema.isNormal && form.examen_fisico_opciones[sistema.id]" class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-3xs animate-fade-in">
                       <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Catálogo Clínico de Hallazgos Auxiliares:</p>
                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -215,7 +207,7 @@
                 </div>
 
                 <div class="space-y-2.5 max-h-76 overflow-y-auto pr-1 custom-scrollbar">
-                  <div v-if="form.diagnostico.length === 0" class="text-center py-12 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-400 tracking-widest flex flex-col items-center justify-center gap-2">
+                  <div class="text-center py-12 border border-dashed border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-400 tracking-widest flex flex-col items-center justify-center gap-2" v-if="form.diagnostico.length === 0">
                     <v-icon name="bi-folder-x" scale="1.2" class="text-slate-300" /> Ningún código OMS anexado a la consulta.
                   </div>
                   <div v-else v-for="(diagEstablecido, idx) in form.diagnostico" :key="idx" class="bg-blue-50/40 border border-blue-100/60 rounded-xl p-3.5 flex justify-between items-center animate-fade-in shadow-3xs">
@@ -305,8 +297,52 @@
                 </div>
               </div>
             </div>
-          </div>
 
+            <!-- MÓDULO INTERACTIVO DE CITAS DE SEGUIMIENTO (BORDES PREMIUM REDONDEADOS) -->
+            <div class="bg-slate-50/60 border border-slate-200 rounded-3xl p-6 space-y-4 text-left shadow-2xs mt-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-purple-50 text-purple-700 border border-purple-100 rounded-xl flex items-center justify-center shadow-3xs">
+                    <v-icon name="bi-arrow-repeat" scale="1.0" />
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Planificar Cita de Seguimiento / Revisión</h4>
+                    <p class="text-[10px] font-medium text-slate-400">Determine si el estado clínico del paciente requiere una reevaluación programada</p>
+                  </div>
+                </div>
+
+                <!-- Toggle Switch con Tailwind -->
+                <label class="relative inline-flex items-center cursor-pointer select-none">
+                  <input type="checkbox" v-model="requiereSeguimiento" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              <!-- Formulario Desplegable Condicional -->
+              <div v-if="requiereSeguimiento" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 animate-fade-in">
+                <div class="space-y-1.5">
+                  <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">Fecha del Seguimiento *</label>
+                  <input
+                    type="date"
+                    v-model="seguimientoData.fecha"
+                    class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold font-mono text-slate-800 outline-hidden focus:border-purple-500 transition-all focus:ring-4 focus:ring-purple-50"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">Hora del Seguimiento *</label>
+                  <input
+                    type="time"
+                    v-model="seguimientoData.hora"
+                    class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold font-mono text-slate-800 outline-hidden focus:border-purple-500 transition-all focus:ring-4 focus:ring-purple-50"
+                  />
+                </div>
+                <p class="sm:col-span-2 text-[10px] font-bold text-purple-700 bg-purple-50 border border-dashed border-purple-100 p-3 rounded-xl leading-relaxed">
+                  📌 <strong>Nota de Automatización:</strong> Al confirmar esta acción, el backend agendará directamente la cita al paciente con el estado <span class="underline font-black">CONFIRMADA</span>, reflejándose de forma automática en su bandeja de Citas Activas.
+                </p>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -337,9 +373,10 @@ import type { DirectiveBinding } from 'vue';
 import PatientBackgroundTabs from '../ui/components/PatientHistory/PatientBackgroundTabs.vue';
 import { GiLungs, GiStomach } from "oh-vue-icons/icons/gi";
 import { FaBrain, FaFemale, FaBone } from "oh-vue-icons/icons/fa";
+import { BiArrowRepeat } from "oh-vue-icons/icons/bi";
 import { addIcons } from "oh-vue-icons";
 
-addIcons(GiLungs, GiStomach, FaBrain, FaFemale, FaBone);
+addIcons(GiLungs, GiStomach, FaBrain, FaFemale, FaBone, BiArrowRepeat);
 
 const OdontologyModule = defineAsyncComponent(() =>
   import('../../consultations/ui/components/odontology/OdontologyModule.vue')
@@ -383,6 +420,10 @@ let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 const presupuestoEspecialidad = ref<number>(0);
 const datosOdontologiaExtra = ref<OdontologyPayload | null>(null);
 
+// ESTADOS PARA LA PLANIFICACIÓN DE SEGUIMIENTO AUTOMÁTICO
+const requiereSeguimiento = ref<boolean>(false);
+const seguimientoData = ref({ fecha: '', hora: '' });
+
 const nuevoMedPlan = ref<FilaMedicamentoConsulta>({
   NombreMedicamento: '',
   Dosis: '',
@@ -415,7 +456,7 @@ const getSignoIcon = (key: string): { icon: string; color: string; bgColor: stri
     presion: { icon: 'bi-droplet-fill', color: 'text-rose-500', bgColor: 'bg-rose-50' },
     pulso: { icon: 'bi-heart-fill', color: 'text-emerald-500', bgColor: 'bg-emerald-50' },
     temp: { icon: 'bi-thermometer-half', color: 'text-amber-500', bgColor: 'bg-amber-50' },
-    respiracion: { icon: 'bi-activity', color: 'text-sky-500', bgColor: 'bg-sky-50' }
+    respiracion: { icon: 'bi-activity', color: 'text-sky-500', bgColor: 'bg-[#005596]/10' }
   };
   return mapping[key] || { icon: 'bi-activity', color: 'text-slate-400', bgColor: 'bg-slate-50' };
 };
@@ -455,7 +496,6 @@ const getSistemaStyles = (nombre: string): { icon: string; bgClass: string } => 
 };
 
 const obtenerBorradorInicial = () => {
-  // Estructura limpia y segura por defecto
   const defaultForm = {
     cita_id: 0,
     signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '' } as SignosVitales,
@@ -471,7 +511,6 @@ const obtenerBorradorInicial = () => {
   if (borradorGuardado) {
     try {
       const parsed = JSON.parse(borradorGuardado);
-      // Fusionamos el borrador para asegurar la existencia de propiedades internas críticas
       return {
         cita_id: parsed.cita_id ?? defaultForm.cita_id,
         signos_vitales: { ...defaultForm.signos_vitales, ...parsed.signos_vitales },
@@ -640,6 +679,11 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (requiereSeguimiento.value && (!seguimientoData.value.fecha || !seguimientoData.value.hora)) {
+    toast.error('Por favor especifique la fecha y la hora para la cita de seguimiento.');
+    return;
+  }
+
   loading.value = true;
   try {
     const payload = JSON.parse(JSON.stringify(form.value));
@@ -659,8 +703,19 @@ const handleSubmit = async () => {
       payload.examenes_odontologicos_json = datosOdontologiaExtra.value.examenesBase || [];
     }
 
+    const fechaHoraSeguimiento = requiereSeguimiento.value
+      ? `${seguimientoData.value.fecha} ${seguimientoData.value.hora}:00`
+      : null;
+
+    if (requiereSeguimiento.value) {
+      payload.crear_seguimiento = true;
+      payload.seguimiento_fecha_hora = fechaHoraSeguimiento;
+    } else {
+      payload.crear_seguimiento = false;
+    }
+
     await repo.completeConsultation(payload);
-    toast.success('¡Consulta Odontológica finalizada con éxito!');
+    toast.success('¡Consulta finalizada y cita de seguimiento agendada con éxito!');
 
     const hallazgosExamenFisico: Array<{
       sistema: string;
@@ -702,6 +757,8 @@ const handleSubmit = async () => {
       diagnostico: payload.diagnostico,
       detalle_medicamentos: form.value.detalle_medicamentos || [],
       signos_vitales: form.value.signos_vitales,
+
+      fechaSeguimiento: fechaHoraSeguimiento,
 
       antecedentes: {
         cronicas: appointment.value?.Sintomas || 'No registra',
@@ -775,7 +832,6 @@ const vClickOutside = {
   iframe {
     display: none !important;
     visibility: hidden !important;
-    height: 0 !important;
     opacity: 0 !important;
   }
 }

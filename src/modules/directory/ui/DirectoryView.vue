@@ -187,10 +187,10 @@
             <h5 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Acceso Rápido</h5>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
 
-              <div @click="historyViewMode = 'completo'; activeTab = 'history'" class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-sky-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3.5 group">
-                <v-icon name="bi-folder-fill" class="text-sky-500 h-5 w-5" />
+              <div @click="historyViewMode = 'citas_gestion'; activeTab = 'history'" class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-sky-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3.5 group">
+                <v-icon name="bi-calendar-check-fill" class="text-sky-500 h-5 w-5" />
                 <span class="text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-sky-600">
-                  {{ te('tabs.history') ? t('tabs.history') : 'Historial' }}
+                  Mis Citas Activas
                 </span>
               </div>
 
@@ -219,7 +219,6 @@
           </div>
         </section>
 
-        <!-- SECCIÓN DIRECTORIO: RESTAURADA CON LA BARRA DE FILTROS ORIGINAL COMPLETA -->
         <section v-if="activeTab === 'directory'" class="space-y-8 animate-fade-in">
           <div>
             <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Mis Médicos</h2>
@@ -227,7 +226,6 @@
           </div>
 
           <div class="bg-white rounded-[2.5rem] p-8 shadow-xs border border-slate-100 space-y-5">
-            <!-- Fila 1: Input de Búsqueda -->
             <div class="flex flex-col lg:flex-row gap-4 items-center">
               <div class="flex-1 w-full relative">
                 <input v-model="filters.search" type="text" placeholder="Buscar por nombre o especialidad..." class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4.5 px-6 pl-14 outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-400 focus:bg-white transition-all text-slate-700 font-bold placeholder:text-slate-300 text-sm" />
@@ -235,7 +233,6 @@
               </div>
             </div>
 
-            <!-- Fila 2: Desplegables de Selección (Especialidades y Ordenamiento) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select v-model="filters.especialidad" class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-400 text-slate-700 font-bold text-xs cursor-pointer">
                 <option value="">Todas las especialidades</option>
@@ -251,7 +248,6 @@
               </select>
             </div>
 
-            <!-- Fila 3: Switches de Filtros (Disponible ahora e Idioma Inglés) -->
             <div class="flex items-center gap-6 pt-1">
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <div class="relative">
@@ -275,7 +271,6 @@
             </div>
           </div>
 
-          <!-- Listado de Doctores Filtrados -->
           <div v-if="doctors.length > 0" class="space-y-4">
             <div v-for="doctor in doctors" :key="doctor.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all hover:border-sky-200/60">
               <div class="flex items-center gap-6 w-full md:flex-1">
@@ -349,7 +344,35 @@
         </section>
 
         <section v-if="activeTab === 'laboratory'" class="animate-fade-in"><PatientLabView /></section>
-        <section v-if="activeTab === 'history'" class="animate-fade-in"><MedicalHistoryView :usuarioId="userData.id" :viewMode="historyViewMode" /></section>
+
+        <!-- INTEGRACIÓN COMPLETA OPCIÓN B: CORREGIDA EXPRESIÓN TERNARIA PARA VITE -->
+        <section v-if="activeTab === 'history'" class="animate-fade-in space-y-6 text-left">
+
+          <div class="flex bg-slate-200/60 p-1.5 rounded-2xl border border-slate-200 shadow-inner w-fit gap-1 mb-2">
+            <button
+              @click="historyViewMode = historyViewMode === 'citas_gestion' ? 'completo' : historyViewMode"
+              :class="historyViewMode !== 'citas_gestion' ? 'bg-white text-purple-600 font-black shadow-xs scale-102' : 'text-slate-500 font-bold hover:text-slate-800'"
+              class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2 border-none"
+            >
+              <v-icon name="bi-folder-fill" scale="0.85" /> Historial Clínico
+            </button>
+            <button
+              @click="historyViewMode = 'citas_gestion'"
+              :class="historyViewMode === 'citas_gestion' ? 'bg-white text-[#005596] font-black shadow-xs scale-102' : 'text-slate-500 font-bold hover:text-slate-800'"
+              class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2 border-none"
+            >
+              <v-icon name="bi-calendar-check-fill" scale="0.85" /> Control de Citas
+            </button>
+          </div>
+
+          <div v-if="historyViewMode === 'citas_gestion'">
+            <PatientAppointmentsView />
+          </div>
+          <div v-else>
+            <MedicalHistoryView :usuarioId="Number(idClinicoActivo)" :viewMode="historyViewMode" />
+          </div>
+        </section>
+
         <section v-if="activeTab === 'configuracion'" class="space-y-6 animate-fade-in"><SettingsView /></section>
 
       </main>
@@ -421,6 +444,12 @@ import type { PatientExtendedProfile } from '../../patients/domain/entities/Pati
 import MedicalHistoryView from '@/modules/appointments/ui/MedicalHistoryView.vue';
 import PatientLabView from '../../laboratories/ui/PatientLabView.vue';
 
+// CONTROLADOR DE CITAS Y SUS ICONOS
+import PatientAppointmentsView from '@/modules/appointments/ui/PatientAppointmentsView.vue';
+import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
+import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill } from 'oh-vue-icons/icons/bi';
+addIcons(BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill);
+
 interface Clinica { EntidadID: number; NombreInstitucion: string; Descripcion?: string; Direccion?: string; }
 interface EntidadBackend { EntidadID: number | string; NombreComercial?: string; Nombre?: string; Descripcion?: string; Direccion?: string; }
 type DoctorExtended = Doctor & { CostoConsulta?: number; Precio?: number; costo?: number };
@@ -434,7 +463,9 @@ interface Dependiente {
 }
 
 const toast = useToast();
-const historyViewMode = ref<'completo' | 'recetas'>('completo');
+const historyViewMode = ref<'completo' | 'recetas' | 'citas_gestion'>('completo');
+const idClinicoActivo = ref<number>(0);
+
 const router = useRouter();
 const directoryRepo = new DirectoryRepositoryImpl();
 const { t, te, locale } = useI18n();
@@ -556,6 +587,9 @@ const cambiarPacienteSeleccionado = (index: number) => {
 
   pacienteActualSeleccionado.value = paciente;
 
+  const idClinico = paciente.PacienteID || paciente.id;
+  idClinicoActivo.value = idClinico ? Number(idClinico) : userData.value.id;
+
   const idPaciente = paciente.UsuarioID || paciente.usuario_id;
   userData.value.id = idPaciente ? Number(idPaciente) : userData.value.id;
   userData.value.nombre = paciente.Nombre || paciente.nombre || 'Paciente';
@@ -565,8 +599,7 @@ const cambiarPacienteSeleccionado = (index: number) => {
   const edadPaciente = paciente.Edad || paciente.edad;
   userData.value.fecha_nacimiento = edadPaciente ? String(edadPaciente) : '';
 
-  const idAAlmacenar = paciente.PacienteID || paciente.id || '';
-  localStorage.setItem('paciente_actual_id', String(idAAlmacenar));
+  localStorage.setItem('paciente_actual_id', String(idClinico));
 };
 
 const evaluarSeleccionPaciente = (event: Event) => {
@@ -667,6 +700,7 @@ const loadUser = async () => {
         } else if (response.data.data) {
           const paciente = response.data.data;
           pacienteActualSeleccionado.value = paciente;
+          idClinicoActivo.value = paciente.PacienteID || paciente.id || parsed.id;
           userData.value.telefono = paciente.Telefono || paciente.telefono || '';
           userData.value.genero = paciente.Genero || paciente.genero || '';
           userData.value.fecha_nacimiento = paciente.Edad || paciente.edad || '';

@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import { useMedicalStore } from '@/stores/medicalStore';
-import type { Patient } from '@/modules/patients/domain/entities/Patient';
+import type { Patient } from '../../../../patients/domain/entities/Patient';
 import type { DashboardAppointment } from '@/modules/appointments/domain/Appointment';
 
 interface CalendarDay {
@@ -105,24 +105,31 @@ const isToday = (dateString: string) => {
 };
 
 const handleCellClick = () => {
-  
+
 
 };
 
 const goToPatient = (app: DashboardAppointment) => {
-  const patientData: Patient = {
-    Nombre: app.nombrePaciente.split(' ')[0] || '',
-    Apellido: app.nombrePaciente.split(' ')[1] || '',
-    DNI: '',
-    Telefono: '',
-    email: '',
+  // Homologamos el objeto a la estructura esperada por el ecosistema de consulta del médico (PascalCase)
+  const appointmentPascal = {
+    CitaID: Number(app.id),
+    Paciente: app.nombrePaciente,
+    Motivo: app.motivo,
     Edad: app.edad,
     Genero: app.genero,
-    Disponible: true,
-    Estado: app.estado
-  } as Patient;
+    EstadoCita: app.estado,
+    Sintomas: 'Evaluación programada por agenda semanal.',
+    Alergias: 'No reportadas',
+    MedicamentosActuales: 'Ninguno'
+  };
 
-  medicalStore.setPatient(patientData);
+  localStorage.setItem('current_appointment', JSON.stringify(appointmentPascal));
+
+  medicalStore.setPatient({
+    PacienteID: String(app.id),
+    Nombre: app.nombrePaciente,
+  } as Patient);
+
 };
 
 const scrollToCurrentHour = () => {

@@ -25,4 +25,7 @@ export class AppointmentRepository {
     const response = await api.get(`historial/recetas/${usuarioId}`);
     return response.data;
   }
+  async reschedule(citaId: number, fechaHora: string): Promise<void> {
+    await api.put(`citas/${citaId}/reprogramar`, { fecha_hora: fechaHora });
+  }
 }

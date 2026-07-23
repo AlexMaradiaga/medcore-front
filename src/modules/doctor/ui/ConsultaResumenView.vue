@@ -3,7 +3,7 @@
     <main class="min-h-screen bg-slate-50/60 pb-32 font-premium select-none animate-fade-in text-left print:hidden">
       <div class="max-w-7xl mx-auto p-6 space-y-8">
 
-        <!-- CABECERA -->
+        <!-- CABECERA DE LA VISTA EN PANTALLA -->
         <div class="bg-linear-to-r from-blue-100/80 via-purple-100/50 to-emerald-100/70 border border-slate-200/80 border-t-8 border-t-[#005596] rounded-4xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.03)] flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,85,150,0.07)]">
           <div class="space-y-4 flex-1 w-full">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -41,7 +41,7 @@
               @click="imprimirResumen"
               class="bg-white text-slate-700 border border-slate-200 px-5 py-3 rounded-xl font-black uppercase text-[10px] tracking-wider shadow-sm transition-all cursor-pointer flex items-center gap-2 border-b-4 border-b-slate-300 active:translate-y-1 active:border-b-0 active:bg-slate-50"
             >
-              <VIcon name="bi-download" scale="0.95" /> Descargar
+              <VIcon name="bi-download" scale="0.95" /> Descargar / Imprimir
             </button>
             <div class="relative">
               <button
@@ -58,12 +58,25 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        <!-- AVISO DE CITA DE SEGUIMIENTO PROGRAMADA (PANTALLA WEB) -->
+        <div v-if="datos.fechaSeguimiento" class="bg-linear-to-r from-purple-500/10 via-purple-500/5 to-transparent border-l-4 border-l-purple-600 rounded-2xl p-4 shadow-3xs flex items-center gap-4 animate-fade-in">
+          <div class="bg-purple-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0">
+            <VIcon name="bi-calendar-event" scale="1.1" />
+          </div>
+          <div>
+            <h4 class="text-xs font-black text-purple-950 uppercase tracking-wider">Cita de Revisión / Seguimiento Programada</h4>
+            <p class="text-xs font-medium text-purple-800 mt-0.5">
+              Este paciente tiene programada su próxima evaluación clínica el día: <strong class="font-black underline font-mono text-purple-950">{{ formatearFechaEspecifica(datos.fechaSeguimiento) }}</strong>.
+            </p>
+          </div>
+        </div>
 
+        <!-- TARJETAS CLINICAS EN PANTALLA -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           <div class="bg-white border border-slate-200/80 rounded-4xl shadow-[0_12px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-            <div class="bg-linear-to-r from-blue-500/15 via-blue-500/5 to-transparent border-b border-blue-100 px-6 py-4">
+            <div class="bg-linear-to-r from-blue-50/15 via-blue-50/5 to-transparent border-b border-blue-100 px-6 py-4">
               <h4 class="text-xs font-black text-[#005596] uppercase tracking-widest flex items-center gap-2">
-                <span class="bg-white w-6 h-6 rounded-lg flex items-center justify-center border border-blue-100 text-[#005596] shadow-3xs"><VIcon name="bi-person-bounding-box" scale="0.85" /></span> Datos Subjetivos
+                <span class="bg-white w-6 h-6 rounded-lg flex items-center justify-center border border-blue-100 text-[#005596] shadow-3xs"><VIcon name="bi-person-bounding-box" scale="0.85" /></span> Anamnesis y Antecedentes
               </h4>
             </div>
             <div class="p-6 space-y-4 flex-1 flex flex-col justify-start">
@@ -71,12 +84,6 @@
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Motivo de Consulta</p>
                 <div class="text-xs font-bold text-slate-700 bg-slate-50/60 p-4 rounded-xl border border-slate-200/40">
                   {{ datos.motivoConsulta || '--' }}
-                </div>
-              </div>
-              <div class="space-y-1.5 pt-1">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Historia / Sintomatología</p>
-                <div class="text-xs font-bold text-slate-700 bg-slate-50/60 p-4 rounded-xl border border-slate-200/40 min-h-20">
-                  {{ datos.historiaActual || '--' }}
                 </div>
               </div>
 
@@ -101,9 +108,9 @@
           </div>
 
           <div class="bg-white border border-slate-200/80 rounded-4xl shadow-[0_12px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-            <div class="bg-linear-to-r from-purple-500/15 via-purple-500/5 to-transparent border-b border-purple-100 px-6 py-4">
+            <div class="bg-linear-to-r from-purple-50/15 via-purple-50/5 to-transparent border-b border-purple-100 px-6 py-4">
               <h4 class="text-xs font-black text-purple-700 uppercase tracking-widest flex items-center gap-2">
-                <span class="bg-white w-6 h-6 rounded-lg flex items-center justify-center border border-purple-100 text-purple-700 shadow-3xs"><VIcon name="bi-heart-pulse-fill" scale="0.85" /></span> Datos Objetivos
+                <span class="bg-white w-6 h-6 rounded-lg flex items-center justify-center border border-purple-100 text-purple-700 shadow-3xs"><VIcon name="bi-heart-pulse-fill" scale="0.85" /></span> Signos Vitales y Físico
               </h4>
             </div>
             <div class="p-6 space-y-4 flex-1 flex flex-col justify-between">
@@ -135,21 +142,14 @@
                     <div class="flex justify-between items-center mb-0.5">
                       <span class="font-bold text-slate-800 uppercase text-[9px] tracking-wide">{{ h.sistema }}</span>
                       <span v-if="h.isNormal" class="inline-flex items-center gap-1 text-[8px] font-black uppercase text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded-md">
-                        <VIcon name="bi-check-circle-fill" scale="0.6" /> Sano / Normal
+                        <VIcon name="bi-check-circle-fill" scale="0.6" /> Normal
                       </span>
-                      <span v-else class="inline-flex items-center gap-1 text-[8px] font-black uppercase text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-md animate-pulse">
+                      <span v-else class="inline-flex items-center gap-1 text-[8px] font-black uppercase text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-md">
                         ⚠️ Hallazgos
                       </span>
                     </div>
-                    <div v-if="!h.isNormal" class="space-y-1 mt-1 font-medium text-slate-600">
-                      <p v-if="h.opciones && h.opciones.length > 0" class="text-[10px]"><span class="text-amber-800">●</span> {{ h.opciones.join(', ') }}</p>
-                      <p v-if="h.notas" class="text-[10px] italic bg-white/80 p-1.5 rounded-lg border border-slate-100">"{{ h.notas }}"</p>
-                    </div>
                   </div>
                 </div>
-              </div>
-              <div v-else class="bg-linear-to-r from-emerald-50/50 to-white border border-emerald-200 text-emerald-800 rounded-xl p-3 text-[11px] font-bold shadow-3xs flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shrink-0"></span> Examen Físico Segmentario Concluido.
               </div>
             </div>
           </div>
@@ -166,9 +166,9 @@
                   <span class="text-orange-500 font-mono text-[9px]">#{{ idx + 1 }}</span> {{ diag }}
                 </div>
               </div>
-              <div v-if="criterioExtenso" class="border-t border-slate-100 pt-3">
+              <div class="border-t border-slate-100 pt-3">
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1">Criterio / Evolución</p>
-                <p class="text-xs font-semibold text-slate-600 bg-slate-50/40 border border-slate-100 p-3 rounded-xl line-clamp-2 italic">"{{ criterioExtenso }}"</p>
+                <p class="text-xs font-semibold text-slate-600 bg-slate-50/40 border border-slate-100 p-3 rounded-xl italic">"{{ criterioExtenso || 'Sin criterio registrado.' }}"</p>
               </div>
             </div>
           </div>
@@ -178,7 +178,7 @@
           <div class="bg-linear-to-r from-blue-100/80 via-purple-100/50 to-emerald-100/70 border-b border-slate-200/80 border-t-8 border-t-[#005596] px-8 py-6 flex justify-between items-center">
             <div>
               <h3 class="text-xl font-black text-slate-900 tracking-tight">Receta Médica Digital</h3>
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Medicamentos e indicaciones validadas para dispensación electrónica</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Medicamentos e indicaciones validadas</p>
             </div>
             <span class="text-[10px] font-black bg-emerald-600 text-white px-4 py-2 rounded-xl uppercase tracking-widest shadow-sm font-mono border border-emerald-500/20 flex items-center gap-1.5">
               <VIcon name="bi-file-earmark-medical" scale="0.9" /> Total: {{ datos.detalle_medicamentos?.length || 0 }} ítems
@@ -196,10 +196,10 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(med, idx) in datos.detalle_medicamentos" :key="idx" class="border-b border-slate-100 last:border-0 bg-white odd:bg-slate-50/10 text-slate-700 text-xs">
+                  <tr v-for="(med, idx) in datos.detalle_medicamentos" :key="idx" class="border-b border-slate-100 last:border-0 bg-white text-slate-700 text-xs">
                     <td class="py-5 px-5 text-center text-slate-400 font-mono font-black border-r border-slate-100">{{ idx + 1 }}</td>
                     <td class="py-5 px-5 border-r border-slate-100">
-                      <div class="bg-blue-50/70 border border-blue-200/60 px-4 py-2.5 rounded-xl text-[#005596] font-black uppercase text-[11px] tracking-tight w-fit shadow-3xs">
+                      <div class="bg-blue-50/70 border border-blue-200/60 px-4 py-2.5 rounded-xl text-[#005596] font-black uppercase text-[11px] tracking-tight w-fit">
                         {{ med?.NombreMedicamento || '--' }}
                       </div>
                     </td>
@@ -223,7 +223,12 @@
       </div>
     </main>
 
+    <!-- ========================================================= -->
+    <!--  DOCUMENTO NATIVO DE IMPRESIÓN (PRINT CONTAINER CLEAN)    -->
+    <!-- ========================================================= -->
     <div class="hidden print:block w-full text-black font-sans bg-white p-0 text-left leading-normal selection:bg-transparent">
+
+      <!-- ENCABEZADO OFICIAL -->
       <div class="border-b-4 border-[#005596] pb-4 flex justify-between items-start">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 tracking-tight uppercase">Resumen de Consulta Clínica</h1>
@@ -235,6 +240,7 @@
         </div>
       </div>
 
+      <!-- I. INFORMACION PACIENTE -->
       <div class="mt-6">
         <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">I. Información General del Paciente</h3>
         <table class="w-full text-xs border border-slate-300 text-left">
@@ -259,23 +265,35 @@
         </table>
       </div>
 
+      <!-- AVISO DE CITA DE SEGUIMIENTO EN LA HOJA IMPRESA -->
+      <div v-if="datos.fechaSeguimiento" class="mt-4 border-2 border-purple-600 bg-purple-50/50 p-3 rounded-xl text-xs">
+        <p class="text-purple-950 font-black uppercase tracking-tight">
+          ⚠️ Próxima Cita de Revisión / Seguimiento Programada
+        </p>
+        <p class="text-purple-900 mt-1 font-semibold">
+          Se solicita al paciente asistir a la institución para su reevaluación médica obligatoria el día:
+          <strong class="font-mono text-sm text-purple-950 underline ml-1">{{ formatearFechaEspecifica(datos.fechaSeguimiento) }}</strong>
+        </p>
+      </div>
+
       <div class="mt-6 grid grid-cols-2 gap-4">
+        <!-- II. MOTIVO DE CONSULTA Y ANTECEDENTES -->
         <div>
           <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">II. Anamnesis (Datos Subjetivos)</h3>
-          <div class="border border-slate-300 p-3 rounded-lg text-xs min-h-24 bg-white whitespace-pre-line">
-            <p class="mb-1"><strong>Motivo de Consulta:</strong></p>
-            <p class="text-slate-700 italic mb-3">{{ datos.motivoConsulta || '--' }}</p>
-            <p class="mb-1"><strong>Historia / Sintomatología:</strong></p>
-            <p class="text-slate-700 italic mb-3">{{ datos.historiaActual || '--' }}</p>
-            <div class="pt-2 border-t border-slate-150 text-[10px] space-y-0.5">
+          <div class="border border-slate-300 p-3 rounded-lg text-xs bg-white">
+            <p class="mb-1 font-bold text-slate-900">Motivo de Consulta:</p>
+            <p class="text-slate-700 italic mb-3 font-medium">{{ datos.motivoConsulta || 'Evaluación médica general.' }}</p>
+            <div class="pt-2 border-t border-slate-200 text-[10px] space-y-0.5">
               <p><strong>Enfermedades Crónicas:</strong> {{ datos.antecedentes?.cronicas || 'Ninguna registrada' }}</p>
               <p><strong>Reacciones Alérgicas:</strong> {{ datos.antecedentes?.alergias || 'Ninguna registrada' }}</p>
               <p><strong>Medicación Actual:</strong> {{ datos.antecedentes?.medicamentos || 'Ninguna registrada' }}</p>
             </div>
           </div>
         </div>
+
+        <!-- III. SIGNOS VITALES -->
         <div>
-          <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">III. Signos Vitales y Examen Físico (Objetivos)</h3>
+          <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">III. Signos Vitales y Examen Físico</h3>
           <table class="w-full text-xs border border-slate-300 text-left mb-3">
             <thead>
               <tr class="bg-slate-100 text-slate-700 font-bold text-[10px]">
@@ -302,23 +320,10 @@
               </tr>
             </tbody>
           </table>
-
-          <div v-if="datos.hallazgos_examen_fisico && datos.hallazgos_examen_fisico.length > 0" class="border border-slate-300 p-2.5 rounded-lg text-[10px]">
-            <p class="font-bold text-[#005596] uppercase tracking-wide mb-1">Detalle de Hallazgos Segmentarios:</p>
-            <ul class="space-y-1 max-h-24 overflow-hidden">
-              <li v-for="h in datos.hallazgos_examen_fisico" :key="h.sistema" class="leading-normal">
-                <strong>{{ h.sistema }}:</strong>
-                <span v-if="h.isNormal" class="text-emerald-700 font-semibold">Normal</span>
-                <span v-else class="text-amber-800 font-semibold">
-                  Anomalías ({{ h.opciones.join(', ') }})
-                  <span v-if="h.notas" class="text-slate-500 font-normal italic">- "{{ h.notas }}"</span>
-                </span>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
 
+      <!-- IV. IMPRESION DIAGNOSTICA -->
       <div class="mt-6">
         <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">IV. Impresión Diagnóstica (CIE-11)</h3>
         <div class="border border-slate-300 p-3 rounded-lg text-xs">
@@ -333,6 +338,7 @@
         </div>
       </div>
 
+      <!-- V. PLAN TERAPEUTICO -->
       <div class="mt-6">
         <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">V. Plan Terapéutico (Receta Médica Digital)</h3>
         <table class="w-full text-xs border border-slate-400 text-left">
@@ -355,6 +361,7 @@
         </table>
       </div>
 
+      <!-- FIRMA Y SELLO -->
       <div class="mt-16 flex justify-between items-end text-[10px] uppercase font-semibold text-slate-500">
         <div>
           <p>Documento Clínico Autenticado Electrónicamente</p>
@@ -401,7 +408,7 @@ const datos = ref({
   genero: '',
   diagnostico: '',
   motivoConsulta: '',
-  historiaActual: '',
+  fechaSeguimiento: '', // VARIABLE UNICA OFICIAL
   signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '' },
   antecedentes: { cronicas: '', alergias: '', medicamentos: '' },
   hallazgos_examen_fisico: [] as Array<{ sistema: string; isNormal: boolean; opciones: string[]; notas: string; }>,
@@ -415,6 +422,24 @@ const fechaFormateada = computed(() => {
     day: 'numeric'
   });
 });
+
+const formatearFechaEspecifica = (fechaRaw: string) => {
+  if (!fechaRaw) return '--';
+  try {
+    const d = new Date(fechaRaw.replace(' ', 'T'));
+    return d.toLocaleDateString('es-HN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch {
+    return fechaRaw;
+  }
+};
 
 const listaDiagnosticos = computed(() => {
   if (!datos.value.diagnostico) return [];
@@ -441,12 +466,6 @@ onMounted(() => {
       fallbackMotivo = `Evaluación clínica por: ${deags.split(', ')[0]}`;
     }
 
-    let fallbackHistoria = parsed.historiaActual || parsed.sintomas?.dolor || '';
-    if (!fallbackHistoria && parsed.diagnostico) {
-      const partes = parsed.diagnostico.split(' | Nota de Criterio Clínico:');
-      fallbackHistoria = partes[1] ? partes[1].trim() : 'Evolución estable documentada.';
-    }
-
     datos.value = {
       paciente: parsed.paciente || '',
       telefono: parsed.telefono || '',
@@ -454,8 +473,11 @@ onMounted(() => {
       edad: parsed.edad || '',
       genero: parsed.genero || '',
       diagnostico: parsed.diagnostico || '',
-      motivoConsulta: fallbackMotivo || 'Consulta de seguimiento',
-      historiaActual: fallbackHistoria || 'Estable durante la evaluación.',
+      motivoConsulta: fallbackMotivo || 'Consulta de evaluación',
+
+      // 🟢 ASIGNACIÓN DIRECTA DE LA VARIABLE ÚNICA
+      fechaSeguimiento: parsed.fechaSeguimiento || '',
+
       signos_vitales: {
         presion: parsed.signos_vitales?.presion || '',
         pulso: parsed.signos_vitales?.pulso || '',
@@ -488,6 +510,9 @@ const construirTextoResumen = () => {
   texto += `*Diagnósticos OMS:* ${listaDiagnosticos.value.join(', ') || 'Ninguno'}\n`;
   if (criterioExtenso.value) {
     texto += `*Criterio Clínico:* ${criterioExtenso.value}\n`;
+  }
+  if (datos.value.fechaSeguimiento) {
+    texto += `\n*⚠️ CITA DE REVISIÓN PROGRAMADA:* ${formatearFechaEspecifica(datos.value.fechaSeguimiento)}\n`;
   }
   texto += `\n*TRATAMIENTO PRESCRITO:*\n`;
 
@@ -531,54 +556,39 @@ const ejecutarCompartir = (tipo: 'whatsapp' | 'correo') => {
 .font-premium { font-family: 'Montserrat', 'Inter', system-ui, sans-serif; }
 
 .shadow-3xs { box-shadow: 0 1px 2px rgba(0,0,0,0.01); }
-.shadow-2xs { box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
 
 .custom-scrollbar::-webkit-scrollbar { height: 5px; width: 5px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-:deep(div[class*="fixed"]),
-:deep(div[class*="sticky"]),
-:deep(div[style*="position: fixed"]),
-:deep(div[style*="position:fixed"]),
-:deep(.fixed),
-:deep(.sticky),
-:deep(button[class*="rounded-full"]),
-:deep(.bg-gradient-to-tr.from-purple-500),
-:deep(.bg-amber-400),
-:deep(.bg-yellow-400) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  width: 0 !important;
-}
-
+/* REGLAS ABSOLUTAS DE IMPRESION */
 @media print {
+  :global(body > *:not(#app)),
+  :global(.layout-medico-print header),
+  :global(.layout-medico-print nav),
+  :global(.layout-medico-print aside),
+  :global(.layout-medico-print footer),
+  :global(div[class*="fixed"]),
+  :global(div[class*="sticky"]),
+  :global(div[class*="gratis"]),
+  :global(div[class*="floating"]),
+  :global(button) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+  }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    background-image: none !important;
+    box-shadow: none !important;
   }
 
   @page {
     size: letter;
-    margin: 15mm 15mm 15mm 15mm !important;
-  }
-
-  .layout-medico-print :deep(header),
-  .layout-medico-print :deep(nav),
-  .layout-medico-print :deep(aside),
-  .layout-medico-print :deep(footer),
-  div.fixed,
-  div.sticky,
-  button,
-  iframe {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    opacity: 0 !important;
+    margin: 12mm 15mm 12mm 15mm !important;
   }
 }
 </style>

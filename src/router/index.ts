@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth';
+
 import LoginView from '@/modules/auth/ui/LoginView.vue'
 import DashboardView from '@/modules/auth/ui/DashboardView.vue';
 import RegisterView from '@/modules/auth/ui/RegisterView.vue'
@@ -8,6 +10,12 @@ import RegisterDoctorView from '@/modules/auth/ui/RegisterDoctorView.vue';
 import DoctorLabPage from '@/modules/doctor/ui/DoctorLabPage.vue';
 import ClinicAdminView from '@/modules/clinic/ui/ClinicAdminView.vue';
 
+
+const ROLE_MAP: Record<number, string> = {
+  1: 'Admin',
+  2: 'Doctor',
+  3: 'Paciente'
+};
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,7 +68,8 @@ const router = createRouter({
     {
       path: '/medico/receta/:id?',
       name: 'doctor-prescription',
-      component: () => import('@/modules/doctor/ui/PrescriptionPage.vue')
+      component: () => import('@/modules/doctor/ui/PrescriptionPage.vue'),
+      meta: { requiresAuth: true, role: 'Doctor' }
     },
     {
       path: '/medico/consulta/:id/resumen',
@@ -77,7 +86,7 @@ const router = createRouter({
       path: '/medico/consulta/cierre/:id',
       name: 'ConsultaCierre',
       component: () => import('@/modules/consultations/ui/components/BillingModal.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, role: 'Doctor' }
     },
     {
       path: '/reporte-ejecutivo',
@@ -109,41 +118,54 @@ const router = createRouter({
       component: () => import('@/modules/laboratories/ui/components/LabDashboardView.vue'),
       meta: { requiresAuth: true }
     },
+    {
+      path: '/paciente/citas',
+      name: 'PacienteCitas',
+      component: () => import('@/modules/appointments/ui/PatientAppointmentsView.vue'),
+      meta: { requiresAuth: true, role: 'Paciente' }
+    },
   ]
 })
 
-
 router.beforeEach((to, _from) => {
+  const authStore = useAuthStore();
+
   const publicPages = ['/', '/register', '/register-doctor'];
   const authRequired = !publicPages.includes(to.path);
-  const loggedIn = localStorage.getItem('token');
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const role = user.rol_id || user.RolID;
-  const entidadId = user.entidadId || user.entidad_id || user.EntidadID;
-  const tipoEntidad = user.tipo_entidad || user.TipoEntidad;
+  const loggedIn = !!authStore.token;
+  const user = authStore.user;
 
   if (authRequired && !loggedIn) {
     return '/';
   }
 
-  if (to.path.startsWith('/medico') && role !== 2) {
-    console.warn("Acceso denegado a ruta médica. Rol actual:", role);
+  const roleId = user?.rol_id;
+  const userRoleStr = roleId ? ROLE_MAP[Number(roleId)] : null;
+  const entidadId = user?.entidadId;
+  const tipoEntidad = user?.tipo_entidad;
 
-    if (role === 3) return '/directorio';
-    return '/';
-  }
-  if (to.path === '/dashboard' && role === 2) {
-    return '/medico/dashboard';
+  if (to.meta.requiresAuth && to.meta.role) {
+    if (userRoleStr !== to.meta.role) {
+      console.warn(`Acceso denegado. Ruta requiere: ${to.meta.role}. Usuario tiene: ${userRoleStr}`);
+
+      if (userRoleStr === 'Paciente') return '/directorio';
+      return '/';
+    }
   }
 
-  if (to.path === '/dashboard' && role === 1 && entidadId && Number(entidadId) !== 1) {
-    if (tipoEntidad === 'Laboratorio') return '/laboratorio/dashboard';
-    if (tipoEntidad === 'Clinica') return '/clinica/dashboard';
+  if (to.path === '/dashboard') {
+    if (roleId === 2) {
+      return '/medico/dashboard';
+    }
+
+    if (roleId === 1 && entidadId && Number(entidadId) !== 1) {
+      if (tipoEntidad === 'Laboratorio') return '/laboratorio/dashboard';
+      if (tipoEntidad === 'Clinica') return '/clinica/dashboard';
+    }
   }
 
   return true;
 });
 
 export default router
-

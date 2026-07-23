@@ -5,7 +5,7 @@ export interface SchedulableProvider {
   EntidadID: number;
   Tipo: ProviderType;
   NombrePrincipal: string;
-  NombreSecundario?: string; 
+  NombreSecundario?: string;
   Especialidad_Servicio: string;
   Costo: number;
 }
@@ -37,6 +37,8 @@ export interface Appointment {
   Sintomas?: string;
   Alergias: string;
   MedicamentosActuales: string;
+  fecha_hora?: string; 
+  motivo?: string;
 }
 
 export interface MedicalRecord {

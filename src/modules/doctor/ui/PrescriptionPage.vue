@@ -58,7 +58,7 @@
             </div>
           </div>
 
-          <div class="bg-white border border-slate-200/80 rounded-3xl shadow-[0_12px_30px_rgba(0,0,0,0.01)] overflow-hidden flex flex-col mb-8">
+          <div class="bg-white border border-slate-200/80 rounded-3xl shadow-[0_12px_30px_rgba(0,0,0,0.01)] overflow-hidden flex flex-col mb-6">
             <div class="bg-linear-to-r from-blue-500/15 via-blue-500/5 to-transparent border-b border-blue-100 px-6 py-3">
               <h4 class="text-xs font-black text-[#005596] uppercase tracking-widest flex items-center gap-2">
                 <VIcon name="bi-person-badge-fill" scale="0.85" /> Información del Paciente Asignado
@@ -84,6 +84,17 @@
                 <p class="text-sm font-black text-slate-700 font-mono tracking-tight">{{ telefonoPaciente }}</p>
               </div>
             </div>
+          </div>
+
+          <!-- BLOQUE DE CITA DE SEGUIMIENTO PROGRAMADA (WEB RECETA) -->
+          <div v-if="fechaSeguimiento" style="background-color: #f3e8ff; border: 1px solid #d8b4fe; border-left: 6px solid #9333ea; border-radius: 1rem; padding: 14px 20px; margin-bottom: 24px;">
+            <p style="margin: 0; font-size: 11px; font-weight: 900; color: #581c87; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <VIcon name="bi-calendar-event" scale="0.9" /> Próxima Cita de Revisión / Seguimiento Programada
+            </p>
+            <p style="margin-top: 4px; margin-bottom: 0; font-size: 12px; font-weight: 700; color: #6b21a8;">
+              El paciente debe regresar para evaluar la evolución de su tratamiento el día:
+              <strong style="font-family: monospace; font-size: 13px; color: #3b0764; background-color: #ffffff; padding: 2px 8px; border-radius: 0.375rem; border: 1px solid #e9d5ff; margin-left: 4px;">{{ formatearFechaEspecifica(fechaSeguimiento) }}</strong>
+            </p>
           </div>
 
           <div style="border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; margin-bottom: 32px;">
@@ -131,6 +142,7 @@
       </div>
     </main>
 
+    <!-- DOCUMENTO NATIVO PARA IMPRESIÓN FÍSICA -->
     <div class="hidden print:block w-full text-black font-sans bg-white p-0 text-left leading-normal">
       <div class="border-b-4 border-black pb-4 mb-6 flex justify-between items-start">
         <div>
@@ -161,6 +173,14 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- CITA DE SEGUIMIENTO IMPRESA -->
+      <div v-if="fechaSeguimiento" class="mb-6 border border-black p-3 rounded bg-slate-50 text-xs">
+        <p class="font-bold uppercase">⚠️ Próxima Cita de Revisión / Seguimiento Programada</p>
+        <p class="mt-1 font-semibold">
+          El paciente debe regresar para su cita de control el día: <strong class="font-mono text-sm underline">{{ formatearFechaEspecifica(fechaSeguimiento) }}</strong>
+        </p>
       </div>
 
       <div class="mb-8">
@@ -261,6 +281,7 @@ const medicamentosPrescritos = ref<FilaReceta[]>([]);
 const cargandoReceta = ref<boolean>(true);
 const procesandoFisico = ref<boolean>(false);
 const pacienteBackup = ref({ nombre: '', edad: '', tel: '' });
+const fechaSeguimiento = ref<string>('');
 
 const nombrePaciente = computed(() => pacienteBackup.value.nombre || 'Paciente');
 const edadPaciente = computed(() => pacienteBackup.value.edad || '---');
@@ -291,6 +312,24 @@ const urlQrVista = computed(() => {
   return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(payloadTexto)}&ecc=M`;
 });
 
+const formatearFechaEspecifica = (fechaRaw: string) => {
+  if (!fechaRaw) return '--';
+  try {
+    const d = new Date(fechaRaw.replace(' ', 'T'));
+    return d.toLocaleDateString('es-HN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch {
+    return fechaRaw;
+  }
+};
+
 const getBase64ImageFromUrl = async (url: string): Promise<string> => {
   const data = await fetch(url);
   const blob = await data.blob();
@@ -302,7 +341,7 @@ const getBase64ImageFromUrl = async (url: string): Promise<string> => {
 };
 
 const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
-  return {
+  const def: TDocumentDefinitions = {
     pageSize: 'LETTER',
     pageMargins: [40, 40, 40, 40],
     content: [
@@ -319,48 +358,7 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
             [nombrePaciente.value, edadPaciente.value, telefonoPaciente.value]
           ]
         },
-        margin: [0, 0, 0, 20]
-      },
-      { text: 'MEDICAMENTOS', style: 'subheader' },
-      {
-        table: {
-          widths: [20, 150, 100, '*'],
-          body: [
-            ['#', 'Medicamento', 'Dosis', 'Indicaciones'],
-            ...medicamentosPrescritos.value.map((med, i) => [
-              i + 1, med.NombreMedicamento, med.Dosis, med.Indicaciones
-            ])
-          ]
-        },
-        margin: [0, 0, 0, 30]
-      },
-      {
-        table: {
-          widths: ['auto', '*'],
-          body: [
-            [{ text: 'Validación Electrónica', style: 'subheader', colSpan: 2, margin: [0, 0, 0, 5] }, {}],
-            [
-              { image: qrBase64, width: 80, margin: [0, 5, 40, 0] },
-              {
-                margin: [70, 0, 0, 0],
-                stack: [
-                  { text: '__________________________________', margin: [0, 30, 15, 5] },
-                  { text: 'DR. MÉDICO\nFIRMA Y SELLO AUTORIZADO', fontSize: 10, bold: true }
-                ]
-              }
-            ],
-            [{
-              stack: [
-                { text: `ID Seguridad: ${codigoCanjeReal.value}`, fontSize: 9, italics: true },
-                { text: 'Escanee este código para verificar la firma del especialista y mitigar alteraciones físicas en la receta.', fontSize: 10, margin: [0, 10, 0, 5] },
-              ],
-              colSpan: 2,
-              margin: [0, 5, 0, 0]
-            }, {}]
-          ]
-        },
-        layout: 'noBorders',
-        margin: [0, 10, 0, 0]
+        margin: [0, 0, 0, 15]
       }
     ],
     styles: {
@@ -369,17 +367,84 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
       info: { fontSize: 12, margin: [0, 2, 0, 2] }
     }
   };
+
+  if (fechaSeguimiento.value) {
+    (def.content as Array<unknown>).push({
+      table: {
+        widths: ['*'],
+        body: [
+          [{
+            text: `⚠️ EL PACIENTE DEBE REGRESAR PARA SU CITA DE SEGUIMIENTO EL DÍA: ${formatearFechaEspecifica(fechaSeguimiento.value)}`,
+            bold: true,
+            fontSize: 10,
+            fillColor: '#f3e8ff',
+            color: '#581c87'
+          }]
+        ]
+      },
+      margin: [0, 0, 0, 15]
+    });
+  }
+
+  (def.content as Array<unknown>).push(
+    { text: 'MEDICAMENTOS PRESCRITOS', style: 'subheader' },
+    {
+      table: {
+        widths: [20, 150, 100, '*'],
+        body: [
+          ['#', 'Medicamento', 'Dosis', 'Indicaciones'],
+          ...medicamentosPrescritos.value.map((med, i) => [
+            i + 1, med.NombreMedicamento, med.Dosis, med.Indicaciones
+          ])
+        ]
+      },
+      margin: [0, 0, 0, 30]
+    },
+    {
+      table: {
+        widths: ['auto', '*'],
+        body: [
+          [{ text: 'Validación Electrónica', style: 'subheader', colSpan: 2, margin: [0, 0, 0, 5] }, {}],
+          [
+            { image: qrBase64, width: 80, margin: [0, 5, 40, 0] },
+            {
+              margin: [70, 0, 0, 0],
+              stack: [
+                { text: '__________________________________', margin: [0, 30, 15, 5] },
+                { text: 'DR. MÉDICO\nFIRMA Y SELLO AUTORIZADO', fontSize: 10, bold: true }
+              ]
+            }
+          ],
+          [{
+            stack: [
+              { text: `ID Seguridad: ${codigoCanjeReal.value}`, fontSize: 9, italics: true },
+              { text: 'Escanee este código para verificar la firma del especialista y mitigar alteraciones físicas en la receta.', fontSize: 10, margin: [0, 10, 0, 5] },
+            ],
+            colSpan: 2,
+            margin: [0, 5, 0, 0]
+          }, {}]
+        ]
+      },
+      layout: 'noBorders',
+      margin: [0, 10, 0, 0]
+    }
+  );
+
+  return def;
 };
 
 onMounted(async () => {
   try {
     const idUrl = Number(route.params.id);
-    const resGuardado = localStorage.getItem('MedGo+_resumen_compartir');
+    const resGuardado = localStorage.getItem('MedGo+_resumen_compartir') || localStorage.getItem('medcore_resumen_compartir');
 
     if (resGuardado) {
       const d = JSON.parse(resGuardado);
       medicamentosPrescritos.value = d.detalle_medicamentos || [];
       pacienteBackup.value = { nombre: d.paciente || '', edad: d.edad || '', tel: d.telefono || '' };
+
+      // 🟢 LECTURA LIMPIA DE LA VARIABLE ÚNICA ESTANDARIZADA
+      fechaSeguimiento.value = d.fechaSeguimiento || '';
     }
 
     if (medicamentosPrescritos.value.length === 0 && idUrl > 0) {
@@ -429,9 +494,15 @@ const compartirDocumentoFisico = async () => {
       `${i + 1}. 💊 *${med.NombreMedicamento.toUpperCase()}*\n   Dosis: ${med.Dosis}\n   Indicaciones: _${med.Indicaciones}_`
     ).join('\n\n');
 
-    const textoCompartir =
+    let textoCompartir =
       `🏥 *MedGo+* \n*PRESCRIPCIÓN MÉDICA AUTORIZADA*\n\n` +
-      `👤 *Paciente:* ${nombrePaciente.value}\n👨‍⚕️ *Doctor:* ${nombreDoctor.value}\n📅 *Fecha:* ${fechaActual.value}\n\n` +
+      `👤 *Paciente:* ${nombrePaciente.value}\n👨‍⚕️ *Doctor:* ${nombreDoctor.value}\n📅 *Fecha:* ${fechaActual.value}\n\n`;
+
+    if (fechaSeguimiento.value) {
+      textoCompartir += `⚠️ *REVISIÓN / CITA DE SEGUIMIENTO (REGRESAR):* ${formatearFechaEspecifica(fechaSeguimiento.value)}\n\n`;
+    }
+
+    textoCompartir +=
       `📋 *MEDICAMENTOS:* \n\n${listadoMedicamentos}\n\n` +
       `------------------------------------------\n` +
       `🔐 *ID:* ${codigoCanjeReal.value}\n🌐 *Ver receta oficial:* \n${window.location.href}`;
