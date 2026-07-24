@@ -5,6 +5,7 @@ export interface User {
   rol_id: number;
   entidadId?: number | string;
   tipo_entidad?: string;
+  plan?: string;
 
 }
 

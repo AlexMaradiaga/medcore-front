@@ -298,46 +298,86 @@
               </div>
             </div>
 
-            <!-- MÓDULO INTERACTIVO DE CITAS DE SEGUIMIENTO (BORDES PREMIUM REDONDEADOS) -->
-            <div class="bg-slate-50/60 border border-slate-200 rounded-3xl p-6 space-y-4 text-left shadow-2xs mt-4">
+            <!-- MÓDULO INTERACTIVO DE CITAS DE SEGUIMIENTO PROTEGIDO -->
+            <div
+              class="bg-slate-50/60 border border-slate-200 rounded-3xl p-6 space-y-4 text-left shadow-2xs mt-4 relative"
+              v-locked="{
+                isLocked: esPlanRestringido,
+                message: 'Requiere Plan Ejecutivo o Superior para planificar citas de seguimiento automáticas'
+              }"
+            >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-purple-50 text-purple-700 border border-purple-100 rounded-xl flex items-center justify-center shadow-3xs">
                     <v-icon name="bi-arrow-repeat" scale="1.0" />
                   </div>
+
                   <div>
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Planificar Cita de Seguimiento / Revisión</h4>
-                    <p class="text-[10px] font-medium text-slate-400">Determine si el estado clínico del paciente requiere una reevaluación programada</p>
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      Planificar Cita de Seguimiento / Revisión
+                    </h4>
+
+                    <p class="text-[10px] font-medium text-slate-400">
+                      Determine si el estado clínico del paciente requiere una reevaluación programada
+                    </p>
                   </div>
                 </div>
 
-                <!-- Toggle Switch con Tailwind -->
+                <!-- Toggle -->
                 <label class="relative inline-flex items-center cursor-pointer select-none">
-                  <input type="checkbox" v-model="requiereSeguimiento" class="sr-only peer">
-                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <input
+                    type="checkbox"
+                    v-model="requiereSeguimiento"
+                    class="sr-only peer"
+                  />
+
+                  <div
+                    class="w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer
+                    peer-checked:after:translate-x-full peer-checked:after:border-white
+                    after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                    after:bg-white after:border-slate-300 after:border after:rounded-full
+                    after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"
+                  ></div>
                 </label>
               </div>
 
-              <!-- Formulario Desplegable Condicional -->
-              <div v-if="requiereSeguimiento" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 animate-fade-in">
+              <!-- Formulario -->
+              <div
+                v-if="requiereSeguimiento"
+                class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 animate-fade-in"
+              >
                 <div class="space-y-1.5">
-                  <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">Fecha del Seguimiento *</label>
+                  <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">
+                    Fecha del Seguimiento *
+                  </label>
+
                   <input
                     type="date"
                     v-model="seguimientoData.fecha"
                     class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold font-mono text-slate-800 outline-hidden focus:border-purple-500 transition-all focus:ring-4 focus:ring-purple-50"
                   />
                 </div>
+
                 <div class="space-y-1.5">
-                  <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">Hora del Seguimiento *</label>
+                  <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">
+                    Hora del Seguimiento *
+                  </label>
+
                   <input
                     type="time"
                     v-model="seguimientoData.hora"
                     class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold font-mono text-slate-800 outline-hidden focus:border-purple-500 transition-all focus:ring-4 focus:ring-purple-50"
                   />
                 </div>
-                <p class="sm:col-span-2 text-[10px] font-bold text-purple-700 bg-purple-50 border border-dashed border-purple-100 p-3 rounded-xl leading-relaxed">
-                  📌 <strong>Nota de Automatización:</strong> Al confirmar esta acción, el backend agendará directamente la cita al paciente con el estado <span class="underline font-black">CONFIRMADA</span>, reflejándose de forma automática en su bandeja de Citas Activas.
+
+                <p
+                  class="sm:col-span-2 text-[10px] font-bold text-purple-700 bg-purple-50 border border-dashed border-purple-100 p-3 rounded-xl leading-relaxed"
+                >
+                  📌 <strong>Nota de Automatización:</strong>
+                  Al confirmar esta acción, el backend agendará directamente la cita al
+                  paciente con el estado
+                  <span class="underline font-black">CONFIRMADA</span>,
+                  reflejándose de forma automática en su bandeja de Citas Activas.
                 </p>
               </div>
             </div>
@@ -366,6 +406,7 @@ import { ref, onMounted, computed, watch, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
+import { useAuthStore } from '../../../stores/auth';
 import { useMedicalStore } from '@/stores/medicalStore';
 import { DoctorRepository } from '../infrastructure/DoctorRepository';
 import type { DoctorAppointment, DiagnosticoCIE11, SistemaExamenUI, OdontologyPayload } from '../domain/DoctorAppointment';
@@ -401,6 +442,7 @@ interface FilaMedicamentoConsulta {
 
 const router = useRouter();
 const toast = useToast();
+const authStore = useAuthStore();
 const medicalStore = useMedicalStore();
 const repo = new DoctorRepository();
 const appointment = ref<DoctorAppointment | null>(null);
@@ -423,6 +465,35 @@ const datosOdontologiaExtra = ref<OdontologyPayload | null>(null);
 // ESTADOS PARA LA PLANIFICACIÓN DE SEGUIMIENTO AUTOMÁTICO
 const requiereSeguimiento = ref<boolean>(false);
 const seguimientoData = ref({ fecha: '', hora: '' });
+
+const esPlanRestringido = computed(() => {
+  const userAuth = authStore.user as Record<string, unknown> | null;
+  const doctorInfo = medicalStore.doctor as Record<string, unknown> | null;
+  const planGuardado = localStorage.getItem('user_plan');
+
+  // 1. Detectar si la cuenta pertenece a una Clínica/Entidad o si es un Doctor verificado
+  const tipoEntidad = String(userAuth?.tipo_entidad ?? doctorInfo?.tipo_entidad ?? '').toLowerCase();
+  const esVerificado = String(doctorInfo?.EsVerificado ?? userAuth?.EsVerificado ?? '0') === '1';
+
+  // 2. Extraer el plan (con fallback a 'Ejecutivo' si es Clínica o Doctor Verificado)
+  const planBruto =
+    userAuth?.plan ||
+    planGuardado ||
+    doctorInfo?.plan ||
+    doctorInfo?.suscripcion ||
+    ((tipoEntidad === 'clinica' || esVerificado) ? 'Ejecutivo' : 'basico');
+
+  const plan = String(planBruto).toLowerCase().trim();
+
+  // 3. Lista de planes que están restringidos
+  const planesGratuitos = ['basico', 'free', 'gratis', 'unassigned', 'undefined'];
+
+  const estaRestringido = planesGratuitos.includes(plan);
+
+  console.log('📌 Plan Evaluado Final:', plan, '| ¿Restringido?:', estaRestringido);
+
+  return estaRestringido;
+});
 
 const nuevoMedPlan = ref<FilaMedicamentoConsulta>({
   NombreMedicamento: '',
@@ -670,6 +741,9 @@ const handleSaveDraft = () => {
 };
 
 const handleSubmit = async () => {
+  const timestamp = new Date().toISOString();
+  console.group(`🚀 [handleSubmit] Inicio de ejecución: ${timestamp}`);
+
   if (form.value.diagnostico.length === 0 && !form.value.diagnostico_extenso.trim()) {
     toast.error('Por favor registre un diagnóstico antes de finalizar.');
     return;
@@ -715,6 +789,7 @@ const handleSubmit = async () => {
     }
 
     await repo.completeConsultation(payload);
+
     toast.success('¡Consulta finalizada y cita de seguimiento agendada con éxito!');
 
     const hallazgosExamenFisico: Array<{
@@ -773,15 +848,14 @@ const handleSubmit = async () => {
     };
 
     localStorage.setItem('MedGo+_resumen_compartir', JSON.stringify(objetoResumen));
-
     localStorage.removeItem('draft_consulta_actual');
     medicalStore.setConsultationActive(false);
     medicalStore.clearPatient();
     localStorage.removeItem('current_appointment');
 
+
     router.push(`/medico/consulta/${payload.cita_id}/resumen`);
-  } catch (error) {
-    console.error("[Submit Error]", error);
+  } catch  {
     toast.error('Error crítico al intentar finalizar la consulta.');
   } finally {
     loading.value = false;

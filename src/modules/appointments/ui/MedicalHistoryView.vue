@@ -27,8 +27,8 @@
       </button>
     </div>
 
-    <div v-if="loading" class="py-20 text-center">
-      <div class="animate-spin inline-block w-10 h-10 border-4 border-[#005596] border-t-transparent rounded-full"></div>
+    <div v-if="loading" class="py-24 text-center flex justify-center items-center">
+      <OrbsLoader />
     </div>
 
     <div v-else class="mt-8">
@@ -282,67 +282,74 @@
 
     </div>
 
-    <div v-if="selectedItem" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl border border-slate-100">
-        <h3 class="text-3xl font-black text-slate-800 uppercase tracking-tight mb-6 flex items-center gap-2">
-          <v-icon name="bi-check-circle-fill" scale="1.2" class="text-[#005596]" /> Diagnóstico Clínico
-        </h3>
-        <div class="bg-slate-50 p-8 rounded-3xl space-y-6 text-left border border-slate-200/40">
-          <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Conclusión Médica</p>
-            <p class="text-slate-700 font-bold text-xl mt-2 leading-relaxed uppercase">Dr. {{ selectedItem.Doctor }} • Cita #{{ selectedItem.CitaID }}</p>
-            <p class="text-slate-600 font-bold mt-2 text-lg">Motivo: {{ selectedItem.Motivo }}</p>
+    <Teleport to="body">
+      <div v-if="selectedItem" class="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in overflow-y-auto">
+        <div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl border border-slate-100 my-auto">
+          <h3 class="text-3xl font-black text-slate-800 uppercase tracking-tight mb-6 flex items-center gap-2">
+            <v-icon name="bi-check-circle-fill" scale="1.2" class="text-[#005596]" /> Diagnóstico Clínico
+          </h3>
+          <div class="bg-slate-50 p-8 rounded-3xl space-y-6 text-left border border-slate-200/40">
+            <div>
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Conclusión Médica</p>
+              <p class="text-slate-700 font-bold text-xl mt-2 leading-relaxed uppercase">Dr. {{ selectedItem.Doctor }} • Cita #{{ selectedItem.CitaID }}</p>
+              <p class="text-slate-600 font-bold mt-2 text-lg">Motivo: {{ selectedItem.Motivo }}</p>
+            </div>
+            <div v-if="selectedItem.Sintomas">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Síntomas Reportados</p>
+              <p class="text-slate-600 font-semibold mt-1 text-base italic leading-relaxed">"{{ selectedItem.Sintomas }}"</p>
+            </div>
           </div>
-          <div v-if="selectedItem.Sintomas">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Síntomas Reportados</p>
-            <p class="text-slate-600 font-semibold mt-1 text-base italic leading-relaxed">"{{ selectedItem.Sintomas }}"</p>
-          </div>
-        </div>
-        <button @click="selectedItem = null" class="w-full mt-8 py-4.5 bg-linear-to-r from-[#005596] to-[#00345c] text-white rounded-2xl font-black uppercase border-b-4 border-b-[#00213b] active:translate-y-0.5 active:border-b-0 cursor-pointer text-xs tracking-widest">Cerrar Expediente</button>
-      </div>
-    </div>
-
-    <div v-if="selectedSistema" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div class="bg-white w-full max-w-xl rounded-[3rem] p-10 shadow-2xl border border-slate-100">
-        <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight mb-4">Evaluación de Sistema</h3>
-        <div class="bg-slate-50 p-6 rounded-3xl text-left space-y-4 border border-slate-200/40">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Área Analizada</p><p class="text-xl font-black text-[#005596] uppercase mt-1">Sistema {{ selectedSistema.SistemaID }}</p></div>
-          <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado de Condición</p><span :class="selectedSistema.EsNormal === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider inline-block">{{ selectedSistema.EsNormal === 1 ? 'Sistema Saludable / Normal' : 'Anormalidad / Hallazgo Clínico' }}</span></div>
-          <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Notas Clínicas del Especialista</p><p class="text-slate-700 font-medium italic text-sm mt-1 bg-white p-4 rounded-xl border border-slate-100 leading-relaxed">{{ selectedSistema.NotasAdicionales || 'El especialista no registró anotaciones adicionales específicas para este sistema.' }}</p></div>
-        </div>
-        <button @click="selectedSistema = null" class="w-full mt-6 py-4 bg-slate-800 text-white rounded-xl font-black uppercase cursor-pointer text-xs tracking-wider">Cerrar Detalle</button>
-      </div>
-    </div>
-
-    <div v-if="pdfUrl" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in">
-      <div class="bg-white w-full max-w-4xl h-[85vh] rounded-[2.5rem] p-6 shadow-2xl flex flex-col justify-between border border-slate-100">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-          <div class="text-left">
-            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Prescripción Médica Digital</h3>
-            <p class="text-xs text-slate-400 font-bold uppercase">MedCore Global • Visor de Documentos Oficiales</p>
-          </div>
-          <button @click="cerrarVisualizador" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-black flex items-center justify-center cursor-pointer transition-all">
-            ✕
-          </button>
-        </div>
-
-        <div class="flex-1 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 relative">
-          <iframe :src="pdfUrl" class="w-full h-full border-none" @load="pdfLoading = false"></iframe>
-          <div v-if="pdfLoading" class="absolute inset-0 bg-white flex items-center justify-center">
-            <div class="animate-spin inline-block w-8 h-8 border-4 border-[#005596] border-t-transparent rounded-full"></div>
-          </div>
-        </div>
-
-        <div class="flex gap-4 mt-4">
-          <button @click="cerrarVisualizador" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer transition-all">
-            Cerrar Visor
-          </button>
-          <a :href="pdfUrl" :download="'Receta_MedCore_' + recetaSeleccionadaId + '.pdf'" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider text-center block shadow-sm transition-all">
-            Descargar Copia Física
-          </a>
+          <button @click="selectedItem = null" class="w-full mt-8 py-4.5 bg-linear-to-r from-[#005596] to-[#00345c] text-white rounded-2xl font-black uppercase border-b-4 border-b-[#00213b] active:translate-y-0.5 active:border-b-0 cursor-pointer text-xs tracking-widest">Cerrar Expediente</button>
         </div>
       </div>
-    </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="selectedSistema" class="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in overflow-y-auto">
+        <div class="bg-white w-full max-w-xl rounded-[3rem] p-10 shadow-2xl border border-slate-100 my-auto">
+          <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight mb-4">Evaluación de Sistema</h3>
+          <div class="bg-slate-50 p-6 rounded-3xl text-left space-y-4 border border-slate-200/40">
+            <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Área Analizada</p><p class="text-xl font-black text-[#005596] uppercase mt-1">Sistema {{ selectedSistema.SistemaID }}</p></div>
+            <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado de Condición</p><span :class="selectedSistema.EsNormal === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider inline-block">{{ selectedSistema.EsNormal === 1 ? 'Sistema Saludable / Normal' : 'Anormalidad / Hallazgo Clínico' }}</span></div>
+            <div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Notas Clínicas del Especialista</p><p class="text-slate-700 font-medium italic text-sm mt-1 bg-white p-4 rounded-xl border border-slate-100 leading-relaxed">{{ selectedSistema.NotasAdicionales || 'El especialista no registró anotaciones adicionales específicas para este sistema.' }}</p></div>
+          </div>
+          <button @click="selectedSistema = null" class="w-full mt-6 py-4 bg-slate-800 text-white rounded-xl font-black uppercase cursor-pointer text-xs tracking-wider">Cerrar Detalle</button>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="pdfUrl" class="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in overflow-y-auto">
+        <div class="bg-white w-full max-w-4xl h-[85vh] rounded-[2.5rem] p-6 shadow-2xl flex flex-col justify-between border border-slate-100 my-auto">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+            <div class="text-left">
+              <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Prescripción Médica Digital</h3>
+              <p class="text-xs text-slate-400 font-bold uppercase">MedCore Global • Visor de Documentos Oficiales</p>
+            </div>
+            <button @click="cerrarVisualizador" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-black flex items-center justify-center cursor-pointer transition-all">
+              ✕
+            </button>
+          </div>
+
+          <div class="flex-1 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 relative">
+            <iframe :src="pdfUrl" class="w-full h-full border-none" @load="pdfLoading = false"></iframe>
+
+            <div v-if="pdfLoading" class="absolute inset-0 bg-white/90 backdrop-blur-xs flex items-center justify-center z-20">
+              <OrbsLoader />
+            </div>
+          </div>
+
+          <div class="flex gap-4 mt-4">
+            <button @click="cerrarVisualizador" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer transition-all">
+              Cerrar Visor
+            </button>
+            <a :href="pdfUrl" :download="'Receta_MedCore_' + recetaSeleccionadaId + '.pdf'" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider text-center block shadow-sm transition-all">
+              Descargar Copia Física
+            </a>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
   </div>
 </template>
@@ -353,6 +360,8 @@ import { useToast } from 'vue-toastification';
 import { AppointmentRepository } from '../infrastructure/AppointmentRepo';
 import type { MedicalRecord, Exam, Prescription } from '../../appointments/domain/Appointment';
 import api from '@/shared/infrastructure/api';
+
+import OrbsLoader from '../../../components/common/OrbsLoader.vue';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -584,7 +593,6 @@ const abrirVisualizadorPDF = async (recetaId: number) => {
     console.error("Error al renderizar la receta:", error);
     toast.error("No se pudo previsualizar la receta médica.");
     pdfUrl.value = null;
-  } finally {
     pdfLoading.value = false;
   }
 };
@@ -593,6 +601,7 @@ const cerrarVisualizador = () => {
   if (pdfUrl.value) window.URL.revokeObjectURL(pdfUrl.value);
   pdfUrl.value = null;
   recetaSeleccionadaId.value = 0;
+  pdfLoading.value = false;
 };
 
 const loadData = async () => {

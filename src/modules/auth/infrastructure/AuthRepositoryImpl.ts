@@ -22,7 +22,8 @@ export class AuthRepositoryImpl implements AuthRepository {
                 email: rawUser.email,
                 rol_id: rawUser.rol_id,
                 entidadId: rawUser.entidad_id,
-                tipo_entidad: rawUser.tipo_entidad || rawUser.TipoEntidad
+                tipo_entidad: rawUser.tipo_entidad || rawUser.TipoEntidad,
+                plan: rawUser.plan || rawUser.plan_suscripto || 'Basico' // 👈 Capturamos el plan devuelto por el backend
             };
 
             return { user, token };

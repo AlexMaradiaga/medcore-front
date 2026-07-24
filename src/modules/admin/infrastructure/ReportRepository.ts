@@ -7,8 +7,8 @@ export class ReportRepository {
     return response.data.data;
   }
 
-  async cambiarPlanSaaS(payload: { tipo_plan: string; dias_vigencia: number; token_pasarela: string }) {
-    return await api.post('admin/saas/actualizar-plan', payload);
+  async cambiarPlanSaaS(datos: { tipo_plan: string; dias_vigencia: number; token_pasarela: string }) {
+    return await api.post('/saas/actualizar-plan', datos);
   }
 
   async obtenerIndicadoresCalidad(): Promise<IndicadoresCalidadContract> {

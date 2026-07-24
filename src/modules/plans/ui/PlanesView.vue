@@ -291,9 +291,21 @@ const iconoRol = computed<string>(() => {
 
 const consultarCitasOperacionales = async () => {
   const usuarioId = authStore.user?.id;
-  if (!usuarioId) return;
+  console.group('🔍 [MedGo+ Log] Consultando Citas Operacionales');
+  console.log('👤 Usuario en AuthStore:', authStore.user);
+  console.log('🆔 ID del Usuario autenticado:', usuarioId);
+
+  if (!usuarioId) {
+    console.warn('⚠️ No se encontró usuarioId en authStore, abortando consulta de citas.');
+    console.groupEnd();
+    return;
+  }
+
   try {
+    console.log(`📡 GET Endpoint Citas: doctor/citas/${usuarioId}`);
     const res = await api.get(`doctor/citas/${usuarioId}`);
+    console.log('📥 Respuesta Citas API:', res.data);
+
     if (Array.isArray(res.data)) {
       const citas: CitaContract[] = res.data;
       citasContadas.value = citas.length;
@@ -308,25 +320,40 @@ const consultarCitasOperacionales = async () => {
       }
     }
 
+    console.log('📡 GET Endpoint Doctores: doctores');
     const resDoctores = await api.get('doctores');
+    console.log('📥 Respuesta Doctores API:', resDoctores.data);
+
     if (Array.isArray(resDoctores.data)) {
       medicosActivosContados.value = resDoctores.data.length;
     } else if (resDoctores.data && Array.isArray(resDoctores.data.data)) {
       medicosActivosContados.value = resDoctores.data.data.length;
     }
   } catch (error) {
-    console.error("Error al recuperar métricas del médico:", error);
+    console.error("❌ Error al recuperar métricas del médico:", error);
+  } finally {
+    console.groupEnd();
   }
 };
 
-const procesarPagoPlan = async (plan: string) => {
+const procesarPagoPlan = async (plan: string): Promise<void> => {
   planEnProceso.value = plan;
+
+  const payload = {
+    tipo_plan: plan,
+    dias_vigencia: 30,
+    token_pasarela: 'TOK_HN_' + Math.random().toString(36).substring(5).toUpperCase()
+  };
+
   try {
-    await repo.cambiarPlanSaaS({
-      tipo_plan: plan,
-      dias_vigencia: 30,
-      token_pasarela: 'TOK_HN_' + Math.random().toString(36).substring(5).toUpperCase()
-    });
+    await repo.cambiarPlanSaaS(payload);
+
+    if (authStore.user) {
+      (authStore.user as Record<string, unknown>).plan = plan;
+    }
+
+    localStorage.setItem('user_plan', plan);
+
     toast.success(`¡Plan ${plan} solicitado con éxito para validación!`);
     window.location.reload();
   } catch {
@@ -337,6 +364,7 @@ const procesarPagoPlan = async (plan: string) => {
 };
 
 onMounted(() => {
+  console.log('🏁 Componente Planes/Métricas montado.');
   consultarCitasOperacionales();
 });
 </script>

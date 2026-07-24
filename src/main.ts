@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { vLocked } from './directives/vLocked';
 
 import PrimeVue from 'primevue/config';
 import MiEdicionPreset from './theme/miEdicion';
@@ -26,6 +27,7 @@ addIcons(...Bi, RiBuildingFill, RiCapsuleFill, RiRocketFill, RiHospitalFill, RiS
 const app = createApp(App)
 
 app.component("v-icon", OhVueIconComponent);
+app.directive('locked', vLocked);
 
 app.use(PrimeVue, {
     theme: {

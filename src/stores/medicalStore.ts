@@ -26,6 +26,10 @@ export const useMedicalStore = defineStore('medical', () => {
     JSON.parse(localStorage.getItem('isConsultationActive') || 'false')
   );
 
+  const userPlan = ref<string>(
+    localStorage.getItem('user_plan') || profileDoctor.Plan || 'Gratis'
+  );
+
   const doctorFullName = computed(() => {
     const docObj = doctor.value as Record<string, unknown>;
 
@@ -49,6 +53,11 @@ export const useMedicalStore = defineStore('medical', () => {
 
   const hasPatientSelected = computed(() => !!selectedPatient.value.PacienteID);
 
+  const canAccessExpediente = computed(() => {
+    const plan = userPlan.value.toLowerCase();
+    return plan === 'elite' || plan === 'vip' || plan === 'ejecutivo';
+  });
+
   function setConsultationActive(status: boolean) {
     isConsultationActive.value = status;
     localStorage.setItem('isConsultationActive', JSON.stringify(status));
@@ -71,6 +80,11 @@ export const useMedicalStore = defineStore('medical', () => {
     localStorage.setItem('doctor_profile', JSON.stringify(doctorData));
   }
 
+  function setUserPlan(plan: string) {
+    userPlan.value = plan;
+    localStorage.setItem('user_plan', plan);
+  }
+
   function clearPatient() {
     selectedPatient.value = {};
     localStorage.removeItem('selectedPatient');
@@ -80,12 +94,15 @@ export const useMedicalStore = defineStore('medical', () => {
     doctor,
     selectedPatient,
     isConsultationActive,
+    userPlan,
     doctorFullName,
     hasPatientSelected,
     canAccessMedicalMenu,
+    canAccessExpediente,
     setPatient,
     setConsultationActive,
     setDoctor,
+    setUserPlan,
     clearPatient
   };
 });
