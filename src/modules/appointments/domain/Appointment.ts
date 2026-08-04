@@ -18,12 +18,12 @@ export interface AppointmentRequest {
   motivo: string;
   sintomas: string;
   alergias?: string;
-  edad: number;
   genero: string;
+  TipoSangre?: string;
   aseguradora?: string;
   numero_poliza?: string;
-  nombre_contacto_emergencia?: string;
-  telefono_contacto_emergencia?: string;
+  nombre_contacto_emergencia?: string | null;
+  telefono_contacto_emergencia?: string | null;
   medicamentos_actuales?: string;
   cronicas_ids: number[];
 }
@@ -37,7 +37,7 @@ export interface Appointment {
   Sintomas?: string;
   Alergias: string;
   MedicamentosActuales: string;
-  fecha_hora?: string; 
+  fecha_hora?: string;
   motivo?: string;
 }
 

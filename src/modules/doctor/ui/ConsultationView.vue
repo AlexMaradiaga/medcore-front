@@ -59,7 +59,7 @@
             <div class="bg-linear-to-r from-slate-50/50 to-white rounded-3xl p-8 border-l-4 border-l-[#005596] border-y border-r border-slate-200/60 space-y-5 relative shadow-xs">
               <div class="flex justify-between items-center">
                 <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <v-icon name="bi-file-earmark-text-fill" class="text-[#005596]" /> Motivo de Consulta y Síntomas
+                  <v-icon name="bi-file-earmark-text-fill" class="text-[#005596]" /> Motivo de Consulta y Antecedentes
                 </h4>
                 <div class="flex items-center gap-2">
                   <span class="bg-blue-50 text-[#005596] border border-blue-100/70 px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-3xs">Pre-llenado de Admisión</span>
@@ -68,13 +68,16 @@
                   </button>
                 </div>
               </div>
+
+              <!-- ANTECEDENTES Y PATOLOGÍAS CORREGIDOS -->
               <div class="space-y-6">
                 <PatientBackgroundTabs
-                  :enfermedadesText="appointment?.Sintomas || null"
+                  :enfermedadesText="obtenerEnfermedadesCronicas"
                   :alergiasText="appointment?.Alergias || null"
                   :medicamentosText="appointment?.MedicamentosActuales || null"
                 />
               </div>
+
               <div v-if="!isEditingSubjetivo" class="animate-fade-in pt-1">
                 <p class="text-slate-600 font-semibold leading-relaxed text-sm bg-white p-5 rounded-2xl border border-slate-100 shadow-inner">
                   {{ editableSubjetivo || (appointment?.Motivo + ' - ' + (appointment?.Sintomas || 'Sin síntomas registrados')) }}
@@ -373,7 +376,7 @@
                 <p
                   class="sm:col-span-2 text-[10px] font-bold text-purple-700 bg-purple-50 border border-dashed border-purple-100 p-3 rounded-xl leading-relaxed"
                 >
-                  📌 <strong>Nota de Automatización:</strong>
+                 <strong>Nota de Automatización:</strong>
                   Al confirmar esta acción, el backend agendará directamente la cita al
                   paciente con el estado
                   <span class="underline font-black">CONFIRMADA</span>,
@@ -471,11 +474,9 @@ const esPlanRestringido = computed(() => {
   const doctorInfo = medicalStore.doctor as Record<string, unknown> | null;
   const planGuardado = localStorage.getItem('user_plan');
 
-  // 1. Detectar si la cuenta pertenece a una Clínica/Entidad o si es un Doctor verificado
   const tipoEntidad = String(userAuth?.tipo_entidad ?? doctorInfo?.tipo_entidad ?? '').toLowerCase();
   const esVerificado = String(doctorInfo?.EsVerificado ?? userAuth?.EsVerificado ?? '0') === '1';
 
-  // 2. Extraer el plan (con fallback a 'Ejecutivo' si es Clínica o Doctor Verificado)
   const planBruto =
     userAuth?.plan ||
     planGuardado ||
@@ -484,15 +485,9 @@ const esPlanRestringido = computed(() => {
     ((tipoEntidad === 'clinica' || esVerificado) ? 'Ejecutivo' : 'basico');
 
   const plan = String(planBruto).toLowerCase().trim();
-
-  // 3. Lista de planes que están restringidos
   const planesGratuitos = ['basico', 'free', 'gratis', 'unassigned', 'undefined'];
 
-  const estaRestringido = planesGratuitos.includes(plan);
-
-  console.log('📌 Plan Evaluado Final:', plan, '| ¿Restringido?:', estaRestringido);
-
-  return estaRestringido;
+  return planesGratuitos.includes(plan);
 });
 
 const nuevoMedPlan = ref<FilaMedicamentoConsulta>({
@@ -521,6 +516,24 @@ const getTabIcon = (tab: string): string => {
   };
   return icons[tab] || 'bi-activity';
 };
+
+const obtenerEnfermedadesCronicas = computed(() => {
+  if (!appointment.value) {
+    const selectedCitaRaw = localStorage.getItem('selectedAppointment') || localStorage.getItem('current_appointment');
+    if (selectedCitaRaw) {
+      try {
+        const parsed = JSON.parse(selectedCitaRaw);
+        return parsed.EnfermedadesCronicas || parsed.enfermedadesCronicas || parsed.enfermedades_cronicas || null;
+      } catch  {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  const app = appointment.value as Record<string, unknown>;
+  return app.EnfermedadesCronicas || app.enfermedadesCronicas || app.enfermedades_cronicas || null;
+});
 
 const getSignoIcon = (key: string): { icon: string; color: string; bgColor: string } => {
   const mapping: Record<string, { icon: string; color: string; bgColor: string }> = {
@@ -741,9 +754,6 @@ const handleSaveDraft = () => {
 };
 
 const handleSubmit = async () => {
-  const timestamp = new Date().toISOString();
-  console.group(`🚀 [handleSubmit] Inicio de ejecución: ${timestamp}`);
-
   if (form.value.diagnostico.length === 0 && !form.value.diagnostico_extenso.trim()) {
     toast.error('Por favor registre un diagnóstico antes de finalizar.');
     return;
@@ -763,6 +773,27 @@ const handleSubmit = async () => {
     const payload = JSON.parse(JSON.stringify(form.value));
     payload.cita_id = Number(payload.cita_id);
 
+    const notaMedicaFinal = form.value.notas_medicas
+      || editableSubjetivo.value
+      || tempSubjetivo?.value
+      || (appointment.value ? `${appointment.value.Motivo} - ${appointment.value.Sintomas || 'Sin síntomas registrados'}` : 'Sin síntomas registrados');
+
+    payload.notas_medicas = notaMedicaFinal;
+
+    const sv = form.value.signos_vitales || {};
+
+    payload.signos_vitales = {
+      PresionArterial: sv.presion || sv.PresionArterial || null,
+      FrecuenciaCardiaca: sv.pulso ? parseInt(String(sv.pulso), 10) : null,
+      FrecuenciaRespiratoria: sv.respiracion ? parseInt(String(sv.respiracion), 10) : null,
+      Temperatura: sv.temp ? parseFloat(String(sv.temp)) : null,
+      
+      // Copias redundantes en minúscula
+      pulso: sv.pulso ? parseInt(String(sv.pulso), 10) : null,
+      respiracion: sv.respiracion ? parseInt(String(sv.respiracion), 10) : null,
+      temp: sv.temp ? parseFloat(String(sv.temp)) : null
+    };
+
     let diagnosticoFinal = form.value.diagnostico.join(', ');
     if (form.value.diagnostico_extenso.trim()) {
       diagnosticoFinal = diagnosticoFinal
@@ -777,16 +808,18 @@ const handleSubmit = async () => {
       payload.examenes_odontologicos_json = datosOdontologiaExtra.value.examenesBase || [];
     }
 
-    const fechaHoraSeguimiento = requiereSeguimiento.value
-      ? `${seguimientoData.value.fecha} ${seguimientoData.value.hora}:00`
-      : null;
+    // 🌟 OPTIMIZACIÓN DE FECHA Y HORA DE SEGUIMIENTO PARA SQL SERVER
+    let fechaHoraSeguimiento: string | null = null;
 
-    if (requiereSeguimiento.value) {
-      payload.crear_seguimiento = true;
-      payload.seguimiento_fecha_hora = fechaHoraSeguimiento;
-    } else {
-      payload.crear_seguimiento = false;
+    if (requiereSeguimiento.value && seguimientoData.value.fecha && seguimientoData.value.hora) {
+      const horaLimpia = seguimientoData.value.hora.trim();
+      const horaFormateada = horaLimpia.length === 5 ? `${horaLimpia}:00` : horaLimpia;
+      fechaHoraSeguimiento = `${seguimientoData.value.fecha.trim()} ${horaFormateada}`;
     }
+
+    // 🌟 ASIGNACIÓN BOOLEANA STRICTA
+    payload.crear_seguimiento = Boolean(requiereSeguimiento.value && fechaHoraSeguimiento);
+    payload.seguimiento_fecha_hora = fechaHoraSeguimiento;
 
     await repo.completeConsultation(payload);
 
@@ -823,26 +856,37 @@ const handleSubmit = async () => {
       });
     }
 
+    const prevResumenRaw = localStorage.getItem('MedGo+_resumen_compartir');
+    const prevResumen = prevResumenRaw ? JSON.parse(prevResumenRaw) : {};
+    const sangreDetectada = appointment.value?.TipoSangre || prevResumen.tipoSangre || prevResumen.TipoSangre || 'N/A';
+
     const objetoResumen = {
       paciente: appointment.value?.Paciente || 'Paciente',
       edad: appointment.value?.Edad || 'No registrada',
       genero: appointment.value?.Genero || 'No especificado',
       telefono: appointment.value?.Telefono || 'No disponible',
       email: appointment.value?.EmailPaciente || 'No disponible',
+      tipoSangre: sangreDetectada,
       diagnostico: payload.diagnostico,
       detalle_medicamentos: form.value.detalle_medicamentos || [],
-      signos_vitales: form.value.signos_vitales,
+
+      signos_vitales: {
+        presion: sv.presion || payload.signos_vitales.PresionArterial || '',
+        pulso: sv.pulso || payload.signos_vitales.FrecuenciaCardiaca || '',
+        temp: sv.temp || payload.signos_vitales.Temperatura || '',
+        respiracion: sv.respiracion || payload.signos_vitales.FrecuenciaRespiratoria || ''
+      },
 
       fechaSeguimiento: fechaHoraSeguimiento,
 
       antecedentes: {
-        cronicas: appointment.value?.Sintomas || 'No registra',
+        cronicas: obtenerEnfermedadesCronicas.value || 'No registra',
         alergias: appointment.value?.Alergias || 'Ninguna conocida',
         medicamentos: appointment.value?.MedicamentosActuales || 'Ninguno'
       },
       sintomas: {
-        motivo: appointment.value?.Motivo  || payload.motivo_consulta || 'Consulta de seguimiento',
-        dolor: form.value.notas_medicas || editableSubjetivo.value  || (appointment.value ? (appointment.value.Motivo + ' - ' + (appointment.value.Sintomas || 'Sin síntomas registrados')) : 'Sin síntomas registrados')
+        motivo: appointment.value?.Motivo || 'Consulta de seguimiento',
+        dolor: appointment.value?.Sintomas || payload.notas_medicas || 'Sin síntomas reportados'
       },
       hallazgos_examen_fisico: hallazgosExamenFisico
     };
@@ -853,9 +897,9 @@ const handleSubmit = async () => {
     medicalStore.clearPatient();
     localStorage.removeItem('current_appointment');
 
-
     router.push(`/medico/consulta/${payload.cita_id}/resumen`);
-  } catch  {
+  } catch (error) {
+    console.error('Error al completar consulta:', error);
     toast.error('Error crítico al intentar finalizar la consulta.');
   } finally {
     loading.value = false;

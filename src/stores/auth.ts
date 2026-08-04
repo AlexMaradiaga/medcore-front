@@ -8,10 +8,16 @@ const loginUserUseCase = new LoginUser(authRepository);
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user') || 'null') as (User & { plan?: string; tipo_entidad?: string }) | null,
+    user: JSON.parse(localStorage.getItem('user') || 'null') as (User & {
+      plan?: string;
+      tipo_entidad?: string;
+      es_founder?: boolean;
+      nivel_founder?: number;
+    }) | null,
     token: localStorage.getItem('token') || null,
     loading: false,
   }),
+
   actions: {
     async login(credentials: { email: string; password: string }) {
       this.loading = true;

@@ -8,6 +8,9 @@ export interface SessionUser {
   email?: string;
   rol_id?: number;
   RolID?: number;
+  es_founder?: boolean;
+  nivel_founder?: number;
+  fecha_founder?: string;
 }
 
 export interface AuditLog {

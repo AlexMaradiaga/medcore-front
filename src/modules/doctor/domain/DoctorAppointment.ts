@@ -6,12 +6,14 @@ export interface DoctorAppointment {
     FechaHora: string;
     Motivo: string;
     Sintomas: string;
+    EnfermedadesCronicas?: string;
     EstadoCita: string;
     Edad?: number;
     Genero?: string;
     Telefono?: string;
     EmailPaciente?: string;
     Alergias?: string;
+    TipoSangre?: string;
     MedicamentosActuales?: string;
     EspecialidadID?: number;
 }

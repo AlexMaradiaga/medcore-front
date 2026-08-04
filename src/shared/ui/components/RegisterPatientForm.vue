@@ -61,6 +61,36 @@
         </div>
       </div>
 
+      <!-- NUEVA FILA: NACIONALIDAD Y TIPO DE SANGRE -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Nacionalidad</label>
+          <input
+            v-model="form.Nacionalidad"
+            type="text"
+            placeholder="Ej. Hondureña"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 font-medium text-sm focus:bg-white focus:border-sky-500 outline-hidden transition-all text-slate-700"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Sangre</label>
+          <select
+            v-model="form.TipoSangre"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 font-medium text-sm focus:bg-white focus:border-sky-500 outline-hidden transition-all text-slate-700 cursor-pointer"
+          >
+            <option value="" disabled>Seleccione...</option>
+            <option value="O+">O Rh Positivo (O+)</option>
+            <option value="O-">O Rh Negativo (O-)</option>
+            <option value="A+">A Rh Positivo (A+)</option>
+            <option value="A-">A Rh Negativo (A-)</option>
+            <option value="B+">B Rh Positivo (B+)</option>
+            <option value="B-">B Rh Negativo (B-)</option>
+            <option value="AB+">AB Rh Positivo (AB+)</option>
+            <option value="AB-">AB Rh Negativo (AB-)</option>
+          </select>
+        </div>
+      </div>
+
       <!-- CAMPOS EXCLUSIVOS SI ES ADULTO (Para crear credenciales de acceso inmediatas) -->
       <div v-if="!isPediatric" class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-50 pt-4">
         <div class="space-y-1.5">
@@ -186,6 +216,8 @@ const form = reactive({
   Apellido: props.initialApellido || '',
   DNI: '',
   Telefono: '',
+  Nacionalidad: 'Hondureña',
+  TipoSangre: '',
   email: '',
   password: '',
   tutor_dni: '',
@@ -242,12 +274,13 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    // Orquestamos la misma petición pública que tiene RegisterView
     await patientRepo.registerPublic({
       DNI: form.DNI,
       Nombre: form.Nombre,
       Apellido: form.Apellido,
       Telefono: form.Telefono,
+      nacionalidad: form.Nacionalidad,
+      tipo_sangre: form.TipoSangre || undefined,
       email: form.email,
       password: form.password,
       es_dependiente: isPediatric.value,
@@ -260,9 +293,10 @@ const handleSubmit = async () => {
 
     toast.success("¡Expediente indexado de forma segura en MedCore Global!");
 
-    // Reseteo de control
     form.DNI = '';
     form.Telefono = '';
+    form.Nacionalidad = 'Hondureña';
+    form.TipoSangre = '';
     form.email = '';
     form.password = '';
     selectedFile.value = null;

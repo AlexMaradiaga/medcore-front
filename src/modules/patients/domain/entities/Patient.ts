@@ -5,6 +5,8 @@ export interface Patient {
   Nombre: string;
   Apellido: string;
   Telefono: string;
+  Nacionalidad?: string;
+  TipoSangre?: string;
   email?: string;
   Estado?: string;
   password?: string;
@@ -36,10 +38,13 @@ export interface PatientExtendedProfile {
   Estado: string;
   Aseguradora: string | null;
   NumeroPoliza: string | null;
-  NombreContactoEmergencia: string | null;
-  TelefonoContactoEmergencia: string | null;
 
+  nombre_contacto_emergencia?: string | null;
+  NombreContactoEmergencia?: string | null;   // <--- Agregado en PascalCase
   
+  telefono_contacto_emergencia?: string | null;
+  TelefonoContactoEmergencia?: string | null;
+
   es_dependiente?: boolean;
   TutorID?: number;
   parentesco?: string;

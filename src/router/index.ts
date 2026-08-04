@@ -124,6 +124,12 @@ const router = createRouter({
       component: () => import('@/modules/appointments/ui/PatientAppointmentsView.vue'),
       meta: { requiresAuth: true, role: 'Paciente' }
     },
+    {
+      path: '/farmacia/dashboard',
+      name: 'FarmaciaDashboard',
+      component: () => import('@/modules/pharmacy/ui/FarmaciaDashboard.vue'),
+      meta: { requiresAuth: true }
+    },
   ]
 })
 

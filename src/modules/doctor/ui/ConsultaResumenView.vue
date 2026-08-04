@@ -22,7 +22,10 @@
               <span class="text-slate-300 font-normal">|</span>
               <span class="flex items-center gap-1.5"><VIcon name="fa-hourglass-half" scale="0.8" /> {{ datos.edad || '--' }} Años</span>
               <span class="text-slate-300 font-normal">|</span>
-              <span class="flex items-center gap-1.5"><VIcon name="bi-gender-ambiguous" scale="0.85" /> Género: {{ datos.genero === 'M' ? 'Masculino' : (datos.genero === 'F' ? 'Femenino' : '--') }}</span>
+              <span class="flex items-center gap-1.5"><VIcon name="bi-gender-ambiguous" scale="0.85" /> Género: {{ datos.genero === 'M' || datos.genero === 'Masculino' ? 'Masculino' : (datos.genero === 'F' || datos.genero === 'Femenino' ? 'Femenino' : '--') }}</span>
+              <span class="text-slate-300 font-normal">|</span>
+              <!-- TIPO DE SANGRE DESTACADO EN CABECERA -->
+              <span class="flex items-center gap-1 text-rose-600 font-black bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-200/60 shadow-3xs">🩸 Sangre: {{ datos.tipoSangre || 'N/A' }}</span>
             </p>
             <div class="flex flex-wrap items-center gap-3 pt-1">
               <div class="flex items-center gap-2 bg-white/80 backdrop-blur-xs px-3 py-1.5 rounded-xl border border-slate-200/50 shadow-3xs">
@@ -58,7 +61,7 @@
           </div>
         </div>
 
-        <!-- AVISO DE CITA DE SEGUIMIENTO PROGRAMADA (PANTALLA WEB) -->
+        <!-- AVISO DE CITA DE SEGUIMIENTO PROGRAMADA -->
         <div v-if="datos.fechaSeguimiento" class="bg-linear-to-r from-purple-500/10 via-purple-500/5 to-transparent border-l-4 border-l-purple-600 rounded-2xl p-4 shadow-3xs flex items-center gap-4 animate-fade-in">
           <div class="bg-purple-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0">
             <VIcon name="bi-calendar-event" scale="1.1" />
@@ -73,6 +76,8 @@
 
         <!-- TARJETAS CLINICAS EN PANTALLA -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+
+          <!-- ANAMNESIS Y TIPO DE SANGRE -->
           <div class="bg-white border border-slate-200/80 rounded-4xl shadow-[0_12px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
             <div class="bg-linear-to-r from-blue-50/15 via-blue-50/5 to-transparent border-b border-blue-100 px-6 py-4">
               <h4 class="text-xs font-black text-[#005596] uppercase tracking-widest flex items-center gap-2">
@@ -85,6 +90,16 @@
                 <div class="text-xs font-bold text-slate-700 bg-slate-50/60 p-4 rounded-xl border border-slate-200/40">
                   {{ datos.motivoConsulta || '--' }}
                 </div>
+              </div>
+
+              <!-- REGISTRO DESTACADO TIPO SANGRE -->
+              <div class="bg-rose-50/60 border border-rose-100/80 p-3 rounded-2xl flex justify-between items-center">
+                <span class="text-[10px] font-black text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
+                  🩸 Grupo Sanguíneo y RH:
+                </span>
+                <span class="text-xs font-black text-rose-700 bg-white px-3 py-1 rounded-xl border border-rose-200 shadow-3xs uppercase">
+                  {{ datos.tipoSangre || 'N/A' }}
+                </span>
               </div>
 
               <div class="border-t border-slate-100 pt-3 space-y-3">
@@ -107,30 +122,36 @@
             </div>
           </div>
 
+          <!-- SIGNOS VITALES COMPLETOS (5 PARÁMETROS) -->
           <div class="bg-white border border-slate-200/80 rounded-4xl shadow-[0_12px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
             <div class="bg-linear-to-r from-purple-50/15 via-purple-50/5 to-transparent border-b border-purple-100 px-6 py-4">
               <h4 class="text-xs font-black text-purple-700 uppercase tracking-widest flex items-center gap-2">
-                <span class="bg-white w-6 h-6 rounded-lg flex items-center justify-center border border-purple-100 text-purple-700 shadow-3xs"><VIcon name="bi-heart-pulse-fill" scale="0.85" /></span> Signos Vitales y Físico
+                <span class="bg-white w-6 h-6 rounded-lg flex items-center justify-center border border-purple-100 text-purple-700 shadow-3xs"><VIcon name="bi-heart-pulse-fill" scale="0.85" /></span> Signos Vitales Fisiológicos
               </h4>
             </div>
             <div class="p-6 space-y-4 flex-1 flex flex-col justify-between">
-              <div class="grid grid-cols-2 gap-3.5 mb-3">
-                <div class="bg-linear-to-b from-blue-50/40 to-white border border-blue-200/50 rounded-xl p-3.5 shadow-3xs">
+              <div class="grid grid-cols-2 gap-3 mb-2">
+                <div class="bg-linear-to-b from-blue-50/40 to-white border border-blue-200/50 rounded-xl p-3 shadow-3xs">
                   <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest">Presión Art.</p>
-                  <p class="text-sm font-black text-blue-900 mt-1 font-mono">{{ datos.signos_vitales.presion || '--' }} <span v-if="datos.signos_vitales.presion" class="text-[9px] font-bold text-blue-400 font-sans">mmHg</span></p>
+                  <p class="text-xs font-black text-blue-900 mt-1 font-mono">{{ datos.signos_vitales.presion || '--' }} <span v-if="datos.signos_vitales.presion && datos.signos_vitales.presion !== '--'" class="text-[8px] font-bold text-blue-400 font-sans">mmHg</span></p>
                 </div>
-                <div class="bg-linear-to-b from-rose-50/40 to-white border border-rose-200/50 rounded-xl p-3.5 shadow-3xs">
+                <div class="bg-linear-to-b from-rose-50/40 to-white border border-rose-200/50 rounded-xl p-3 shadow-3xs">
                   <p class="text-[9px] font-black text-rose-500 uppercase tracking-widest">Frec. Cardíaca</p>
-                  <p class="text-sm font-black text-rose-900 mt-1 font-mono">{{ datos.signos_vitales.pulso || '--' }} <span v-if="datos.signos_vitales.pulso" class="text-[9px] font-bold text-rose-400 font-sans">LPM</span></p>
+                  <p class="text-xs font-black text-rose-900 mt-1 font-mono">{{ datos.signos_vitales.pulso || '--' }} <span v-if="datos.signos_vitales.pulso && datos.signos_vitales.pulso !== '--'" class="text-[8px] font-bold text-rose-400 font-sans">LPM</span></p>
                 </div>
-                <div class="bg-linear-to-b from-amber-50/40 to-white border border-amber-200/50 rounded-xl p-3.5 shadow-3xs">
+                <div class="bg-linear-to-b from-amber-50/40 to-white border border-amber-200/50 rounded-xl p-3 shadow-3xs">
                   <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest">Temperatura</p>
-                  <p class="text-sm font-black text-amber-900 mt-1 font-mono">{{ datos.signos_vitales.temp || '--' }} <span v-if="datos.signos_vitales.temp" class="text-[9px] font-bold text-amber-500 font-sans">°C</span></p>
+                  <p class="text-xs font-black text-amber-900 mt-1 font-mono">{{ datos.signos_vitales.temp || '--' }} <span v-if="datos.signos_vitales.temp && datos.signos_vitales.temp !== '--'" class="text-[8px] font-bold text-amber-500 font-sans">°C</span></p>
                 </div>
-                <div class="bg-linear-to-b from-emerald-50/40 to-white border border-emerald-200/50 rounded-xl p-3.5 shadow-3xs">
+                <div class="bg-linear-to-b from-emerald-50/40 to-white border border-emerald-200/50 rounded-xl p-3 shadow-3xs">
                   <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Frec. Resp.</p>
-                  <p class="text-sm font-black text-emerald-900 mt-1 font-mono">{{ datos.signos_vitales.respiracion || '--' }} <span v-if="datos.signos_vitales.respiracion" class="text-[9px] font-bold text-emerald-400 font-sans">RPM</span></p>
+                  <p class="text-xs font-black text-emerald-900 mt-1 font-mono">{{ datos.signos_vitales.respiracion || '--' }} <span v-if="datos.signos_vitales.respiracion && datos.signos_vitales.respiracion !== '--'" class="text-[8px] font-bold text-emerald-400 font-sans">RPM</span></p>
                 </div>
+                <!-- 5to PARÁMETRO: SATURACIÓN DE OXÍGENO -->
+                <!-- <div class="col-span-2 bg-linear-to-b from-indigo-50/40 to-white border border-indigo-200/50 rounded-xl p-3 shadow-3xs flex items-center justify-between">
+                  <p class="text-[9px] font-black text-indigo-600 uppercase tracking-widest">Saturación de Oxígeno (SpO2)</p>
+                  <p class="text-xs font-black text-indigo-950 font-mono">{{ datos.signos_vitales.saturacion || '--' }} <span v-if="datos.signos_vitales.saturacion && datos.signos_vitales.saturacion !== '--'" class="text-[8px] font-bold text-indigo-500 font-sans">%</span></p>
+                </div> -->
               </div>
 
               <div v-if="datos.hallazgos_examen_fisico && datos.hallazgos_examen_fisico.length > 0" class="border-t border-slate-100 pt-3 space-y-2">
@@ -223,9 +244,7 @@
       </div>
     </main>
 
-    <!-- ========================================================= -->
-    <!--  DOCUMENTO NATIVO DE IMPRESIÓN (PRINT CONTAINER CLEAN)    -->
-    <!-- ========================================================= -->
+    <!-- DOCUMENTO NATIVO DE IMPRESIÓN IMPRESO Y REPORTE FISICO -->
     <div class="hidden print:block w-full text-black font-sans bg-white p-0 text-left leading-normal selection:bg-transparent">
 
       <!-- ENCABEZADO OFICIAL -->
@@ -253,13 +272,17 @@
               <td class="p-2 border border-slate-300 bg-slate-50 w-1/4 font-bold">Edad Cronológica:</td>
               <td class="p-2 border border-slate-300">{{ datos.edad || '--' }} Años</td>
               <td class="p-2 border border-slate-300 bg-slate-50 w-1/4 font-bold">Género Biológico:</td>
-              <td class="p-2 border border-slate-300">{{ datos.genero === 'M' ? 'Masculino' : (datos.genero === 'F' ? 'Femenino' : '--') }}</td>
+              <td class="p-2 border border-slate-300">{{ datos.genero === 'M' || datos.genero === 'Masculino' ? 'Masculino' : (datos.genero === 'F' || datos.genero === 'Femenino' ? 'Femenino' : '--') }}</td>
             </tr>
             <tr>
+              <td class="p-2 border border-slate-300 bg-slate-50 w-1/4 font-bold">Tipo de Sangre:</td>
+              <td class="p-2 border border-slate-300 font-extrabold text-red-600 uppercase">{{ datos.tipoSangre || 'N/A' }}</td>
               <td class="p-2 border border-slate-300 bg-slate-50 w-1/4 font-bold">Teléfono Registro:</td>
               <td class="p-2 border border-slate-300 font-mono">{{ datos.telefono || '--' }}</td>
+            </tr>
+            <tr>
               <td class="p-2 border border-slate-300 bg-slate-50 w-1/4 font-bold">Correo Electrónico:</td>
-              <td class="p-2 border border-slate-300 lowercase">{{ datos.email || '--' }}</td>
+              <td class="p-2 border border-slate-300 lowercase" colspan="3">{{ datos.email || '--' }}</td>
             </tr>
           </tbody>
         </table>
@@ -291,9 +314,9 @@
           </div>
         </div>
 
-        <!-- III. SIGNOS VITALES -->
+        <!-- III. SIGNOS VITALES COMPLETOS IMPRESOS -->
         <div>
-          <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">III. Signos Vitales y Examen Físico</h3>
+          <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">III. Signos Vitales Tomados</h3>
           <table class="w-full text-xs border border-slate-300 text-left mb-3">
             <thead>
               <tr class="bg-slate-100 text-slate-700 font-bold text-[10px]">
@@ -304,20 +327,24 @@
             <tbody>
               <tr>
                 <td class="p-1.5 border border-slate-300">Presión Arterial (PA)</td>
-                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.presion || '--' }} mmHg</td>
+                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.presion || '--' }} {{ datos.signos_vitales.presion && datos.signos_vitales.presion !== '--' ? 'mmHg' : '' }}</td>
               </tr>
               <tr>
                 <td class="p-1.5 border border-slate-300">Frecuencia Cardíaca (FC)</td>
-                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.pulso || '--' }} LPM</td>
+                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.pulso || '--' }} {{ datos.signos_vitales.pulso && datos.signos_vitales.pulso !== '--' ? 'LPM' : '' }}</td>
               </tr>
               <tr>
                 <td class="p-1.5 border border-slate-300">Temperatura Corporal</td>
-                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.temp || '--' }} °C</td>
+                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.temp || '--' }} {{ datos.signos_vitales.temp && datos.signos_vitales.temp !== '--' ? '°C' : '' }}</td>
               </tr>
               <tr>
                 <td class="p-1.5 border border-slate-300">Frecuencia Respiratoria</td>
-                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.respiracion || '--' }} RPM</td>
+                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.respiracion || '--' }} {{ datos.signos_vitales.respiracion && datos.signos_vitales.respiracion !== '--' ? 'RPM' : '' }}</td>
               </tr>
+              <!-- <tr>
+                <td class="p-1.5 border border-slate-300">Saturación de Oxígeno (SpO2)</td>
+                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.saturacion || '--' }} {{ datos.signos_vitales.saturacion && datos.signos_vitales.saturacion !== '--' ? '%' : '' }}</td>
+              </tr> -->
             </tbody>
           </table>
         </div>
@@ -406,10 +433,11 @@ const datos = ref({
   email: '',
   edad: '',
   genero: '',
+  tipoSangre: '',
   diagnostico: '',
   motivoConsulta: '',
-  fechaSeguimiento: '', // VARIABLE UNICA OFICIAL
-  signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '' },
+  fechaSeguimiento: '',
+  signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '', saturacion: '' },
   antecedentes: { cronicas: '', alergias: '', medicamentos: '' },
   hallazgos_examen_fisico: [] as Array<{ sistema: string; isNormal: boolean; opciones: string[]; notas: string; }>,
   detalle_medicamentos: [] as Array<{ NombreMedicamento: string; Dosis: string; Indications?: string; Indicaciones: string; }>
@@ -454,35 +482,68 @@ const criterioExtenso = computed(() => {
   return partes[1] ? partes[1].trim() : '';
 });
 
+/**
+ * Helper para obtener valores de un objeto sin importar el casing de la propiedad.
+ */
+const obtenerValorRobusto = (obj: Record<string, unknown> | null | undefined, llaves: string[]): string => {
+  if (!obj) return '';
+
+  const mapaMin: Record<string, unknown> = {};
+  for (const k of Object.keys(obj)) {
+    mapaMin[k.toLowerCase()] = obj[k];
+  }
+
+  for (const llave of llaves) {
+    const val = mapaMin[llave.toLowerCase()];
+    if (val !== undefined && val !== null && val !== '') {
+      return String(val);
+    }
+  }
+  return '';
+};
+
 onMounted(() => {
-  const resumenGuardado = localStorage.getItem('MedGo+_resumen_compartir') || localStorage.getItem('medcore_resumen_compartir');
+  const rawStorage = localStorage.getItem('MedGo+_resumen_compartir');
+  const parsed = rawStorage ? JSON.parse(rawStorage) : (window.history.state?.resumenCompartir || null);
 
-  if (resumenGuardado) {
-    const parsed = JSON.parse(resumenGuardado);
-
+  if (parsed) {
     let fallbackMotivo = parsed.motivoConsulta || parsed.sintomas?.motivo || '';
     if (!fallbackMotivo && parsed.diagnostico) {
       const deags = parsed.diagnostico.split(' | ')[0];
       fallbackMotivo = `Evaluación clínica por: ${deags.split(', ')[0]}`;
     }
 
+    // Detección tolerante del Tipo de Sangre evaluando paciente.TipoSangre o raíz
+    const sangreDetectada = obtenerValorRobusto(parsed.paciente, ['tipoSangre', 'TipoSangre', 'tipo_sangre']) ||
+                            obtenerValorRobusto(parsed, ['tipoSangre', 'TipoSangre', 'tipo_sangre', 'bloodType']) || 'N/A';
+
+    // Extracción de Signos Vitales evaluando signos_vitales, signosVitales o vitals
+    const svRaw = parsed.signos_vitales || parsed.signosVitales || parsed.vitals || {};
+
+    const presionVal = obtenerValorRobusto(svRaw, ['presion', 'PresionArterial', 'presionarterial', 'pa', 'presion_arterial']);
+    const pulsoVal = obtenerValorRobusto(svRaw, ['pulso', 'FrecuenciaCardiaca', 'frecuenciacardiaca', 'fc', 'frecuencia_cardiaca']);
+    const tempVal = obtenerValorRobusto(svRaw, ['temp', 'Temperatura', 'temperatura']);
+    const respVal = obtenerValorRobusto(svRaw, ['respiracion', 'FrecuenciaRespiratoria', 'frecuenciarespiratoria', 'fr', 'frecuencia_respiratoria']);
+    const satVal = obtenerValorRobusto(svRaw, ['saturacion', 'SaturacionOxigeno', 'saturacionoxigeno', 'spo2', 'saturacion_oxigeno']);
+
     datos.value = {
-      paciente: parsed.paciente || '',
-      telefono: parsed.telefono || '',
-      email: parsed.email || '',
-      edad: parsed.edad || '',
-      genero: parsed.genero || '',
+      paciente: obtenerValorRobusto(parsed, ['paciente', 'nombre', 'Paciente']) ||
+                (typeof parsed.paciente === 'object' ? `${parsed.paciente.nombre} ${parsed.paciente.apellido || ''}` : ''),
+      telefono: obtenerValorRobusto(parsed, ['telefono', 'tel', 'Telefono']),
+      email: obtenerValorRobusto(parsed, ['email', 'emailpaciente', 'correo', 'Email']),
+      edad: obtenerValorRobusto(parsed, ['edad', 'Edad']),
+      genero: obtenerValorRobusto(parsed, ['genero', 'Genero']),
+      tipoSangre: sangreDetectada,
       diagnostico: parsed.diagnostico || '',
       motivoConsulta: fallbackMotivo || 'Consulta de evaluación',
-
-      // 🟢 ASIGNACIÓN DIRECTA DE LA VARIABLE ÚNICA
       fechaSeguimiento: parsed.fechaSeguimiento || '',
 
       signos_vitales: {
-        presion: parsed.signos_vitales?.presion || '',
-        pulso: parsed.signos_vitales?.pulso || '',
-        temp: parsed.signos_vitales?.temp || '',
-        respiracion: parsed.signos_vitales?.respiracion || ''
+        presion: presionVal,
+        pulso: pulsoVal,
+        temp: tempVal,
+        respiracion: respVal,
+        saturacion: satVal
       },
       antecedentes: {
         cronicas: parsed.antecedentes?.cronicas || 'No registra',
@@ -493,20 +554,20 @@ onMounted(() => {
       detalle_medicamentos: parsed.detalle_medicamentos || []
     };
   } else {
-    const state = window.history.state?.resumenCompartir;
-    if (state) {
-      datos.value = state;
-    } else {
-      toast.error("No se detectaron datos de la consulta completada.");
-      router.push('/medico/dashboard');
-    }
+    toast.error("No se detectaron datos de la consulta completada.");
+    router.push('/medico/dashboard');
   }
 });
 
 const construirTextoResumen = () => {
   let texto = `*MedGo+ - RESUMEN DE CONSULTA*\n\n`;
   texto += `*Paciente:* ${datos.value.paciente}\n`;
+  texto += `*Tipo de Sangre:* ${datos.value.tipoSangre || 'N/A'}\n`;
   texto += `*Motivo:* ${datos.value.motivoConsulta}\n`;
+  texto += `*Presión Arterial:* ${datos.value.signos_vitales.presion || 'N/R'}\n`;
+  texto += `*Pulso / FC:* ${datos.value.signos_vitales.pulso || 'N/R'} LPM\n`;
+  texto += `*Temperatura:* ${datos.value.signos_vitales.temp || 'N/R'} °C\n`;
+  //texto += `*Saturación O2:* ${datos.value.signos_vitales.saturacion || 'N/R'} %\n`;
   texto += `*Diagnósticos OMS:* ${listaDiagnosticos.value.join(', ') || 'Ninguno'}\n`;
   if (criterioExtenso.value) {
     texto += `*Criterio Clínico:* ${criterioExtenso.value}\n`;

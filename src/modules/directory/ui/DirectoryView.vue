@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-slate-100 flex font-sans selection:bg-sky-500/10 text-left">
 
+    <!-- BARRA LATERAL (ASIDE) -->
     <aside class="w-72 bg-white border-r border-slate-100 flex flex-col justify-between p-6 sticky top-0 h-screen z-30 shrink-0 shadow-xs">
       <div class="space-y-8">
         <div class="flex items-center gap-4 px-2 cursor-pointer group/logo" @click="activeTab = 'home'; subViewInstituciones = 'clinicas'">
@@ -46,20 +47,25 @@
       </button>
     </aside>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
 
+      <!-- ENCABEZADO -->
       <header class="bg-white border-b border-slate-100 px-10 py-4 flex justify-end items-center sticky top-0 z-20 shadow-xs">
         <div class="flex items-center gap-6">
 
-          <div v-if="esTutor" class="flex items-center gap-3 bg-amber-50/60 px-3 py-1.5 rounded-2xl border border-amber-200/50 animate-fade-in">
-            <div class="flex items-center gap-1">
-              <label class="text-[10px] font-black text-amber-800 uppercase tracking-wider">Paciente:</label>
+          <!-- SELECTOR DE PACIENTE/DEPENDIENTE AJUSTADO -->
+          <div v-if="esTutor || misDependientes.length > 0" class="flex items-center gap-3 bg-amber-50/60 px-3.5 py-1.5 rounded-2xl border border-amber-200/50 animate-fade-in shadow-2xs">
+            <div class="flex items-center gap-2">
+              <label class="text-[10px] font-black text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                <v-icon name="bi-people-fill" class="h-3 w-3 text-amber-600" /> Paciente:
+              </label>
               <select
-                class="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer border-none p-0 pr-4 focus:ring-0"
+                class="bg-transparent text-xs font-black text-slate-800 outline-none cursor-pointer border-none p-0 pr-4 focus:ring-0"
                 @change="evaluarSeleccionPaciente($event)"
               >
                 <option v-for="(dep, idx) in misDependientes" :key="dep.PacienteID" :value="idx">
-                  {{ dep.Nombre }} {{ dep.TutorID === null || dep.es_dependiente === 0 ? '(Titular)' : '(Hijo/a)' }}
+                  {{ dep.Nombre }} {{ dep.TutorID === null || dep.es_dependiente === 0 ? '(Titular / Tutor)' : '(Dependiente)' }}
                 </option>
                 <option v-if="necesitaPerfilTutor" value="crear_mi_perfil">+ Crear mi perfil de paciente</option>
               </select>
@@ -68,7 +74,7 @@
             <button
               v-if="pacienteActualSeleccionado?.es_dependiente === 1"
               @click="openEmancipateModal"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] uppercase tracking-wider px-2 py-1 rounded-lg transition-colors cursor-pointer"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-xs"
             >
               Independizar Hijo
             </button>
@@ -89,8 +95,10 @@
         </div>
       </header>
 
+      <!-- ÁREA DE VISTAS (MAIN) -->
       <main class="p-10 flex-1 max-w-7xl w-full mx-auto space-y-12">
 
+        <!-- INICIO -->
         <section v-if="activeTab === 'home'" class="space-y-10 animate-fade-in">
           <div>
             <h2 class="text-4xl font-black text-slate-800 tracking-tight">Hola, {{ userData.nombre.split(' ')[0] }}</h2>
@@ -219,10 +227,29 @@
           </div>
         </section>
 
+        <!-- DIRECTORIO MÉDICO (CON INDICADOR CLARO DEL PACIENTE ACTIVO) -->
         <section v-if="activeTab === 'directory'" class="space-y-8 animate-fade-in">
-          <div>
-            <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Mis Médicos</h2>
-            <p class="text-slate-400 font-bold text-xs mt-1">Directorio de médicos verificados en Roatán</p>
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Mis Médicos</h2>
+              <p class="text-slate-400 font-bold text-xs mt-1">Directorio de médicos verificados en Roatán</p>
+            </div>
+
+            <!-- TARJETA INTEGRADORA DE SELECCIÓN DE PACIENTE / DEPENDIENTE -->
+            <div v-if="misDependientes.length > 0" class="bg-sky-50 border border-sky-100 p-4 rounded-2xl flex items-center gap-4">
+              <div class="w-10 h-10 bg-sky-500 text-white rounded-xl flex items-center justify-center font-black text-sm">
+                {{ perfilPacienteActivo.nombre.charAt(0) }}
+              </div>
+              <div class="text-left">
+                <p class="text-[10px] font-black uppercase text-sky-600 tracking-wider">Agendando como:</p>
+                <p class="text-sm font-black text-slate-800 leading-tight">
+                  {{ perfilPacienteActivo.nombre }}
+                  <span class="text-xs font-semibold text-slate-500">
+                    {{ perfilPacienteActivo.es_dependiente ? '(Dependiente)' : '(Tutor)' }}
+                  </span>
+                </p>
+              </div>
+            </div>
           </div>
 
           <div class="bg-white rounded-[2.5rem] p-8 shadow-xs border border-slate-100 space-y-5">
@@ -248,7 +275,9 @@
               </select>
             </div>
 
-            <div class="flex items-center gap-6 pt-1">
+            <!-- TOGGLES Y FILTROS AVANZADOS -->
+            <div class="flex flex-wrap items-center gap-6 pt-1">
+              <!-- Citas Inmediatas -->
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <div class="relative">
                   <input type="checkbox" v-model="filters.inmediata" class="sr-only peer" />
@@ -259,34 +288,65 @@
                 </div>
               </label>
 
+              <!-- Habla Inglés -->
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <div class="relative">
                   <input type="checkbox" v-model="filters.ingles" class="sr-only peer" />
                   <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-sky-300 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
                 </div>
                 <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                  <v-icon name="bi-translate" class="h-3.5 w-3.5 text-sky-500" /> Habla inglés
+                  <v-icon name="bi-translate" class="h-3.5 w-3.5 text-sky-500" /> {{ te('directory.speaksEnglish') ? t('directory.speaksEnglish') : 'Habla inglés' }}
+                </div>
+              </label>
+
+              <!-- Visita a Domicilio -->
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <div class="relative">
+                  <input type="checkbox" v-model="filters.domicilio" class="sr-only peer" />
+                  <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-emerald-300 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                </div>
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                  <v-icon name="bi-house-fill" class="h-3.5 w-3.5 text-emerald-500" /> Visita a Domicilio
                 </div>
               </label>
             </div>
           </div>
 
+          <!-- LISTADO DE DOCTORES INTEGRADO CON DOCTORLOCATIONCARD -->
           <div v-if="doctors.length > 0" class="space-y-4">
             <div v-for="doctor in doctors" :key="doctor.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all hover:border-sky-200/60">
+
               <div class="flex items-center gap-6 w-full md:flex-1">
                 <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner relative border border-slate-100 shrink-0">
                   <v-icon name="ri-stethoscope-line" scale="2" class="text-slate-400" />
                 </div>
-                <div class="text-left space-y-1">
+                <div class="text-left space-y-1 flex-1">
                   <h3 class="text-xl font-black text-slate-800 leading-tight group-hover:text-sky-600 transition-colors">Dr. {{ doctor.Nombre }} {{ doctor.Apellido }}</h3>
                   <p class="text-xs font-black text-slate-900 uppercase tracking-wider">{{ doctor.Especialidad }}</p>
+
+                  <!-- COMPONENTE DE UBICACIÓN Y DISTANCIA EN KM INTEGRADO -->
+                  <div class="pt-2">
+                    <DoctorLocationCard
+                      :doctor="doctor"
+                      :userLat="userLat"
+                      :userLon="userLon"
+                    />
+                  </div>
                 </div>
               </div>
-              <button @click="startBooking(doctor)" class="w-full md:w-auto bg-sky-50 hover:bg-sky-100 text-sky-700 px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer">Agendar</button>
+
+              <button @click="startBooking(doctor)" class="w-full md:w-auto bg-sky-50 hover:bg-sky-100 text-sky-700 px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer">
+                Agendar
+              </button>
+
             </div>
+          </div>
+          <div v-else class="bg-white rounded-3xl p-12 text-center border border-slate-100">
+            <p class="text-slate-400 font-bold text-sm">No se encontraron doctores que coincidan con los criterios seleccionados.</p>
           </div>
         </section>
 
+        <!-- INSTITUCIONES -->
         <section v-if="activeTab === 'instituciones'" class="space-y-8 animate-fade-in">
           <div v-if="subViewInstituciones === 'clinicas'" class="space-y-6">
             <div class="grid grid-cols-1 gap-6">
@@ -311,6 +371,7 @@
           </div>
         </section>
 
+        <!-- AGENDAR CITA -->
         <section v-if="activeTab === 'schedule'" class="animate-fade-in space-y-6">
           <div v-if="!selectedDoctor" class="space-y-6 w-full text-left">
             <div>
@@ -337,15 +398,16 @@
           <BookingView
             v-else
             :selectedDoctor="selectedDoctor"
-            :patientProfile="(userData as unknown as PatientExtendedProfile)"
+            :patientProfile="perfilPacienteActivo"
             :idioma="locale"
             @cancel="resetBooking"
           />
         </section>
 
+        <!-- LABORATORIO -->
         <section v-if="activeTab === 'laboratory'" class="animate-fade-in"><PatientLabView /></section>
 
-        <!-- INTEGRACIÓN COMPLETA OPCIÓN B: CORREGIDA EXPRESIÓN TERNARIA PARA VITE -->
+        <!-- HISTORIAL Y CITAS -->
         <section v-if="activeTab === 'history'" class="animate-fade-in space-y-6 text-left">
 
           <div class="flex bg-slate-200/60 p-1.5 rounded-2xl border border-slate-200 shadow-inner w-fit gap-1 mb-2">
@@ -373,6 +435,7 @@
           </div>
         </section>
 
+        <!-- CONFIGURACIÓN -->
         <section v-if="activeTab === 'configuracion'" class="space-y-6 animate-fade-in"><SettingsView /></section>
 
       </main>
@@ -384,6 +447,7 @@
     </div>
   </div>
 
+  <!-- MODAL DE AUTO-REGISTRO DE TUTOR/PACIENTE -->
   <div v-if="showAutoRegistroModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl animate-fade-in">
       <h3 class="text-xl font-bold mb-4 text-slate-800">Crear mi Perfil Clínico</h3>
@@ -403,6 +467,7 @@
     </div>
   </div>
 
+  <!-- MODAL DE EMANCIPACIÓN DE HIJO/DEPENDIENTE -->
   <div v-if="showEmancipateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl animate-fade-in">
       <h3 class="text-xl font-bold mb-3 text-slate-800">Dar Acceso Propio a tu Hijo</h3>
@@ -430,12 +495,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'vue-toastification';
 import SettingsView from '@/SettingsView.vue';
 import api from '@/shared/infrastructure/api';
+
+// COMPONENTE DE UBICACIÓN Y DISTANCIA (GEOLOCALIZACIÓN)
+import DoctorLocationCard from '@/shared/ui/components/DoctorLocationCard.vue';
 import { DirectoryRepositoryImpl } from '../infrastructure/DirectoryRepositoryImpl';
 import type { Doctor } from '../domain/entities/Doctor';
 import type { DoctorFilters } from '../domain/repository/DirectoryRepository';
@@ -447,8 +515,8 @@ import PatientLabView from '../../laboratories/ui/PatientLabView.vue';
 // CONTROLADOR DE CITAS Y SUS ICONOS
 import PatientAppointmentsView from '@/modules/appointments/ui/PatientAppointmentsView.vue';
 import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
-import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill } from 'oh-vue-icons/icons/bi';
-addIcons(BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill);
+import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch } from 'oh-vue-icons/icons/bi';
+addIcons(BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch);
 
 interface Clinica { EntidadID: number; NombreInstitucion: string; Descripcion?: string; Direccion?: string; }
 interface EntidadBackend { EntidadID: number | string; NombreComercial?: string; Nombre?: string; Descripcion?: string; Direccion?: string; }
@@ -461,6 +529,19 @@ interface Dependiente {
   Genero?: string; genero?: string; Edad?: number | string; edad?: number | string;
   PacienteID?: number | string; id?: number | string; TutorID?: number | null; es_dependiente?: number;
 }
+
+interface PacienteRecord extends Dependiente {
+  DNI?: string; dni?: string;
+  Apellido?: string; apellido?: string;
+  Aseguradora?: string; aseguradora?: string;
+  NumeroPoliza?: string; poliza?: string;
+  nombre_contacto_emergencia?: string; NombreContactoEmergencia?: string;
+  telefono_contacto_emergencia?: string; TelefonoContactoEmergencia?: string; contacto_emergencia?: string;
+}
+
+// Coordenadas predeterminadas del usuario (Roatán)
+const userLat = ref(16.3298);
+const userLon = ref(-86.5332);
 
 const toast = useToast();
 const historyViewMode = ref<'completo' | 'recetas' | 'citas_gestion'>('completo');
@@ -506,7 +587,72 @@ const tabs = [
   { id: 'history', label: 'tabs.history', fallback: 'Historial', icon: 'bi-folder-fill', color: 'text-purple-500' },
 ];
 
-const filters = reactive<DoctorFilters>({ search: '', especialidad: '', geolocalizacion: false, inmediata: false, ingles: false, ordenar: 'cercania' });
+const filters = reactive<DoctorFilters & { domicilio?: boolean }>({
+  search: '',
+  especialidad: '',
+  geolocalizacion: false,
+  inmediata: false,
+  ingles: false,
+  domicilio: false,
+  ordenar: 'cercania'
+});
+
+const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
+  const p = pacienteActualSeleccionado.value;
+  if (!p) {
+    return {
+      id: userData.value.id,
+      nombre: userData.value.nombre,
+      email: userSessionData.value.email,
+      PacienteID: String(userData.value.id),
+      UsuarioID: String(userData.value.id),
+      DNI: '',
+      Nombre: userData.value.nombre,
+      Apellido: '',
+      Telefono: userData.value.telefono,
+      Genero: userData.value.genero,
+      Edad: userData.value.fecha_nacimiento,
+      Estado: '1',
+      Aseguradora: userData.value.aseguradora || null,
+      NumeroPoliza: userData.value.poliza || null,
+      nombre_contacto_emergencia: userData.value.nombre_contacto_emergencia || null,
+      telefono_contacto_emergencia: userData.value.telefono_contacto_emergencia || null
+    };
+  }
+
+  const pRecord = p as PacienteRecord;
+  const idPaciente = Number(p.PacienteID || p.id || p.UsuarioID || p.usuario_id || userData.value.id || 0);
+
+  return {
+    id: idPaciente,
+    nombre: String(p.Nombre || p.nombre || userData.value.nombre),
+    email: userSessionData.value.email,
+    PacienteID: String(p.PacienteID || p.id || idPaciente),
+    UsuarioID: String(p.UsuarioID || p.usuario_id || idPaciente),
+    DNI: String(pRecord.DNI || pRecord.dni || ''),
+    Nombre: String(p.Nombre || p.nombre || ''),
+    Apellido: String(pRecord.Apellido || pRecord.apellido || ''),
+    Telefono: String(p.Telefono || p.telefono || userData.value.telefono || ''),
+    Genero: String(p.Genero || p.genero || userData.value.genero || ''),
+    Edad: (p.Edad || p.edad || userData.value.fecha_nacimiento || '') as string | number,
+    Estado: '1',
+    Aseguradora: String(pRecord.Aseguradora || pRecord.aseguradora || userData.value.aseguradora || '') || null,
+    NumeroPoliza: String(pRecord.NumeroPoliza || pRecord.poliza || userData.value.poliza || '') || null,
+    nombre_contacto_emergencia: String(
+      pRecord.nombre_contacto_emergencia || 
+      pRecord.NombreContactoEmergencia || 
+      userData.value.nombre_contacto_emergencia || ''
+    ) || null,
+    telefono_contacto_emergencia: String(
+      pRecord.telefono_contacto_emergencia || 
+      pRecord.TelefonoContactoEmergencia || 
+      pRecord.contacto_emergencia || 
+      userData.value.telefono_contacto_emergencia || ''
+    ) || null,
+    es_dependiente: Boolean(p.es_dependiente),
+    TutorID: p.TutorID !== undefined && p.TutorID !== null ? Number(p.TutorID) : undefined
+  };
+});
 
 const fetchClinicas = async () => {
   try {
@@ -567,10 +713,23 @@ const startBooking = (doctor: Doctor) => {
 
 const resetBooking = () => { selectedDoctor.value = null; };
 
+const esVerdadero = (val: unknown): boolean => {
+  return val === true || val === 1 || val === '1' || val === 'true';
+};
+
 const searchDoctors = async () => {
   try {
     const data = await directoryRepo.getDoctors(filters);
-    doctors.value = data || [];
+    let listado = data || [];
+
+    if (filters.ingles) {
+      listado = listado.filter((doc) => esVerdadero(doc.HablaIngles));
+    }
+    if (filters.domicilio) {
+      listado = listado.filter((doc) => esVerdadero(doc.DisponibleDomicilio));
+    }
+
+    doctors.value = listado;
   } catch (error) {
     console.error("Error consultando doctores", error);
   }
@@ -689,16 +848,18 @@ const loadUser = async () => {
       const response = await api.get(`/pacientes/usuario/${parsed.id}`);
 
       if (response.data) {
-        if (response.data.es_tutor) {
+        const payload = response.data.data || response.data;
+
+        if (payload.es_tutor || (payload.todos_los_dependientes && payload.todos_los_dependientes.length > 0)) {
           esTutor.value = true;
-          misDependientes.value = response.data.todos_los_dependientes || [];
-          necesitaPerfilTutor.value = !!response.data.necesita_perfil_tutor;
+          misDependientes.value = payload.todos_los_dependientes || [];
+          necesitaPerfilTutor.value = !!payload.necesita_perfil_tutor;
 
           if (misDependientes.value.length > 0) {
             cambiarPacienteSeleccionado(0);
           }
-        } else if (response.data.data) {
-          const paciente = response.data.data;
+        } else {
+          const paciente = payload;
           pacienteActualSeleccionado.value = paciente;
           idClinicoActivo.value = paciente.PacienteID || paciente.id || parsed.id;
           userData.value.telefono = paciente.Telefono || paciente.telefono || '';
@@ -725,6 +886,16 @@ watch(filters, () => { searchDoctors(); }, { deep: true });
 watch(() => filters.ingles, (newVal) => { locale.value = newVal ? 'en' : 'es'; });
 
 onMounted(async () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userLat.value = pos.coords.latitude;
+        userLon.value = pos.coords.longitude;
+      },
+      (err) => console.warn('Ubicación predeterminada activada (Roatán):', err.message)
+    );
+  }
+
   await loadUser();
   await fetchSpecialties();
   await searchDoctors();

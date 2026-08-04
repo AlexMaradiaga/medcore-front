@@ -1,8 +1,11 @@
+export type EstadoOrdenLaboratorio = 'Emitida' | 'Aceptada' | 'Paciente Recibido' | 'Completada';
+
 export interface CatalogoExamen {
   ExamID: number;
   Categoria: string;
   NombreExamen: string;
-  CondicionesPaciente: string;
+  CondicionesPaciente?: string | null;
+  Precio?: number;
 }
 
 export interface OrdenLaboratorio {
@@ -22,4 +25,19 @@ export interface ResultadoLaboratorio {
   UnidadMedida: string | null;
   BanderaAlerta: string | null;
   ArchivoPdfPath: string | null;
+}
+
+export interface LaboratoryOrderDTO {
+  OrdenID: number;
+  CodigoOrden?: string;
+  Paciente: string;
+  PacienteDNI?: string;
+  PacienteTelefono?: string;
+  Doctor?: string;
+  Estado: EstadoOrdenLaboratorio;
+  MontoTotal: number;
+  ComisionMonto: number;
+  ArchivoPdfPath?: string | null;
+  FechaOrden?: string;
+  FechaCompletado?: string | null;
 }

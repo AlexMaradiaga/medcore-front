@@ -36,6 +36,12 @@
                     {{ appointment.Genero === 'M' || appointment.Genero === 'Masculino' ? 'Masculino' : 'Femenino' }}
                   </span>
                 </div>
+                <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex items-center gap-3">
+                  <span class="text-rose-600">🩸</span>
+                  <span class="text-rose-700 font-black text-sm uppercase">
+                    {{ appointment?.TipoSangre || 'SANGRE: N/A' }}
+                  </span>
+                </div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
                   <span class="text-blue-500">📞</span>
                   <span class="text-slate-600 font-black text-sm uppercase">{{ appointment?.Telefono || 'No registrado' }}</span>
@@ -108,6 +114,7 @@ import type { DoctorAppointment } from '../domain/DoctorAppointment';
 
 interface ComponentAppointment extends Omit<DoctorAppointment, 'Paciente'> {
   Paciente: string;
+  TipoSangre?: string;
   SeguroMedico?: string;
   NombreContactoEmergencia?: string;
   TelefonoContactoEmergencia?: string;
@@ -128,6 +135,23 @@ const contactoEmergenciaDisplay = computed(() => {
 });
 
 const startConsultation = () => {
+  if (appointment.value) {
+    const rawStorage = localStorage.getItem('MedGo+_resumen_compartir');
+    const prevResumen: Record<string, unknown> = rawStorage ? JSON.parse(rawStorage) : {};
+
+    const payloadActualizado = {
+      ...prevResumen,
+      paciente: appointment.value.Paciente,
+      edad: appointment.value.Edad,
+      genero: appointment.value.Genero,
+      telefono: appointment.value.Telefono,
+      email: appointment.value.EmailPaciente,
+      tipoSangre: appointment.value.TipoSangre || 'N/A'
+    };
+
+    localStorage.setItem('MedGo+_resumen_compartir', JSON.stringify(payloadActualizado));
+  }
+
   medicalStore.setConsultationActive(true);
   router.push('/medico/consulta');
 };
@@ -136,10 +160,14 @@ onMounted(() => {
   const saved = localStorage.getItem('current_appointment');
   if (saved) {
     try {
-      appointment.value = JSON.parse(saved) as ComponentAppointment;
-    } catch{
+      const parsedData = JSON.parse(saved);
+
+      appointment.value = parsedData as ComponentAppointment;
+    } catch {
       localStorage.removeItem('current_appointment');
     }
+  } else {
+    console.warn('⚠️ No hay nada guardado bajo la clave "current_appointment" en localStorage.');
   }
 });
 </script>

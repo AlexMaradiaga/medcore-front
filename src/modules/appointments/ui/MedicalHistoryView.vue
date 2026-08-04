@@ -603,24 +603,90 @@ const cerrarVisualizador = () => {
   recetaSeleccionadaId.value = 0;
   pdfLoading.value = false;
 };
+// Definición para respuestas que pueden venir como Array o encapsuladas por el backend/CryptoMiddleware
+interface EncryptedPayload {
+  payload?: string;
+  data?: unknown;
+}
 
-const loadData = async () => {
-  if (props.usuarioId === 0) return;
+// Guard de tipo seguro en TypeScript para verificar si la respuesta viene envuelta
+function isEncryptedPayload(res: unknown): res is EncryptedPayload {
+  return typeof res === 'object' && res !== null && ('payload' in res || 'data' in res);
+}
+
+const loadData = async (): Promise<void> => {
+  console.group(`🔍 [loadData] Iniciando carga para SubTab: "${activeSubTab.value}"`);
+  console.log('📌 Props recibido usuarioId:', props.usuarioId, '| Tipo:', typeof props.usuarioId);
+
+  if (!props.usuarioId || props.usuarioId === 0) {
+    console.warn('⚠️ usuarioId no es válido o es 0. Cancelando petición HTTP.');
+    console.groupEnd();
+    return;
+  }
+
   loading.value = true;
 
   try {
     if (activeSubTab.value === 'consultas') {
-      history.value = await repo.getMedicalHistory(props.usuarioId);
+      console.log('📡 Solicitando getMedicalHistory...');
+      const rawRes: unknown = await repo.getMedicalHistory(props.usuarioId);
+      console.log('📦 Respuesta RAW de Consultas:', rawRes);
+
+      let dataFinal: MedicalRecord[] = [];
+
+      if (Array.isArray(rawRes)) {
+        dataFinal = rawRes as MedicalRecord[];
+      } else if (isEncryptedPayload(rawRes)) {
+        if (Array.isArray(rawRes.data)) {
+          dataFinal = rawRes.data as MedicalRecord[];
+        }
+      }
+
+      console.log('✅ Arreglo final asignado a history:', dataFinal);
+      history.value = dataFinal;
+
     } else if (activeSubTab.value === 'examenes') {
-      exams.value = await repo.getExams(props.usuarioId);
+      console.log('📡 Solicitando getExams...');
+      const rawRes: unknown = await repo.getExams(props.usuarioId);
+      console.log('📦 Respuesta RAW de Exámenes:', rawRes);
+
+      let dataFinal: Exam[] = [];
+
+      if (Array.isArray(rawRes)) {
+        dataFinal = rawRes as Exam[];
+      } else if (isEncryptedPayload(rawRes)) {
+        if (Array.isArray(rawRes.data)) {
+          dataFinal = rawRes.data as Exam[];
+        }
+      }
+
+      console.log('✅ Arreglo final asignado a exams:', dataFinal);
+      exams.value = dataFinal;
+
     } else if (activeSubTab.value === 'recetas') {
-      prescriptions.value = await repo.getPrescriptions(props.usuarioId);
+      console.log('📡 Solicitando getPrescriptions...');
+      const rawRes: unknown = await repo.getPrescriptions(props.usuarioId);
+      console.log('📦 Respuesta RAW de Recetas:', rawRes);
+
+      let dataFinal: Prescription[] = [];
+
+      if (Array.isArray(rawRes)) {
+        dataFinal = rawRes as Prescription[];
+      } else if (isEncryptedPayload(rawRes)) {
+        if (Array.isArray(rawRes.data)) {
+          dataFinal = rawRes.data as Prescription[];
+        }
+      }
+
+      console.log('✅ Arreglo final asignado a prescriptions:', dataFinal);
+      prescriptions.value = dataFinal;
     }
-  } catch (error) {
-    console.error("Error cargando historial clínico:", error);
+  } catch (error: unknown) {
+    console.error("❌ Error en la llamada HTTP de historial clínico:", error);
     toast.error("Error de sincronización con los servicios de MedCore Global.");
   } finally {
     loading.value = false;
+    console.groupEnd();
   }
 };
 

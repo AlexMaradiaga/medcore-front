@@ -64,7 +64,8 @@
                 <VIcon name="bi-person-badge-fill" scale="0.85" /> Información del Paciente Asignado
               </h4>
             </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <!-- CAMBIO: Se ajusta a 4 columnas en grid para agregar Sangre -->
+            <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
               <div class="space-y-1">
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                   <VIcon name="bi-person-fill" scale="0.8" class="text-slate-400" /> Nombre Completo
@@ -76,6 +77,13 @@
                   <VIcon name="bi-calendar-event" scale="0.8" class="text-slate-400" /> Edad
                 </p>
                 <p class="text-sm font-black text-slate-700 font-mono">{{ edadPaciente }} Años</p>
+              </div>
+              <!-- BLOQUE DE SANGRE AÑADIDO EN LA VISTA WEB -->
+              <div class="space-y-1">
+                <p class="text-[9px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1">
+                  🩸 Tipo Sangre
+                </p>
+                <p class="text-sm font-black text-rose-700 font-mono uppercase">{{ tipoSangrePaciente }}</p>
               </div>
               <div class="space-y-1">
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
@@ -168,8 +176,13 @@
             <tr>
               <td class="p-2 border border-black w-1/4 font-bold bg-slate-50">Edad:</td>
               <td class="p-2 border border-black">{{ edadPaciente }} Años</td>
+              <!-- CAMBIO: Tipo de sangre en la tabla impresa -->
+              <td class="p-2 border border-black w-1/4 font-bold bg-slate-50">Tipo de Sangre:</td>
+              <td class="p-2 border border-black font-bold text-red-600 uppercase">{{ tipoSangrePaciente }}</td>
+            </tr>
+            <tr>
               <td class="p-2 border border-black w-1/4 font-bold bg-slate-50">Teléfono:</td>
-              <td class="p-2 border border-black font-mono">{{ telefonoPaciente }}</td>
+              <td class="p-2 border border-black font-mono" colspan="3">{{ telefonoPaciente }}</td>
             </tr>
           </tbody>
         </table>
@@ -280,12 +293,15 @@ const repo = new DoctorRepository();
 const medicamentosPrescritos = ref<FilaReceta[]>([]);
 const cargandoReceta = ref<boolean>(true);
 const procesandoFisico = ref<boolean>(false);
-const pacienteBackup = ref({ nombre: '', edad: '', tel: '' });
+// CAMBIO 1: Se añade 'tipoSangre' en la ref del paciente
+const pacienteBackup = ref({ nombre: '', edad: '', tel: '', tipoSangre: '' });
 const fechaSeguimiento = ref<string>('');
 
 const nombrePaciente = computed(() => pacienteBackup.value.nombre || 'Paciente');
 const edadPaciente = computed(() => pacienteBackup.value.edad || '---');
 const telefonoPaciente = computed(() => pacienteBackup.value.tel || '---');
+// CAMBIO 2: Computed para Sangre
+const tipoSangrePaciente = computed(() => pacienteBackup.value.tipoSangre || 'N/A');
 
 const doctorMapeado = computed<Record<string, unknown>>(() => {
   return (medicalStore.doctor || {}) as Record<string, unknown>;
@@ -352,10 +368,11 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
       { text: 'INFORMACIÓN DEL PACIENTE', style: 'subheader' },
       {
         table: {
-          widths: ['*', 'auto', 'auto'],
+          // CAMBIO 3: Se incluye Tipo Sangre en la grilla del PDF generado por pdfmake
+          widths: ['*', 'auto', 'auto', 'auto'],
           body: [
-            ['Nombre', 'Edad', 'Teléfono'],
-            [nombrePaciente.value, edadPaciente.value, telefonoPaciente.value]
+            ['Nombre', 'Edad', 'Tipo Sangre', 'Teléfono'],
+            [nombrePaciente.value, edadPaciente.value, tipoSangrePaciente.value, telefonoPaciente.value]
           ]
         },
         margin: [0, 0, 0, 15]
@@ -441,9 +458,14 @@ onMounted(async () => {
     if (resGuardado) {
       const d = JSON.parse(resGuardado);
       medicamentosPrescritos.value = d.detalle_medicamentos || [];
-      pacienteBackup.value = { nombre: d.paciente || '', edad: d.edad || '', tel: d.telefono || '' };
+      // CAMBIO 4: Se asigna la propiedad del tipo de sangre desde el localStorage
+      pacienteBackup.value = {
+        nombre: d.paciente || '',
+        edad: d.edad || '',
+        tel: d.telefono || '',
+        tipoSangre: d.tipoSangre || d.TipoSangre || 'N/A'
+      };
 
-      // 🟢 LECTURA LIMPIA DE LA VARIABLE ÚNICA ESTANDARIZADA
       fechaSeguimiento.value = d.fechaSeguimiento || '';
     }
 
@@ -494,9 +516,12 @@ const compartirDocumentoFisico = async () => {
       `${i + 1}. 💊 *${med.NombreMedicamento.toUpperCase()}*\n   Dosis: ${med.Dosis}\n   Indicaciones: _${med.Indicaciones}_`
     ).join('\n\n');
 
+    // CAMBIO 5: Se añade Tipo de Sangre al mensaje compartido
     let textoCompartir =
       `🏥 *MedGo+* \n*PRESCRIPCIÓN MÉDICA AUTORIZADA*\n\n` +
-      `👤 *Paciente:* ${nombrePaciente.value}\n👨‍⚕️ *Doctor:* ${nombreDoctor.value}\n📅 *Fecha:* ${fechaActual.value}\n\n`;
+      `👤 *Paciente:* ${nombrePaciente.value}\n` +
+      `🩸 *Tipo Sangre:* ${tipoSangrePaciente.value}\n` +
+      `👨‍⚕️ *Doctor:* ${nombreDoctor.value}\n📅 *Fecha:* ${fechaActual.value}\n\n`;
 
     if (fechaSeguimiento.value) {
       textoCompartir += `⚠️ *REVISIÓN / CITA DE SEGUIMIENTO (REGRESAR):* ${formatearFechaEspecifica(fechaSeguimiento.value)}\n\n`;

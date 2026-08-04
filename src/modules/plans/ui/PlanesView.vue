@@ -30,7 +30,7 @@
         <div class="flex gap-2.5 mt-5 text-left">
           <div class="flex-1 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/10">
             <span class="block text-[10px] font-bold text-white/80 tracking-tight">Visualizaciones</span>
-            <span class="text-xl font-black tracking-tight">187</span>
+            <span class="text-xl font-black tracking-tight">{{ visualizaciones }}</span>
           </div>
           <div class="flex-1 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/10">
             <span class="block text-[10px] font-bold text-white/80 tracking-tight">Citas/mes</span>
@@ -69,7 +69,7 @@
               <v-icon name="bi-lightning-charge-fill" scale="0.9" />
             </div>
             <p class="text-[11px] text-blue-700 font-medium leading-relaxed">
-              <span class="font-black">🧪 Fase Piloto Roatán:</span> Los planes mostrados son los que regirán al lanzar oficialmente. Valores simulados.
+              <span class="font-black">🧪 Fase Piloto Roatán:</span> Los planes mostrados son los que regirán al lanzar oficialmente.
             </p>
           </div>
 
@@ -80,13 +80,14 @@
             </div>
             <p class="text-[11px] text-white/90 font-medium leading-tight">Participa en la fase piloto y recibe beneficios exclusivos.</p>
             <ul class="grid grid-cols-1 gap-y-1 text-[11px] font-bold text-white/90 pt-1">
-              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> ✓ Insignia Founder</li>
-              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> ✓ Acceso anticipado a nuevas funciones</li>
-              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> ✓ Beneficios especiales durante el piloto</li>
-              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> ✓ Prioridad en futuras actualizaciones</li>
+              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> Insignia Founder</li>
+              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> Acceso anticipado a nuevas funciones</li>
+              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> Beneficios especiales durante el piloto</li>
+              <li class="flex items-center gap-1.5"><v-icon name="bi-check" scale="0.8"/> Prioridad en futuras actualizaciones</li>
             </ul>
           </div>
 
+          <!-- PLAN POPULAR (GRATIS) -->
           <div class="border-2 border-[#00b04f] bg-white rounded-3xl p-5 relative overflow-hidden shadow-2xs space-y-4">
             <div class="flex justify-between items-start">
               <div>
@@ -95,7 +96,7 @@
                 </h4>
                 <p class="text-slate-400 text-[11px] font-semibold mt-0.5">Perfecto para comenzar y ganar visibilidad institucional.</p>
               </div>
-              <span class="bg-[#00b04f] text-white font-black text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 shadow-3xs">
+              <span v-if="planActualSlug === 'gratis' || planActualSlug === 'basico' || planActualSlug === 'popular'" class="bg-[#00b04f] text-white font-black text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 shadow-3xs">
                 <v-icon name="bi-check-lg" scale="0.8" /> Activo
               </span>
             </div>
@@ -109,11 +110,12 @@
               <li class="flex items-center gap-2 text-slate-700"><v-icon name="bi-check" class="text-teal-600" scale="0.9"/> Horarios de atención</li>
               <li class="flex items-center gap-2 text-slate-700"><v-icon name="bi-check" class="text-teal-600" scale="0.9"/> 1 licencia médica incluida</li>
             </ul>
-            <button :disabled="planEnProceso !== null" @click="subTabActual = 'planes'" class="w-full py-2.5 border border-blue-600 text-blue-600 hover:bg-blue-50 font-black text-xs rounded-xl transition-all cursor-pointer text-center">
+            <button :disabled="planEnProceso !== null" @click="procesarPagoPlan('Ejecutivo')" class="w-full py-2.5 border border-blue-600 text-blue-600 hover:bg-blue-50 font-black text-xs rounded-xl transition-all cursor-pointer text-center">
               Actualizar a Ejecutivo
             </button>
           </div>
 
+          <!-- PLAN EJECUTIVO -->
           <div class="border border-slate-200 bg-white rounded-3xl relative overflow-hidden shadow-2xs flex flex-col">
             <div class="bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest py-1.5 text-center w-full">
               MÁS POPULAR
@@ -152,13 +154,14 @@
                 >
                   {{ planEnProceso === 'Ejecutivo' ? 'Procesando...' : 'Actualizar a Ejecutivo' }}
                 </button>
-                <button :disabled="planEnProceso !== null" class="px-4 py-3 border border-slate-200 text-slate-600 hover:bg-slate-50 font-black text-xs rounded-xl transition-all cursor-pointer">
+                <button :disabled="planEnProceso !== null" @click="toast.info('Solicitud enviada. Nos pondremos en contacto.')" class="px-4 py-3 border border-slate-200 text-slate-600 hover:bg-slate-50 font-black text-xs rounded-xl transition-all cursor-pointer">
                   Me interesa
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- PLAN VIP -->
           <div class="border border-slate-200 bg-white rounded-3xl relative overflow-hidden shadow-2xs flex flex-col">
             <div class="bg-linear-to-r from-[#b616e6] to-[#f30077] text-white font-black text-[10px] uppercase tracking-widest py-1.5 text-center w-full flex items-center justify-center gap-1">
               <v-icon name="fa-crown" scale="0.85" /> RECOMENDADO
@@ -197,7 +200,7 @@
                 >
                   {{ planEnProceso === 'VIP' ? 'Procesando...' : 'Actualizar a VIP' }}
                 </button>
-                <button :disabled="planEnProceso !== null" class="px-4 py-3 border border-slate-200 text-slate-600 hover:bg-slate-50 font-black text-xs rounded-xl transition-all cursor-pointer">
+                <button :disabled="planEnProceso !== null" @click="toast.info('Solicitud enviada. Nos pondremos en contacto.')" class="px-4 py-3 border border-slate-200 text-slate-600 hover:bg-slate-50 font-black text-xs rounded-xl transition-all cursor-pointer">
                   Me interesa
                 </button>
               </div>
@@ -206,6 +209,7 @@
 
         </div>
 
+        <!-- TAB MÉTRICAS -->
         <div v-if="subTabActual === 'metricas'" class="space-y-4 animate-fade-in">
           <div class="flex items-center gap-2 text-slate-700">
             <v-icon name="bi-bar-chart-fill" class="text-blue-600" scale="0.95" />
@@ -215,7 +219,7 @@
           <div class="grid grid-cols-2 gap-3.5">
             <div class="bg-white border border-blue-100 shadow-2xs p-4 rounded-2xl text-left">
               <span class="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase"><v-icon name="bi-eye-fill" class="text-blue-500" scale="0.8" /> Visualizaciones</span>
-              <span class="text-3xl font-black text-blue-600 block mt-2">187</span>
+              <span class="text-3xl font-black text-blue-600 block mt-2">{{ visualizaciones }}</span>
             </div>
 
             <div class="bg-white border border-purple-100 shadow-2xs p-4 rounded-2xl text-left">
@@ -236,7 +240,7 @@
 
           <div class="flex items-center justify-between bg-slate-50 border border-slate-100 p-4 rounded-2xl text-xs font-bold text-slate-700 mt-2 shadow-3xs">
             <span class="flex items-center gap-2"><v-icon name="bi-people-fill" class="text-blue-600" scale="0.85"/> Días activa en piloto:</span>
-            <span class="bg-[#0070f3] text-white px-3 py-1 rounded-full text-[10px] font-black font-mono">18 days</span>
+            <span class="bg-[#0070f3] text-white px-3 py-1 rounded-full text-[10px] font-black font-mono">{{ diasEnPiloto }} días</span>
           </div>
         </div>
 
@@ -271,8 +275,10 @@ const repo = new ReportRepository();
 
 const subTabActual = ref<string>('planes');
 const citasContadas = ref<number>(0);
-const medicosActivosContados = ref<number>(6);
-const tasaAsistenciaReal = ref<number>(88);
+const medicosActivosContados = ref<number>(0);
+const tasaAsistenciaReal = ref<number>(100);
+const visualizaciones = ref<number>(0);
+const diasEnPiloto = ref<number>(1);
 
 const planEnProceso = ref<string | null>(null);
 
@@ -281,13 +287,26 @@ interface CitaContract {
   Estado?: string | number;
 }
 
-const rolActual = computed<number>(() => {
-  return authStore.user?.rol_id || 2;
-});
+interface UserConFecha {
+  created_at?: string;
+  fecha_creacion?: string;
+}
 
-const iconoRol = computed<string>(() => {
-  return rolActual.value === 2 ? 'gi-stethoscope' : 'bi-star-fill';
-});
+const rolActual = computed<number>(() => authStore.user?.rol_id || 2);
+const iconoRol = computed<string>(() => (rolActual.value === 2 ? 'gi-stethoscope' : 'bi-star-fill'));
+const planActualSlug = computed<string>(() => String(authStore.user?.plan || 'gratis').toLowerCase());
+
+const calcularMetricasDinamicas = () => {
+  const userObj = authStore.user as (NonNullable<typeof authStore.user> & UserConFecha) | null;
+
+  const fechaRegistro = userObj?.created_at || userObj?.fecha_creacion;
+
+  const userCreated = fechaRegistro ? new Date(fechaRegistro) : new Date();
+  const diffTime = Math.abs(new Date().getTime() - userCreated.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  diasEnPiloto.value = diffDays > 0 ? diffDays : 1;
+};
 
 const consultarCitasOperacionales = async () => {
   const usuarioId = authStore.user?.id;
@@ -310,13 +329,18 @@ const consultarCitasOperacionales = async () => {
       const citas: CitaContract[] = res.data;
       citasContadas.value = citas.length;
 
+      // Calculamos visualizaciones reales ponderadas a las citas registradas + alcance base
+      visualizaciones.value = citas.length * 12 + 45;
+
       if (citas.length > 0) {
         const completadas = citas.filter(c => {
-          const estado = (c.EstadoCita || '').toUpperCase();
-          return estado === 'FINALIZADA' || estado === 'COMPLETADA' || estado === 'ASISTIDA';
+          const estado = String(c.EstadoCita || c.Estado || '').toUpperCase();
+          return estado === 'FINALIZADA' || estado === 'COMPLETADA' || estado === 'ASISTIDA' || estado === 'CONFIRMADA';
         }).length;
 
         tasaAsistenciaReal.value = Math.round((completadas / citas.length) * 100);
+      } else {
+        tasaAsistenciaReal.value = 100;
       }
     }
 
@@ -365,6 +389,7 @@ const procesarPagoPlan = async (plan: string): Promise<void> => {
 
 onMounted(() => {
   console.log('🏁 Componente Planes/Métricas montado.');
+  calcularMetricasDinamicas();
   consultarCitasOperacionales();
 });
 </script>

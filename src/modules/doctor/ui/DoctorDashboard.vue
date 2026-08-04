@@ -2,17 +2,31 @@
   <DoctorLayout>
     <main class="p-8 max-w-350 mx-auto space-y-12 animate-fade-in">
 
+      <!-- CABECERA PRINCIPAL -->
       <div class="flex justify-between items-center">
         <div class="text-left">
           <h2 class="text-4xl font-black text-[#005596] tracking-tighter">Agenda del Día</h2>
           <p class="text-slate-400 font-bold capitalize">{{ new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }}</p>
         </div>
-        <button
-          @click="router.push('/medico/agenda')"
-          class="flex items-center gap-2.5 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black text-slate-600 shadow-sm hover:bg-slate-50 transition-all cursor-pointer"
-        >
-          <v-icon name="bi-calendar-event" scale="0.9" /> Ver Calendario
-        </button>
+
+        <!-- ACCIONES Y BOTONES SUPERIORES -->
+        <div class="flex items-center gap-3">
+          <!-- BOTÓN PARA ABRIR MODAL DE TARIFAS (SÓLO SI EntidadID <= 1 O NULL) -->
+          <button
+            v-if="mostrarGestionTarifas"
+            @click="showTarifasModal = true"
+            class="flex items-center gap-2 px-5 py-3 bg-blue-50 text-[#005596] hover:bg-blue-100 border border-blue-100 rounded-2xl text-xs font-black shadow-2xs transition-all cursor-pointer"
+          >
+            <v-icon name="bi-cash-stack" scale="0.9" /> Configurar Tarifas
+          </button>
+
+          <button
+            @click="router.push('/medico/agenda')"
+            class="flex items-center gap-2.5 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black text-slate-600 shadow-sm hover:bg-slate-50 transition-all cursor-pointer"
+          >
+            <v-icon name="bi-calendar-event" scale="0.9" /> Ver Calendario
+          </button>
+        </div>
       </div>
 
       <!-- SECCIÓN: CONSULTAS URGENTES / PENDIENTES -->
@@ -117,6 +131,9 @@
 
     </main>
 
+    <!-- MODAL FLOTANTE DE CONFIGURACIÓN DE TARIFAS -->
+    <DoctorTarifasModal :show="showTarifasModal" @close="showTarifasModal = false" />
+
     <!-- MODAL PERSONALIZADO PARA RECHAZO DE CITA -->
     <Transition
       enter-active-class="transition duration-300 ease-out"
@@ -126,7 +143,7 @@
       leave-from-class="opacity-100 scale-100"
       leave-to-class="opacity-0 scale-95"
     >
-      <div v-if="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div v-if="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="cerrarModalRechazo"></div>
 
         <div class="bg-white rounded-3xl p-7 max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-100 relative z-10 text-center space-y-5 transform transition-all">
@@ -175,10 +192,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
+import DoctorTarifasModal from './DoctorTarifasModal.vue';
 import { DoctorRepository } from '../infrastructure/DoctorRepository';
 import type { DoctorAppointment } from '../domain/DoctorAppointment';
 import { useMedicalStore } from '@/stores/medicalStore';
@@ -195,9 +213,35 @@ type RawAppointment = Record<string, unknown>;
 
 const appointments = ref<RawAppointment[]>([]);
 
-const showRejectModal = ref(false);
-const motivoRechazo = ref('');
+const showTarifasModal = ref<boolean>(false);
+const showRejectModal = ref<boolean>(false);
+const motivoRechazo = ref<string>('');
 const selectedCitaId = ref<number | null>(null);
+let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+const mostrarGestionTarifas = computed<boolean>(() => {
+  const userRaw = localStorage.getItem('user');
+  let entidadId: number | null = null;
+
+  if (userRaw) {
+    try {
+      const parsedUser = JSON.parse(userRaw) as { entidadId?: number; EntidadID?: number; entidad_id?: number };
+      const rawValue = parsedUser.entidadId ?? parsedUser.EntidadID ?? parsedUser.entidad_id;
+      if (rawValue !== undefined && rawValue !== null) {
+        entidadId = Number(rawValue);
+      }
+    } catch {
+      console.error("[DoctorDashboard] Error parseando datos de usuario local.");
+    }
+  }
+
+  // Fallback si la información proviene de medicalStore
+  if (entidadId === null && medicalStore.doctor?.EntidadID !== undefined) {
+    entidadId = Number(medicalStore.doctor.EntidadID);
+  }
+
+  return entidadId === null || isNaN(entidadId) || entidadId <= 1;
+});
 
 // ==========================================
 // HELPERS TIPADOS Y TOLERANTES A PROPIEDADES
@@ -408,5 +452,15 @@ onMounted(async () => {
   medicalStore.setConsultationActive(false);
   medicalStore.clearPatient();
   await loadDoctorData();
+
+  pollInterval = setInterval(async () => {
+    await loadDoctorData();
+  }, 20000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+  }
 });
 </script>

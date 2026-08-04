@@ -1,6 +1,7 @@
 <template>
   <div class="space-y-8 animate-fade-in pb-20 text-left">
 
+    <!-- Header de navegación -->
     <div class="flex justify-between items-center border-b border-slate-100 pb-4">
       <div class="text-left">
         <h2 class="text-3xl font-black text-slate-800 tracking-tight uppercase">Agendar Nueva Cita</h2>
@@ -15,6 +16,7 @@
       </button>
     </div>
 
+    <!-- Indicador Banner de horario pre-reservado -->
     <transition name="fade">
       <div
         v-if="form.fecha && form.hora"
@@ -32,6 +34,7 @@
       </div>
     </transition>
 
+    <!-- Ficha resumen del especialista -->
     <div v-if="selectedDoctor" class="bg-white border border-slate-100 rounded-[2.5rem] p-6 text-slate-800 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-3xs">
       <div class="flex items-center gap-5 w-full sm:w-auto">
         <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner border border-slate-100 shrink-0">
@@ -53,8 +56,10 @@
       </div>
     </div>
 
+    <!-- Contenedor del Wizard Formulario -->
     <div class="bg-white rounded-[2.5rem] p-10 shadow-3xs border border-slate-100 min-h-130 flex flex-col justify-between">
 
+      <!-- Stepper / Pasos -->
       <div class="flex items-center justify-between border-b border-slate-50 pb-6 mb-4 select-none">
         <div v-for="(step, idx) in totalSteps" :key="step.id" class="flex items-center flex-1 last:flex-none">
           <div class="flex items-center gap-2.5">
@@ -77,6 +82,7 @@
 
       <form @submit.prevent="handleSubmit" class="flex-1 flex flex-col justify-between space-y-8">
 
+        <!-- PASO 01: FECHA Y HORA -->
         <div v-if="currentStep === 1" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-sky-400 pl-4">
             <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">01. Planificación de Fecha y Hora</h4>
@@ -101,6 +107,7 @@
           </div>
         </div>
 
+        <!-- PASO 02: INFORMACIÓN DEL PACIENTE Y EMERGENCIA -->
         <div v-if="currentStep === 2" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-sky-400 pl-4">
             <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">02. Información del Paciente y Emergencia</h4>
@@ -122,7 +129,7 @@
               <label class="block text-xs font-bold text-slate-700">Teléfono de Contacto *</label>
               <input v-model="form.telefono" type="text" placeholder="Ej: +504 9999-9999" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-3 gap-3">
               <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-700">Edad *</label>
                 <input v-model="form.edad" type="number" placeholder="Ej: 28" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
@@ -134,6 +141,16 @@
                   <option value="M">Masculino</option>
                   <option value="F">Femenino</option>
                 </select>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-700">Tipo Sangre</label>
+                <input
+                  v-model="form.tipoSangre"
+                  type="text"
+                  readonly
+                  placeholder="O+"
+                  class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 text-xs font-black text-rose-600 outline-none cursor-not-allowed text-center uppercase"
+                />
               </div>
             </div>
           </div>
@@ -152,6 +169,7 @@
           </div>
         </div>
 
+        <!-- PASO 03: HISTORIAL MÉDICO -->
         <div v-if="currentStep === 3" class="space-y-5">
           <div class="flex items-center gap-2.5 border-l-4 border-sky-400 pl-4 mb-2">
             <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">03. Historial e Información Médica</h4>
@@ -284,17 +302,46 @@
           </div>
 
           <div v-if="activeSubTab === 'seguro'" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left animate-fade-in">
-            <div class="space-y-2">
-              <label class="block text-xs font-bold text-slate-700">Compañía Aseguradora</label>
-              <input v-model="form.aseguradora" type="text" placeholder="Ej: Palic Seguro" class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold outline-none focus:border-sky-400" />
+            <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <input
+                type="checkbox"
+                id="tieneSeguro"
+                v-model="tieneSeguroMedico"
+                @change="onToggleSeguro"
+                class="w-4 h-4 text-[#005596] rounded focus:ring-blue-500 cursor-pointer"
+              />
+              <label for="tieneSeguro" class="text-xs font-black text-slate-700 uppercase cursor-pointer select-none">
+                ¿El paciente cuenta con Seguro Médico / Póliza?
+              </label>
             </div>
-            <div class="space-y-2">
-              <label class="block text-xs font-bold text-slate-700">Número de Póliza / Cobertura</label>
-              <input v-model="form.poliza" type="text" placeholder="Ej: POL-99482-A" class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold outline-none focus:border-sky-400" />
+
+            <div
+              v-if="tieneSeguroMedico"
+              class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100 transition-all"
+            >
+              <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Aseguradora</label>
+                <input
+                  v-model="form.aseguradora"
+                  type="text"
+                  placeholder="Ej. Ficohsa Seguros"
+                  class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                />
+              </div>
+              <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Número de Póliza</label>
+                <input
+                  v-model="form.poliza"
+                  type="text"
+                  placeholder="Ej. POL-998822"
+                  class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold font-mono"
+                />
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- PASO 04: MÉTODO DE PAGO -->
         <div v-if="currentStep === 4" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-emerald-400 pl-4">
             <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">04. Método de Pago de Consulta</h4>
@@ -306,15 +353,14 @@
             </label>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <div
-                @click="form.metodoPago = 'cash'; ubicacionPago = 'clinic'"
-                :class="form.metodoPago === 'cash' ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-3xs font-black' : 'bg-slate-50 text-slate-500 border-slate-100/70'"
+                @click="form.metodoPago = 'Efectivo'; ubicacionPago = 'clinic'"
+                :class="form.metodoPago === 'Efectivo' ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-3xs font-black' : 'bg-slate-50 text-slate-500 border-slate-100/70'"
                 class="p-4.5 rounded-2xl border text-xs font-black uppercase tracking-wider cursor-pointer transition-all flex items-center justify-between select-none"
               >
                 <div class="flex items-center gap-3">💵 Ventanilla / Efectivo</div>
-                <div class="w-4 h-4 rounded-full border flex items-center justify-center bg-white" :class="form.metodoPago === 'cash' ? 'border-emerald-500' : 'border-slate-300'">
-                  <div v-if="form.metodoPago === 'cash'" class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <div class="w-4 h-4 rounded-full border flex items-center justify-center bg-white" :class="form.metodoPago === 'Efectivo' ? 'border-emerald-500' : 'border-slate-300'">
+                  <div v-if="form.metodoPago === 'Efectivo'" class="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 </div>
               </div>
 
@@ -328,11 +374,11 @@
                   <div v-if="form.metodoPago === 'Tarjeta/Transferencia'" class="w-2 h-2 bg-blue-500 rounded-full"></div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
 
+        <!-- Botones de Navegación del Formulario -->
         <div class="flex justify-between items-center pt-6 border-t border-slate-50 mt-auto select-none">
           <button type="button" :disabled="currentStep === 1" @click="currentStep--" :class="currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'" class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">Atrás</button>
           <button type="button" v-if="currentStep < 4" @click="handleNextStep" class="px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white shadow-md shadow-sky-100 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.95] cursor-pointer">Siguiente</button>
@@ -344,6 +390,7 @@
       </form>
     </div>
 
+    <!-- MODAL PASARELA DE PAGO DIGITAL -->
     <div v-if="mostrarPasarelaModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in overflow-y-auto">
       <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full p-8 space-y-6 max-h-[90vh] overflow-y-auto text-left border border-slate-100 font-premium">
 
@@ -352,7 +399,7 @@
           <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Gestión de pago y finalización de reserva</p>
         </div>
 
-        <div class="border border-slate-200/60 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-3xs bg-gradient-tornasol relative overflow-hidden backdrop-blur-xs">
+        <div class="border border-slate-200/60 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-3xs bg-slate-50 relative overflow-hidden backdrop-blur-xs">
           <div class="space-y-0.5 relative z-10">
             <h3 class="text-base font-black text-[#005596] uppercase tracking-tight">
               {{ userData.nombre }}
@@ -369,6 +416,7 @@
           </div>
         </div>
 
+        <!-- Ubicación del cobro -->
         <div class="space-y-2.5">
           <h4 class="text-xs font-black text-slate-400 tracking-widest uppercase flex items-center gap-1.5">
             <span>$</span> Ubicación de Pago
@@ -429,6 +477,7 @@
           </p>
         </div>
 
+        <!-- Método de Pago Específico -->
         <div class="space-y-2.5">
           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
             <span>📋</span> Método de Pago
@@ -533,6 +582,7 @@
           </div>
         </div>
 
+        <!-- Resumen de Transacción -->
         <div id="comprobante-visual" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-3xs space-y-4">
           <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider border-b pb-2 border-slate-100">
             Resumen de Transacción
@@ -565,6 +615,7 @@
           </div>
         </div>
 
+        <!-- Acciones del Modal de Pasarela -->
         <div class="flex justify-between items-center pt-4 border-t border-slate-200">
           <div class="flex items-center gap-2.5">
             <button type="button" @click="descargarReportePdf" title="Descargar Reporte PDF" class="h-9 w-11 bg-blue-50 hover:bg-blue-100 text-[#005596] border border-blue-200 rounded-xl transition-all cursor-pointer flex items-center justify-center border-b-4 border-b-blue-300 active:translate-y-0.5 active:border-b-0">
@@ -588,6 +639,7 @@
       </div>
     </div>
 
+    <!-- MODAL CÓDIGO QR GENERADO -->
     <div v-if="mostrarQrModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in">
       <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-5 border border-slate-100 transform scale-100 transition-all">
         <div class="space-y-1">
@@ -628,14 +680,13 @@ import api from '@/shared/infrastructure/api';
 import { AppointmentRepository } from '../../appointments/infrastructure/AppointmentRepo';
 import { ApiPagoRepository } from '../../consultations/infrastructure/ApiPagoRepository';
 
-import type { AppointmentRequest, EnfermedadCronica, MedicamentoBase, AlergiaBase, AppointmentResponse} from '../../appointments/domain/Appointment';
+import type { AppointmentRequest, EnfermedadCronica, MedicamentoBase, AlergiaBase, AppointmentResponse } from '../../appointments/domain/Appointment';
 import type { Doctor } from '../../directory/domain/entities/Doctor';
 import type { PatientExtendedProfile } from '../../patients/domain/entities/Patient';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
-
 import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
 import {
   BiBoxArrowRight, BiPeopleFill, BiCalendarEvent, BiFileEarmarkTextFill,
@@ -651,11 +702,27 @@ addIcons(
   BiCashCoin, BiExclamationCircleFill, BiDownload, BiShareFill, BiPersonCheckFill, BiPhoneVibrate, BiBank
 );
 
+// INTERFAZ AÑADIDA PARA EVITAR EL "Record<string, unknown>" Y SOPORTAR EL PAYLOAD
+interface GenericProfile {
+  paciente?: GenericProfile;
+  data?: GenericProfile;
+  id?: number | string; PacienteID?: number | string; UsuarioID?: number | string; usuario_id?: number | string;
+  nombre?: string; Nombre?: string; Apellido?: string;
+  email?: string; Email?: string;
+  telefono?: string; Telefono?: string; PacienteTelefono?: string;
+  genero?: string; Genero?: string;
+  tipo_sangre?: string; TipoSangre?: string; tipoSangre?: string;
+  aseguradora?: string; Aseguradora?: string;
+  poliza?: string; NumeroPoliza?: string; numero_poliza?: string;
+  edad?: string | number; Edad?: string | number; fecha_nacimiento?: string | number;
+  nombre_contacto_emergencia?: string; NombreContactoEmergencia?: string; contacto_emergencia_nombre?: string;
+  telefono_contacto_emergencia?: string; TelefonoContactoEmergencia?: string; contacto_emergencia?: string;
+}
+
 interface PdfMakeCustomInstance {
   getBlob(callback: (blob: Blob) => void): void;
   download(defaultFileName?: string): void;
 }
-
 
 const { t, locale } = useI18n();
 type DoctorExtended = Doctor & { CostoConsulta?: number; Precio?: number };
@@ -669,7 +736,6 @@ const props = defineProps<{
   patientProfile?: PatientExtendedProfile;
   idioma?: string;
 }>();
-
 
 const emit = defineEmits(['cancel']);
 const appointmentRepo = new AppointmentRepository();
@@ -731,12 +797,21 @@ const customMedName = ref('');
 
 const form = reactive({
   fecha: '', hora: '', motivo: '', sintomas: '', edad: '' as string | number,
-  genero: '', alergias: '', aseguradora: '', poliza: '', contactoNombre: '',
+  genero: '', tipoSangre: '', alergias: '', aseguradora: '', poliza: '', contactoNombre: '',
   contactoTel: '', telefono: '', metodoPago: 'Efectivo',
   cronicasSeleccionadasIds: [] as number[],
   medicamentosList: [] as { nombre: string }[],
   alergiasList: [] as { nombre: string }[]
 });
+
+const tieneSeguroMedico = ref(false);
+
+const onToggleSeguro = () => {
+  if (!tieneSeguroMedico.value) {
+    form.aseguradora = '';
+    form.poliza = '';
+  }
+};
 
 const fechaActual = computed(() => {
   const hoy = new Date();
@@ -765,7 +840,7 @@ const fetchEnfermedadesCronicas = async () => {
     const response = await api.get('/enfermedades-cronicas');
     listaCronicas.value = response.data || [];
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error al obtener enfermedades crónicas:", error);
   }
 };
 
@@ -774,7 +849,7 @@ const fetchCatalogoMedicamentos = async () => {
     const response = await api.get('/catalogo-medicamentos');
     listaMedicamentosDB.value = response.data || [];
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error al obtener medicamentos:", error);
   }
 };
 
@@ -783,7 +858,7 @@ const fetchCatalogoAlergias = async () => {
     const response = await api.get('/catalogo-alergias');
     listaAlergiasDB.value = response.data || [];
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error al obtener alergias:", error);
   }
 };
 
@@ -828,70 +903,88 @@ const dispararCobroAPI = async (): Promise<void> => {
   }
 };
 
-// HANDLESUBMIT CONDICIONAL INTERACTIVO ADAPTADO
 const handleSubmit = async () => {
-  if (!props.selectedDoctor) return;
+  if (!props.selectedDoctor) {
+    toast.error("No ha seleccionado un profesional médico.");
+    return;
+  }
 
   const medicamentosTexto = form.medicamentosList.map(m => m.nombre).join(', ');
   const alergiasTexto = form.alergiasList.map(a => a.nombre).join(', ');
 
-  const payload: AppointmentRequest = {
-    UsuarioID: userData.value.id,
+  const payload: AppointmentRequest & { edad?: string | number; telefono?: string } = {
+    UsuarioID: userData.value.id, 
     doctor_id: Number(props.selectedDoctor.DoctorID),
     entidad_id: props.selectedDoctor.EntidadID || 1,
     fecha_hora: `${form.fecha} ${form.hora}:00`,
     motivo: form.motivo,
     sintomas: form.sintomas,
+    edad: form.edad,
+    telefono: form.telefono,
     alergias: alergiasTexto || 'Ninguna',
-    edad: Number(form.edad),
     genero: form.genero,
     aseguradora: form.aseguradora,
     numero_poliza: form.poliza,
-    nombre_contacto_emergencia: form.contactoNombre,
-    telefono_contacto_emergencia: form.contactoTel,
+    nombre_contacto_emergencia: form.contactoNombre || undefined,
+    telefono_contacto_emergencia: form.contactoTel || undefined,
     medicamentos_actuales: medicamentosTexto || 'Ninguno',
     cronicas_ids: form.cronicasSeleccionadasIds
   };
 
   try {
-    // 1. Almacenamos la cita en la base de datos por medio de la API
-    await appointmentRepo.create(payload);
+    // 1. Inserción de la cita en la base de datos
+    await appointmentRepo.create(payload as AppointmentRequest);
 
     const docExt = props.selectedDoctor as DoctorExtended;
     const precioConsulta = docExt.CostoConsulta || docExt.Precio || 90;
 
+    // 2. Consulta defensiva del ID generado en el backend
+    const idDetectado = await obtenerUltimaCitaCreada(userData.value.id);
+
+    // 3. Sincronizar estado local para compartir entre componentes
+    const datosResumenLocal = {
+      citaId: idDetectado,
+      paciente: {
+        nombre: userData.value.nombre,
+        email: userData.value.email,
+        telefono: form.telefono,
+        edad: form.edad,
+        genero: form.genero,
+        TipoSangre: form.tipoSangre,
+        tipoSangre: form.tipoSangre
+      },
+      sintomas: form.sintomas,
+      motivo: form.motivo,
+      fechaConsulta: new Date().toISOString()
+    };
+    localStorage.setItem('MedGo+_resumen_compartir', JSON.stringify(datosResumenLocal));
+
+    billingDataLocal.value = {
+      consultationId: String(idDetectado),
+      citaId: idDetectado,
+      servicioId: 1,
+      basePrice: Number(precioConsulta)
+    };
+
+    // 4. Mapeo de modalidad de pago
     if (form.metodoPago === 'Efectivo') {
-      // Flujo de efectivo directo en ventanilla usando la interfaz PagoPayload estricta
-      await pgoRepository.procesarPago({
-        cita_id: 0,
-        servicio_id: 1,
-        monto: Number(precioConsulta),
-        metodo: 'cash',
-        referencia: 'Ventanilla física - Pago en Recepción'
-      });
+      if (idDetectado > 0) {
+        await pgoRepository.procesarPago({
+          cita_id: idDetectado,
+          servicio_id: 1,
+          monto: Number(precioConsulta),
+          metodo: 'cash',
+          referencia: 'Ventanilla física - Pago en Recepción'
+        });
+      }
       toast.success("¡Cita médica agendada en ventanilla correctamente!");
       emit('cancel');
     } else {
-      toast.info("Sincronizando última reserva con la base de datos...");
-
-      const idDetectado = await obtenerUltimaCitaCreada(userData.value.id);
-
-
-      billingDataLocal.value = {
-        consultationId: String(idDetectado),
-        citaId: idDetectado,
-        servicioId: 1,
-        basePrice: Number(precioConsulta)
-      };
-
-      if (idDetectado === 0) {
-        toast.warning("La cita se guardó, pero hubo un retraso al mapear el número de orden.");
-      }
-
       mostrarPasarelaModal.value = true;
-      toast.success("¡Pasarela digital sincronizada con la base de datos!");
+      toast.success("¡Cita reservada con éxito! Proceda con el pago digital.");
     }
-  } catch {
+  } catch (error) {
+    console.error("Error crítico en creación de cita:", error);
     toast.error("Error en el flujo transaccional de la cita.");
   }
 };
@@ -907,15 +1000,15 @@ const finalizarCierreConsulta = async (event?: Event): Promise<void> => {
   if (metodoPago.value === 'transfer')
     refFinal = `Ref: ${transferenciaRef.value || 'N/A'} (${transferenciaBanco.value})`;
 
-  await pgoRepository.procesarPago({
-    cita_id: Number(billingDataLocal.value.citaId || 0),
-    servicio_id: Number(billingDataLocal.value.servicioId) || 1,
-    monto: Number(billingDataLocal.value.basePrice),
-    metodo: metodoPago.value || 'card',
-    referencia: refFinal
-  });
-
   try {
+    await pgoRepository.procesarPago({
+      cita_id: Number(billingDataLocal.value.citaId || 0),
+      servicio_id: Number(billingDataLocal.value.servicioId) || 1,
+      monto: Number(billingDataLocal.value.basePrice),
+      metodo: metodoPago.value || 'card',
+      referencia: refFinal
+    });
+
     toast.success("¡Pago digital registrado con éxito. Cita confirmada!");
     mostrarPasarelaModal.value = false;
     emit('cancel');
@@ -931,9 +1024,7 @@ const obtenerUltimaCitaCreada = async (usuarioId: number): Promise<number> => {
 
     if (responseHistorial.data && Array.isArray(responseHistorial.data) && responseHistorial.data.length > 0) {
       const listaCitas = responseHistorial.data as AppointmentResponse[];
-
       const idMaximo = Math.max(...listaCitas.map(c => Number(c.CitaID || 0)));
-
       return idMaximo > 0 ? idMaximo : 0;
     }
 
@@ -1047,54 +1138,121 @@ const handleNextStep = () => {
   currentStep.value++;
 };
 
-const asignarCamposFormulario = (perfil: PatientExtendedProfile) => {
-  userData.value = {
-    id: perfil.id || Number(perfil.UsuarioID) || 0,
-    nombre: perfil.nombre || perfil.Nombre || 'Paciente',
-    email: perfil.email || ''
-  };
-  const p = perfil as PatientExtendedProfile & Record<string, unknown>;
-  form.telefono = String(p.telefono || p.Telefono || '');
-  form.genero = String(p.genero || p.Genero || '');
-  form.aseguradora = String(p.aseguradora || p.Aseguradora || '');
-  form.poliza = String(p.poliza || p.NumeroPoliza || '');
-  form.contactoNombre = String(p.nombre_contacto_emergencia || p.NombreContactoEmergencia || '');
-  form.contactoTel = String(p.telefono_contacto_emergencia || p.TelefonoContactoEmergencia || '');
-  form.edad = String(p.fecha_nacimiento || p.Edad || '');
-};
-
-watch(() => props.patientProfile, (nuevoPerfil) => {
-  if (nuevoPerfil) {
-    const p = nuevoPerfil as PatientExtendedProfile & Record<string, unknown>;
-    if (p.telefono || p.Telefono || p.id || p.UsuarioID) asignarCamposFormulario(nuevoPerfil);
-  }
-}, { deep: true, immediate: true });
-
-onMounted(() => {
-  fetchEnfermedadesCronicas();
-  fetchCatalogoMedicamentos();
-  fetchCatalogoAlergias();
-
-  if (props.patientProfile && (props.patientProfile.Telefono || props.patientProfile.Edad || props.patientProfile.id)) {
-    asignarCamposFormulario(props.patientProfile);
-    return;
+const obtenerCorreoSesion = (): string => {
+  if (userData.value.email && userData.value.email.trim() !== '') {
+    return userData.value.email;
   }
   const userJson = localStorage.getItem('user');
   if (userJson) {
     try {
       const parsed = JSON.parse(userJson);
-      userData.value = { id: parsed.id ?? 0, nombre: parsed.nombre ?? 'Usuario', email: parsed.email ?? '' };
+      return parsed.email || parsed.Email || '';
     } catch {
-      console.warn("Error en sesión local.");
+      return '';
     }
   }
+  return '';
+};
+
+// SE SUSTITUYE Record<string, unknown> POR NUESTRA INTERFAZ GenericProfile
+const asignarCamposFormulario = (perfil: PatientExtendedProfile | GenericProfile | undefined) => {
+  if (!perfil) return;
+
+  const wrapper = perfil as GenericProfile;
+  const p = (wrapper.paciente || wrapper.data || perfil) as GenericProfile;
+
+  const emailPerfil = String(p.email || p.Email || '').trim();
+  const emailFinal = emailPerfil !== '' ? emailPerfil : obtenerCorreoSesion();
+
+  userData.value = {
+    id: Number(p.id || p.PacienteID || p.UsuarioID || p.usuario_id || userData.value.id || 0),
+    nombre: String(p.nombre || p.Nombre || (p.Nombre ? `${p.Nombre} ${p.Apellido || ''}` : '') || userData.value.nombre || 'Paciente'),
+    email: emailFinal
+  };
+
+  form.telefono = String(p.telefono || p.Telefono || p.PacienteTelefono || '');
+  form.genero = String(p.genero || p.Genero || '');
+  form.tipoSangre = String(p.tipo_sangre || p.TipoSangre || p.tipoSangre || '');
+  form.aseguradora = String(p.aseguradora || p.Aseguradora || '');
+  form.poliza = String(p.poliza || p.NumeroPoliza || p.numero_poliza || '');
+  
+  // Asignación de Edad fija probando ambas llaves
+  form.edad = String(p.edad || p.Edad || p.fecha_nacimiento || '');
+
+  // Asignación de Contacto probando todas las combinaciones
+  form.contactoNombre = String(
+    p.nombre_contacto_emergencia ||
+    p.NombreContactoEmergencia ||
+    p.contacto_emergencia_nombre ||
+    ''
+  );
+
+  form.contactoTel = String(
+    p.telefono_contacto_emergencia ||
+    p.TelefonoContactoEmergencia ||
+    p.contacto_emergencia ||
+    ''
+  );
+
+  if (form.aseguradora || form.poliza) {
+    tieneSeguroMedico.value = true;
+  }
+};
+
+// Reactividad cuando cambian los props desde el componente padre
+watch(() => props.patientProfile, (nuevoPerfil) => {
+  if (nuevoPerfil && Object.keys(nuevoPerfil).length > 0) {
+    asignarCamposFormulario(nuevoPerfil as GenericProfile);
+  }
+}, { deep: true, immediate: true });
+
+onMounted(async () => {
+  fetchEnfermedadesCronicas();
+  fetchCatalogoMedicamentos();
+  fetchCatalogoAlergias();
+
+  // 1. Cargar usuario de LocalStorage
+  const userJson = localStorage.getItem('user');
+  let currentUserId = 0;
+  if (userJson) {
+    try {
+      const parsed = JSON.parse(userJson);
+      currentUserId = parsed.id ?? parsed.UsuarioID ?? 0;
+      userData.value = {
+        id: currentUserId,
+        nombre: parsed.nombre || parsed.Nombre || 'Usuario',
+        email: parsed.email || parsed.Email || ''
+      };
+    } catch (e) {
+      console.warn("Error al parsear la sesión local:", e);
+    }
+  }
+
+  // 2. Si hay ID de usuario, forzamos la llamada a la API para traer los datos FRESCOS de la BD
+  if (currentUserId > 0) {
+    try {
+      const res = await api.get(`/pacientes/usuario/${currentUserId}`);
+      if (res.data && res.data.data) {
+        asignarCamposFormulario(res.data.data as GenericProfile);
+      } else if (res.data) {
+        asignarCamposFormulario(res.data as GenericProfile);
+      }
+    } catch (err) {
+      console.error("Error al obtener paciente desde la API:", err);
+      if (props.patientProfile) {
+        asignarCamposFormulario(props.patientProfile as GenericProfile);
+      }
+    }
+  } else if (props.patientProfile) {
+    asignarCamposFormulario(props.patientProfile as GenericProfile);
+  }
 });
+
 watch(() => props.idioma, (nuevoIdioma) => {
   if (nuevoIdioma) {
     locale.value = nuevoIdioma;
   }
 }, { immediate: true });
-
 </script>
 
 <style scoped>

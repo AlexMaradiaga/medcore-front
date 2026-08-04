@@ -14,4 +14,7 @@ export interface Doctor {
 
   EspecialidadID?: number;
   especialidad_id?: number;
+
+  HablaIngles?: boolean | number | string | null;
+  DisponibleDomicilio?: boolean | number | string | null;
 }

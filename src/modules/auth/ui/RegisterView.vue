@@ -93,6 +93,28 @@
           </div>
         </div>
 
+        <!-- 🟢 NUEVA FILA ADAPTADA: NACIONALIDAD Y TIPO DE SANGRE -->
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="space-y-1">
+            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Nacionalidad</label>
+            <input v-model="form.nacionalidad" type="text" placeholder="Ej. Hondureña" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-medgo-blue outline-none transition-all text-xs font-medium text-slate-700" />
+          </div>
+          <div class="space-y-1">
+            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Tipo de Sangre</label>
+            <select v-model="form.tipo_sangre" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-medgo-blue outline-none transition-all text-xs font-medium text-slate-700 cursor-pointer">
+              <option value="" disabled>Seleccione...</option>
+              <option value="O+">O Rh Positivo (O+)</option>
+              <option value="O-">O Rh Negativo (O-)</option>
+              <option value="A+">A Rh Positivo (A+)</option>
+              <option value="A-">A Rh Negativo (A-)</option>
+              <option value="B+">B Rh Positivo (B+)</option>
+              <option value="B-">B Rh Negativo (B-)</option>
+              <option value="AB+">AB Rh Positivo (AB+)</option>
+              <option value="AB-">AB Rh Negativo (AB-)</option>
+            </select>
+          </div>
+        </div>
+
         <div v-if="!isPediatric" class="grid grid-cols-2 gap-3.5">
           <div class="space-y-1">
             <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Correo Electrónico</label>
@@ -251,6 +273,8 @@ const form = reactive({
   email: '',
   password: '',
   telefono: '',
+  nacionalidad: 'Hondureña',
+  tipo_sangre: '',
   tutor_dni: '',
   tutor_nombre: '',
   tutor_email: '',
@@ -274,7 +298,7 @@ const goToNextStep = (): void => {
       toast.error("Por favor ingresa tu correo electrónico y contraseña de acceso.");
       return;
     }
-    handleRegister();
+    void handleRegister();
   }
 };
 
@@ -309,6 +333,8 @@ const handleRegister = async (): Promise<void> => {
       Nombre: form.nombre,
       Apellido: form.apellido,
       Telefono: form.telefono,
+      nacionalidad: form.nacionalidad,
+      tipo_sangre: form.tipo_sangre || undefined,
       email: form.email,
       password: form.password,
       es_dependiente: isPediatric.value,
@@ -320,7 +346,7 @@ const handleRegister = async (): Promise<void> => {
     });
 
     toast.success("¡Registro completado y enviado para verificación física!");
-    router.push('/');
+    await router.push('/');
   } catch (error: unknown) {
     console.error(error);
     toast.error("Ocurrió un problema al procesar su solicitud de registro.");

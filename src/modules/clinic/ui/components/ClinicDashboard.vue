@@ -35,6 +35,7 @@
       </button>
     </div>
 
+    <!-- PESTAÑA: RESUMEN OPERATIVO -->
     <div v-if="activeTab === 'resumen'" class="space-y-8 animate-fade-in">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
@@ -96,6 +97,7 @@
       </div>
     </div>
 
+    <!-- PESTAÑA: PERSONAL MÉDICO -->
     <div v-if="activeTab === 'doctores'" class="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-fade-in">
 
       <div class="bg-slate-900 rounded-[2.5rem] border border-slate-800 shadow-xs p-8">
@@ -114,16 +116,29 @@
         </div>
 
         <div v-else class="grid grid-cols-1 gap-4">
-          <div v-for="doc in doctoresClinica" :key="doc.UsuarioID" class="p-5 border border-slate-800 rounded-2xl bg-slate-800/50 hover:bg-slate-800 hover:shadow-md transition-all flex justify-between items-center">
+          <div v-for="doc in doctoresClinica" :key="doc.UsuarioID" class="p-5 border border-slate-800 rounded-2xl bg-slate-800/50 hover:bg-slate-800 hover:shadow-md transition-all flex justify-between items-center gap-4">
             <div>
               <p class="text-sm font-black text-white uppercase tracking-tight">{{ doc.NombreCompleto }}</p>
               <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
                 {{ doc.Especialidad || 'Médico' }} • Reg: <span class="font-mono text-slate-500">{{ doc.NumeroColegiado || 'N/A' }}</span>
               </p>
             </div>
-            <span :class="doc.Estado === 1 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'" class="px-2.5 py-1 text-[9px] font-black uppercase rounded-lg shadow-3xs">
-              {{ doc.Estado === 1 ? 'Activo' : 'Inactivo' }}
-            </span>
+
+            <div class="flex items-center gap-3">
+              <!-- BOTÓN DE CONFIGURACIÓN DE TARIFAS POR LA CLÍNICA -->
+              <button
+                @click="abrirModalTarifasDoctor(doc)"
+                title="Configurar Tarifas de Consulta"
+                class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <v-icon name="bi-cash-stack" scale="0.85" />
+                <span>Tarifas</span>
+              </button>
+
+              <span :class="doc.Estado === 1 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'" class="px-2.5 py-1 text-[9px] font-black uppercase rounded-lg shadow-3xs">
+                {{ doc.Estado === 1 ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
           </div>
 
           <div v-if="doctoresClinica.length === 0" class="py-8 text-center text-slate-500 font-bold text-xs uppercase tracking-widest border-2 border-dashed border-slate-800 rounded-2xl">
@@ -148,6 +163,14 @@
       <ClinicSpecialties />
     </div>
 
+    <!-- MODAL FLOTANTE DE CONFIGURACIÓN DE TARIFAS DEL DOCTOR SELECCIONADO -->
+    <DoctorTarifasModal
+      :show="showTarifasModal"
+      :doctorId="selectedDoctorId"
+      :nombreDoctor="selectedDoctorNombre"
+      @close="showTarifasModal = false"
+    />
+
   </div>
 </template>
 
@@ -159,6 +182,9 @@ import api from '@/shared/infrastructure/api';
 import RegisterPatientForm from '@/shared/ui/components/RegisterPatientForm.vue';
 import type { SessionUser } from '../../../../shared/Domain/dashboard.interface';
 import type { ClinicDashboardData, DoctorClinica } from '../../Domain/Clinic';
+
+// Modal de Tarifas
+import DoctorTarifasModal from '../../../doctor/ui/DoctorTarifasModal.vue';
 
 // Componentes Reutilizables
 import QualityAuditModule from '../../../../shared/ui/components/QualityAuditModule.vue';
@@ -175,11 +201,22 @@ import {
   BiShieldFillCheck,
   BiBarChartFill,
   BiArrowClockwise,
-  BiFolderFill
+  BiFolderFill,
+  BiXLg
 } from 'oh-vue-icons/icons';
 import { GiStethoscope } from 'oh-vue-icons/icons';
 
-addIcons(BiCalendarEvent, BiClockHistory, BiCashStack, GiStethoscope, BiShieldFillCheck, BiBarChartFill, BiArrowClockwise, BiFolderFill);
+addIcons(
+  BiCalendarEvent,
+  BiClockHistory,
+  BiCashStack,
+  GiStethoscope,
+  BiShieldFillCheck,
+  BiBarChartFill,
+  BiArrowClockwise,
+  BiFolderFill,
+  BiXLg
+);
 
 const toast = useToast();
 const authStore = useAuthStore();
@@ -187,6 +224,11 @@ const repo = new ClinicRepository();
 
 const activeTab = ref<'resumen' | 'doctores' | 'calidad' | 'especialidades'>('resumen');
 const loadingDoctores = ref(false);
+
+// Estado de Modal de Tarifas por Médico
+const showTarifasModal = ref(false);
+const selectedDoctorId = ref<number | null>(null);
+const selectedDoctorNombre = ref<string>('');
 
 const clinicId = computed<number>(() => {
   const user = authStore.user as SessionUser | null;
@@ -230,6 +272,12 @@ const cargarDoctoresClinica = async (): Promise<void> => {
   } finally {
     loadingDoctores.value = false;
   }
+};
+
+const abrirModalTarifasDoctor = (doc: DoctorClinica) => {
+  selectedDoctorId.value =  doc.UsuarioID || null;
+  selectedDoctorNombre.value = doc.NombreCompleto || 'Médico';
+  showTarifasModal.value = true;
 };
 
 const formatDate = (dateString: string): string => {

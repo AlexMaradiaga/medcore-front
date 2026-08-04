@@ -6,6 +6,8 @@ interface PatientDto {
   Nombre: string;
   Apellido: string;
   Telefono: string;
+  nacionalidad?: string;
+  tipo_sangre?: string;
   email?: string;
   password?: string;
   es_dependiente?: boolean;
