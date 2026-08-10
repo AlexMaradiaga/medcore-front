@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type { User } from '@/modules/auth/domain/User';
 import { AuthRepositoryImpl } from '@/modules/auth/infrastructure/AuthRepositoryImpl';
 import { LoginUser } from '@/modules/auth/application/LoginUser';
+import api from '../shared/infrastructure/api';
 
 const authRepository = new AuthRepositoryImpl();
 const loginUserUseCase = new LoginUser(authRepository);
@@ -53,6 +54,18 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('user_plan');
+    },
+    async changePassword(payload: { email: string; new_password: string }) {
+      this.loading = true;
+      try {
+        const response = await api.put('/auth/password', payload);
+        return { success: true, message: response.data?.message || 'Contraseña actualizada con éxito.' };
+      } catch  {
+        const message = 'No se pudo actualizar la contraseña.';
+        return { success: false, message };
+      } finally {
+        this.loading = false;
+      }
     }
   }
 });

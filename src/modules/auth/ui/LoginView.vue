@@ -87,9 +87,80 @@
               </div>
               <span class="ml-2 font-bold group-hover:text-slate-900 transition-colors">Recordarme</span>
             </label>
-            <a href="#" class="text-medgo-blue font-black hover:text-blue-800 transition-colors hover:underline underline-offset-4">
+            <!-- En tu plantilla sustituye el <a> de '¿Olvidaste tu clave?' por: -->
+            <a
+              href="#"
+              @click.prevent="showForgotModal = true"
+              class="text-medgo-blue font-black hover:text-blue-800 transition-colors hover:underline underline-offset-4 cursor-pointer"
+            >
               ¿Olvidaste tu clave?
             </a>
+
+            <!-- Al final del template de LoginView.vue (antes de cerrar </template>), agrega el modal: -->
+            <Transition
+              enter-active-class="transition duration-300 ease-out"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition duration-200 ease-in"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
+            >
+              <div v-if="showForgotModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <!-- Fondo translúcido -->
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="showForgotModal = false"></div>
+
+                <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 relative z-10 text-left space-y-6">
+                  <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                    <div>
+                      <h3 class="text-xl font-black text-slate-800 tracking-tight uppercase">Restablecer Clave</h3>
+                      <p class="text-xs text-slate-400 font-bold mt-0.5">Ingresa tu correo institucional y tu nueva contraseña</p>
+                    </div>
+                    <button @click="showForgotModal = false" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+                  </div>
+
+                  <form @submit.prevent="handleResetPassword" class="space-y-4">
+                    <div class="space-y-1.5">
+                      <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Correo Electrónico</label>
+                      <input
+                        v-model="forgotForm.email"
+                        type="email"
+                        placeholder="ejemplo@medgo.com"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:bg-white focus:border-medgo-blue outline-none transition-all"
+                        required
+                      />
+                    </div>
+
+                    <div class="space-y-1.5">
+                      <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nueva Contraseña</label>
+                      <input
+                        v-model="forgotForm.nueva_password"
+                        type="password"
+                        placeholder="••••••••"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:bg-white focus:border-medgo-blue outline-none transition-all"
+                        required
+                      />
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4">
+                      <button
+                        type="button"
+                        @click="showForgotModal = false"
+                        class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600 cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        :disabled="resetLoading"
+                        class="px-6 py-2.5 bg-medgo-blue hover:bg-blue-700 disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer"
+                      >
+                        {{ resetLoading ? 'Actualizando...' : 'Cambiar Clave' }}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </Transition>
           </div>
         </div>
 
@@ -146,6 +217,13 @@ const toast = useToast();
 
 const userType = ref('paciente');
 const loading = ref(false);
+
+const showForgotModal = ref(false);
+const resetLoading = ref(false);
+const forgotForm = reactive({
+  email: '',
+  nueva_password: ''
+});
 
 const form = reactive({
   email: '',
@@ -226,6 +304,30 @@ const handleLogin = async () => {
     setTimeout(() => { toast.error('Credenciales inválidas. Intente de nuevo.', { timeout: 4000 }); }, 100);
   } finally {
     setTimeout(() => { loading.value = false; }, 150);
+  }
+};
+const handleResetPassword = async () => {
+  if (!forgotForm.email || !forgotForm.nueva_password) return;
+  resetLoading.value = true;
+
+  try {
+    const res = await authStore.changePassword({
+      email: forgotForm.email,
+      new_password: forgotForm.nueva_password
+    });
+
+    if (res.success) {
+      toast.success(res.message);
+      showForgotModal.value = false;
+      forgotForm.email = '';
+      forgotForm.nueva_password = '';
+    } else {
+      toast.error(res.message);
+    }
+  } catch {
+    toast.error('Error de comunicación con el servidor.');
+  } finally {
+    resetLoading.value = false;
   }
 };
 </script>
