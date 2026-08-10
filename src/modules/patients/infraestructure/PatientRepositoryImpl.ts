@@ -1,22 +1,22 @@
 import api from '@/shared/infrastructure/api';
 import type { Patient } from '../domain/entities/Patient';
 
-interface PatientDto {
+export interface PatientDto {
   DNI: string;
   Nombre: string;
   Apellido: string;
   Telefono: string;
-  nacionalidad?: string;
-  tipo_sangre?: string;
-  email?: string;
-  password?: string;
+  nacionalidad?: string | null;
+  tipo_sangre?: string | null;
+  email?: string | null;
+  password?: string | null;
   es_dependiente?: boolean;
-  tutor_dni?: string;
-  tutor_nombre?: string;
-  parentesco?: string;
-  tutor_email?: string;
-  tutor_telefono?: string;
-  documento_identidad_url?: string;
+  tutor_dni?: string | null;
+  tutor_nombre?: string | null;
+  parentesco?: string | null;     
+  tutor_email?: string | null;
+  tutor_telefono?: string | null;
+  documento_identidad_url?: string | null;
 }
 
 export class PatientRepositoryImpl {
@@ -48,7 +48,8 @@ export class PatientRepositoryImpl {
       nombre: patient.Nombre,
       apellido: patient.Apellido,
       telefono: patient.Telefono,
-
+      nacionalidad: patient.nacionalidad || 'Hondureña',
+      tipo_sangre: patient.tipo_sangre || null,
       email: isPed ? patient.tutor_email : patient.email,
       password: patient.password,
 

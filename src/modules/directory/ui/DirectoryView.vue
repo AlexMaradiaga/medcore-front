@@ -64,8 +64,8 @@
                 class="bg-transparent text-xs font-black text-slate-800 outline-none cursor-pointer border-none p-0 pr-4 focus:ring-0"
                 @change="evaluarSeleccionPaciente($event)"
               >
-                <option v-for="(dep, idx) in misDependientes" :key="dep.PacienteID" :value="idx">
-                  {{ dep.Nombre }} {{ dep.TutorID === null || dep.es_dependiente === 0 ? '(Titular / Tutor)' : '(Dependiente)' }}
+                <option v-for="(dep, idx) in misDependientes" :key="String(dep.PacienteID || idx)" :value="idx">
+                  {{ dep.Nombre || dep.nombre }} {{ dep.TutorID === null || dep.es_dependiente === 0 ? '(Titular / Tutor)' : '(Dependiente)' }}
                 </option>
                 <option v-if="necesitaPerfilTutor" value="crear_mi_perfil">+ Crear mi perfil de paciente</option>
               </select>
@@ -227,7 +227,7 @@
           </div>
         </section>
 
-        <!-- DIRECTORIO MÉDICO (CON INDICADOR CLARO DEL PACIENTE ACTIVO) -->
+        <!-- DIRECTORIO MÉDICO -->
         <section v-if="activeTab === 'directory'" class="space-y-8 animate-fade-in">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -275,9 +275,7 @@
               </select>
             </div>
 
-            <!-- TOGGLES Y FILTROS AVANZADOS -->
             <div class="flex flex-wrap items-center gap-6 pt-1">
-              <!-- Citas Inmediatas -->
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <div class="relative">
                   <input type="checkbox" v-model="filters.inmediata" class="sr-only peer" />
@@ -288,7 +286,6 @@
                 </div>
               </label>
 
-              <!-- Habla Inglés -->
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <div class="relative">
                   <input type="checkbox" v-model="filters.ingles" class="sr-only peer" />
@@ -299,7 +296,6 @@
                 </div>
               </label>
 
-              <!-- Visita a Domicilio -->
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <div class="relative">
                   <input type="checkbox" v-model="filters.domicilio" class="sr-only peer" />
@@ -312,7 +308,6 @@
             </div>
           </div>
 
-          <!-- LISTADO DE DOCTORES INTEGRADO CON DOCTORLOCATIONCARD -->
           <div v-if="doctors.length > 0" class="space-y-4">
             <div v-for="doctor in doctors" :key="doctor.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all hover:border-sky-200/60">
 
@@ -324,7 +319,6 @@
                   <h3 class="text-xl font-black text-slate-800 leading-tight group-hover:text-sky-600 transition-colors">Dr. {{ doctor.Nombre }} {{ doctor.Apellido }}</h3>
                   <p class="text-xs font-black text-slate-900 uppercase tracking-wider">{{ doctor.Especialidad }}</p>
 
-                  <!-- COMPONENTE DE UBICACIÓN Y DISTANCIA EN KM INTEGRADO -->
                   <div class="pt-2">
                     <DoctorLocationCard
                       :doctor="doctor"
@@ -447,7 +441,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE AUTO-REGISTRO DE TUTOR/PACIENTE -->
+  <!-- MODAL DE AUTO-REGISTRO -->
   <div v-if="showAutoRegistroModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl animate-fade-in">
       <h3 class="text-xl font-bold mb-4 text-slate-800">Crear mi Perfil Clínico</h3>
@@ -467,7 +461,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE EMANCIPACIÓN DE HIJO/DEPENDIENTE -->
+  <!-- MODAL DE EMANCIPACIÓN -->
   <div v-if="showEmancipateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl animate-fade-in">
       <h3 class="text-xl font-bold mb-3 text-slate-800">Dar Acceso Propio a tu Hijo</h3>
@@ -502,7 +496,6 @@ import { useToast } from 'vue-toastification';
 import SettingsView from '@/SettingsView.vue';
 import api from '@/shared/infrastructure/api';
 
-// COMPONENTE DE UBICACIÓN Y DISTANCIA (GEOLOCALIZACIÓN)
 import DoctorLocationCard from '@/shared/ui/components/DoctorLocationCard.vue';
 import { DirectoryRepositoryImpl } from '../infrastructure/DirectoryRepositoryImpl';
 import type { Doctor } from '../domain/entities/Doctor';
@@ -512,7 +505,6 @@ import type { PatientExtendedProfile } from '../../patients/domain/entities/Pati
 import MedicalHistoryView from '@/modules/appointments/ui/MedicalHistoryView.vue';
 import PatientLabView from '../../laboratories/ui/PatientLabView.vue';
 
-// CONTROLADOR DE CITAS Y SUS ICONOS
 import PatientAppointmentsView from '@/modules/appointments/ui/PatientAppointmentsView.vue';
 import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
 import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch } from 'oh-vue-icons/icons/bi';
@@ -524,14 +516,29 @@ type DoctorExtended = Doctor & { CostoConsulta?: number; Precio?: number; costo?
 
 interface Specialty { EspecialidadID: number; NombreEspecialidad: string; }
 interface Dependiente {
-  UsuarioID?: number | string; usuario_id?: number | string;
-  Nombre?: string; nombre?: string; Telefono?: string; telefono?: string;
-  Genero?: string; genero?: string; Edad?: number | string; edad?: number | string;
-  PacienteID?: number | string; id?: number | string; TutorID?: number | null; es_dependiente?: number;
+  UsuarioID?: number | string | null;
+  usuario_id?: number | string | null;
+  Nombre?: string;
+  nombre?: string;
+  Telefono?: string;
+  telefono?: string;
+  Genero?: string;
+  genero?: string;
+  Edad?: number | string;
+  edad?: number | string;
+  fecha_nacimiento?: number | string;
+  PacienteID?: number | string;
+  id?: number | string;
+  TutorID?: number | string | null;
+  tutor_id?: number | string | null;
+  es_dependiente?: number;
+  DNI?: string;
+  dni?: string;
+  TipoSangre?: string;
+  tipo_sangre?: string;
 }
 
 interface PacienteRecord extends Dependiente {
-  DNI?: string; dni?: string;
   Apellido?: string; apellido?: string;
   Aseguradora?: string; aseguradora?: string;
   NumeroPoliza?: string; poliza?: string;
@@ -539,7 +546,6 @@ interface PacienteRecord extends Dependiente {
   telefono_contacto_emergencia?: string; TelefonoContactoEmergencia?: string; contacto_emergencia?: string;
 }
 
-// Coordenadas predeterminadas del usuario (Roatán)
 const userLat = ref(16.3298);
 const userLon = ref(-86.5332);
 
@@ -612,6 +618,7 @@ const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
       Telefono: userData.value.telefono,
       Genero: userData.value.genero,
       Edad: userData.value.fecha_nacimiento,
+      TipoSangre: '', // <-- Agregado
       Estado: '1',
       Aseguradora: userData.value.aseguradora || null,
       NumeroPoliza: userData.value.poliza || null,
@@ -635,18 +642,19 @@ const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
     Telefono: String(p.Telefono || p.telefono || userData.value.telefono || ''),
     Genero: String(p.Genero || p.genero || userData.value.genero || ''),
     Edad: (p.Edad || p.edad || userData.value.fecha_nacimiento || '') as string | number,
+    TipoSangre: String(p.TipoSangre || p.tipo_sangre || ''), // <-- Mapeo del tipo de sangre
     Estado: '1',
     Aseguradora: String(pRecord.Aseguradora || pRecord.aseguradora || userData.value.aseguradora || '') || null,
     NumeroPoliza: String(pRecord.NumeroPoliza || pRecord.poliza || userData.value.poliza || '') || null,
     nombre_contacto_emergencia: String(
-      pRecord.nombre_contacto_emergencia || 
-      pRecord.NombreContactoEmergencia || 
+      pRecord.nombre_contacto_emergencia ||
+      pRecord.NombreContactoEmergencia ||
       userData.value.nombre_contacto_emergencia || ''
     ) || null,
     telefono_contacto_emergencia: String(
-      pRecord.telefono_contacto_emergencia || 
-      pRecord.TelefonoContactoEmergencia || 
-      pRecord.contacto_emergencia || 
+      pRecord.telefono_contacto_emergencia ||
+      pRecord.TelefonoContactoEmergencia ||
+      pRecord.contacto_emergencia ||
       userData.value.telefono_contacto_emergencia || ''
     ) || null,
     es_dependiente: Boolean(p.es_dependiente),
@@ -744,21 +752,40 @@ const cambiarPacienteSeleccionado = (index: number) => {
   const paciente = misDependientes.value[index];
   if (!paciente) return;
 
-  pacienteActualSeleccionado.value = paciente;
-
   const idClinico = paciente.PacienteID || paciente.id;
-  idClinicoActivo.value = idClinico ? Number(idClinico) : userData.value.id;
+
+  // Si es el tutor (índice 0) y no tiene PacienteID registrado todavía
+  if (!idClinico && index === 0) {
+    toast.info("Para agendar citas a tu nombre, primero debes completar tu perfil clínico de paciente.");
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      const parsed = JSON.parse(userJson);
+      const nombres = (parsed.nombre || '').split(' ');
+      formAutoRegistro.value.Nombre = nombres[0] || '';
+      formAutoRegistro.value.Apellido = nombres.slice(1).join(' ') || '';
+    }
+    showAutoRegistroModal.value = true;
+    return;
+  }
+
+  pacienteActualSeleccionado.value = paciente;
+  idClinicoActivo.value = idClinico ? Number(idClinico) : 0;
 
   const idPaciente = paciente.UsuarioID || paciente.usuario_id;
-  userData.value.id = idPaciente ? Number(idPaciente) : userData.value.id;
-  userData.value.nombre = paciente.Nombre || paciente.nombre || 'Paciente';
-  userData.value.telefono = paciente.Telefono || paciente.telefono || '';
-  userData.value.genero = paciente.Genero || paciente.genero || '';
+  if (idPaciente) {
+    userData.value.id = Number(idPaciente);
+  }
+
+  userData.value.nombre = String(paciente.Nombre || paciente.nombre || userData.value.nombre);
+  userData.value.telefono = String(paciente.Telefono || paciente.telefono || '');
+  userData.value.genero = String(paciente.Genero || paciente.genero || '');
   userData.value.email = userSessionData.value.email;
   const edadPaciente = paciente.Edad || paciente.edad;
   userData.value.fecha_nacimiento = edadPaciente ? String(edadPaciente) : '';
 
-  localStorage.setItem('paciente_actual_id', String(idClinico));
+  if (idClinico) {
+    localStorage.setItem('paciente_actual_id', String(idClinico));
+  }
 };
 
 const evaluarSeleccionPaciente = (event: Event) => {
@@ -848,29 +875,62 @@ const loadUser = async () => {
       const response = await api.get(`/pacientes/usuario/${parsed.id}`);
 
       if (response.data) {
-        const payload = response.data.data || response.data;
+        const rootData = response.data;
+        const payload = rootData.data || rootData;
 
-        if (payload.es_tutor || (payload.todos_los_dependientes && payload.todos_los_dependientes.length > 0)) {
-          esTutor.value = true;
-          misDependientes.value = payload.todos_los_dependientes || [];
-          necesitaPerfilTutor.value = !!payload.necesita_perfil_tutor;
+        esTutor.value = !!rootData.es_tutor || (Array.isArray(rootData.todos_los_dependientes) && rootData.todos_los_dependientes.length > 0);
+        necesitaPerfilTutor.value = !!rootData.necesita_perfil_tutor;
 
-          if (misDependientes.value.length > 0) {
-            cambiarPacienteSeleccionado(0);
-          }
-        } else {
-          const paciente = payload;
-          pacienteActualSeleccionado.value = paciente;
-          idClinicoActivo.value = paciente.PacienteID || paciente.id || parsed.id;
-          userData.value.telefono = paciente.Telefono || paciente.telefono || '';
-          userData.value.genero = paciente.Genero || paciente.genero || '';
-          userData.value.fecha_nacimiento = paciente.Edad || paciente.edad || '';
-          necesitaPerfilTutor.value = false;
-          esTutor.value = false;
+        if (payload && (payload.nombre || payload.Nombre)) {
+          userData.value.nombre = String(payload.nombre || payload.Nombre);
+        }
+
+        const perfilTutorComoOpcion: Dependiente = {
+          id: payload.id ?? payload.PacienteID ?? undefined,
+          PacienteID: payload.id ?? payload.PacienteID ?? undefined,
+          UsuarioID: payload.usuario_id ?? payload.UsuarioID ?? parsed.id,
+          usuario_id: payload.usuario_id ?? payload.UsuarioID ?? parsed.id,
+          Nombre: payload.nombre ?? payload.Nombre ?? userData.value.nombre,
+          nombre: payload.nombre ?? payload.Nombre ?? userData.value.nombre,
+          Telefono: payload.telefono ?? payload.Telefono ?? '',
+          telefono: payload.telefono ?? payload.Telefono ?? '',
+          Genero: payload.genero ?? payload.Genero ?? '',
+          genero: payload.genero ?? payload.Genero ?? '',
+          es_dependiente: 0,
+          TutorID: null,
+          DNI: payload.dni ?? payload.DNI ?? '',
+          dni: payload.dni ?? payload.DNI ?? ''
+        };
+
+        const dependientesCrudos: Dependiente[] = rootData.todos_los_dependientes || rootData.dependientes || [];
+
+        // TIPADO STRICTO: (d: Dependiente) en lugar de (d: any)
+        const dependientesNormalizados: Dependiente[] = dependientesCrudos.map((d: Dependiente) => ({
+          id: d.PacienteID ?? d.id,
+          PacienteID: d.PacienteID ?? d.id,
+          UsuarioID: d.UsuarioID ?? d.usuario_id ?? null,
+          usuario_id: d.UsuarioID ?? d.usuario_id ?? null,
+          Nombre: d.Nombre ?? d.nombre,
+          nombre: d.Nombre ?? d.nombre,
+          Telefono: d.Telefono ?? d.telefono ?? '',
+          telefono: d.Telefono ?? d.telefono ?? '',
+          Genero: d.Genero ?? d.genero ?? '',
+          genero: d.Genero ?? d.genero ?? '',
+          Edad: d.Edad ?? d.edad ?? d.fecha_nacimiento ?? '',
+          edad: d.Edad ?? d.edad ?? d.fecha_nacimiento ?? '',
+          es_dependiente: 1,
+          TutorID: d.TutorID ?? d.tutor_id ?? 5,
+          DNI: d.DNI ?? d.dni ?? ''
+        }));
+
+        misDependientes.value = [perfilTutorComoOpcion, ...dependientesNormalizados];
+
+        if (misDependientes.value.length > 0) {
+          cambiarPacienteSeleccionado(0);
         }
       }
-    } catch (error) {
-      console.warn("Perfil clínico base cargado alternativamente.", error);
+    } catch (error: unknown) {
+      console.warn("Error cargando perfil clínico:", error);
     }
   }
 };

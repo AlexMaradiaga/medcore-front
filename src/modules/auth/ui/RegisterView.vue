@@ -333,16 +333,16 @@ const handleRegister = async (): Promise<void> => {
       Nombre: form.nombre,
       Apellido: form.apellido,
       Telefono: form.telefono,
-      nacionalidad: form.nacionalidad,
-      tipo_sangre: form.tipo_sangre || undefined,
-      email: form.email,
-      password: form.password,
+      nacionalidad: form.nacionalidad || 'Hondureña',
+      tipo_sangre: form.tipo_sangre ? form.tipo_sangre : null,
+      email: form.email || null,
+      password: form.password || null,
       es_dependiente: isPediatric.value,
-      tutor_dni: isPediatric.value ? form.tutor_dni : undefined,
-      tutor_nombre: isPediatric.value ? form.tutor_nombre : undefined,
-      tutor_email: isPediatric.value ? form.tutor_email : undefined,
-      parentesco: isPediatric.value ? form.parentesco : undefined,
-      documento_identidad_url: selectedFile.value ? selectedFile.value.name : undefined
+      tutor_dni: isPediatric.value ? form.tutor_dni : null,
+      tutor_nombre: isPediatric.value ? form.tutor_nombre : null,
+      tutor_email: isPediatric.value ? form.tutor_email : null,
+      parentesco: isPediatric.value ? form.parentesco : null,
+      documento_identidad_url: selectedFile.value ? selectedFile.value.name : null
     });
 
     toast.success("¡Registro completado y enviado para verificación física!");

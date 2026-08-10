@@ -16,6 +16,110 @@
       </button>
     </div>
 
+    <!-- ========================================================================= -->
+    <!-- SECTOR RESTAURADO: SELECTOR DE PACIENTE (TUTOR PRINCIPAL / DEPENDIENTES) -->
+    <!-- ========================================================================= -->
+    <div class="bg-white rounded-[2.5rem] p-6 shadow-3xs border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <span class="text-[9px] font-black uppercase tracking-widest text-[#005596] bg-sky-50 px-3 py-1 rounded-full border border-sky-100/80">
+          Atención Médica Dirigida
+        </span>
+        <h3 class="text-lg font-black text-slate-800 tracking-tight mt-1">
+          ¿Para quién es la consulta médica?
+        </h3>
+        <p class="text-xs font-bold text-slate-400">
+          Seleccione si la cita es para el titular o para uno de sus dependientes a cargo.
+        </p>
+      </div>
+
+      <!-- Dropdown Desplegable -->
+      <div class="relative w-full md:w-auto">
+        <button
+          type="button"
+          @click="dropdownDependientes = !dropdownDependientes"
+          class="w-full md:w-auto flex items-center justify-between gap-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 px-5 py-3 rounded-2xl transition-all cursor-pointer text-left shadow-2xs"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              :class="pacienteSeleccionado.esDependiente ? 'bg-amber-500 text-white' : 'bg-[#005596] text-white'"
+              class="w-9 h-9 rounded-xl font-black flex items-center justify-center text-xs shadow-3xs"
+            >
+              {{ pacienteSeleccionado.iniciales }}
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-black text-slate-800 leading-tight">
+                {{ pacienteSeleccionado.nombre }}
+              </span>
+              <span class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">
+                {{ pacienteSeleccionado.esDependiente ? `Dependiente (${pacienteSeleccionado.parentesco})` : 'Tutor Principal' }}
+              </span>
+            </div>
+          </div>
+
+          <v-icon
+            name="bi-chevron-right"
+            scale="0.8"
+            class="text-slate-400 transition-transform duration-200"
+            :class="{ 'rotate-90': dropdownDependientes }"
+          />
+        </button>
+
+        <!-- Listado de perfiles -->
+        <Transition name="fade">
+          <div
+            v-if="dropdownDependientes"
+            class="absolute right-0 mt-2 w-full md:w-72 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 font-sans"
+          >
+            <div class="px-4 py-1.5 border-b border-slate-100">
+              <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                Perfiles Disponibles
+              </span>
+            </div>
+
+            <!-- Opción: Tutor -->
+            <button
+              type="button"
+              @click="seleccionarPaciente(tutorPrincipalPerfil)"
+              class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+              :class="{ 'bg-sky-50/60': pacienteSeleccionado.id === tutorPrincipalPerfil.id }"
+            >
+              <div class="w-8 h-8 rounded-xl bg-sky-100 text-[#005596] font-bold flex items-center justify-center text-xs">
+                {{ tutorPrincipalPerfil.iniciales }}
+              </div>
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-800">{{ tutorPrincipalPerfil.nombre }}</span>
+                <span class="text-[10px] text-slate-400 font-semibold">Tutor Principal (Yo)</span>
+              </div>
+            </button>
+
+            <!-- Opción: Dependientes -->
+            <div v-if="listaDependientes.length > 0" class="border-t border-slate-100 mt-1 pt-1">
+              <div class="px-4 py-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Dependientes a Cargo
+              </div>
+
+              <button
+                v-for="dep in listaDependientes"
+                :key="dep.id"
+                type="button"
+                @click="seleccionarPaciente(dep)"
+                class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+                :class="{ 'bg-sky-50/60': pacienteSeleccionado.id === dep.id }"
+              >
+                <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xs">
+                  {{ dep.iniciales }}
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-slate-800">{{ dep.nombre }}</span>
+                  <span class="text-[10px] text-amber-600 font-semibold">{{ dep.parentesco }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </div>
+
     <!-- Indicador Banner de horario pre-reservado -->
     <transition name="fade">
       <div
@@ -147,7 +251,7 @@
                 <input
                   v-model="form.tipoSangre"
                   type="text"
-                  readonly
+                  
                   placeholder="O+"
                   class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 text-xs font-black text-rose-600 outline-none cursor-not-allowed text-center uppercase"
                 />
@@ -341,10 +445,10 @@
           </div>
         </div>
 
-        <!-- PASO 04: MÉTODO DE PAGO -->
+        <!-- PASO 04: MÉTODO DE PAGO Y TÉRMINOS Y CONDICIONES -->
         <div v-if="currentStep === 4" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-emerald-400 pl-4">
-            <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">04. Método de Pago de Consulta</h4>
+            <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">04. Método de Pago y Confirmación</h4>
           </div>
 
           <div class="space-y-3">
@@ -376,18 +480,161 @@
               </div>
             </div>
           </div>
+
+          <!-- SECCIÓN DE ACEPTACIÓN LEGAL DE TÉRMINOS Y CONDICIONES -->
+          <div class="bg-amber-50/60 border border-amber-200/80 p-5 rounded-2xl space-y-2 text-left">
+            <label class="flex items-start gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                v-model="aceptoTerminos"
+                class="mt-0.5 w-4 h-4 text-emerald-600 bg-white border-amber-300 rounded focus:ring-emerald-500 cursor-pointer"
+              />
+              <span class="text-xs text-slate-700 font-semibold leading-relaxed">
+                Declaro que he leído, comprendo y acepto expresamente los
+                <button
+                  type="button"
+                  @click="showModalTerminos = true"
+                  class="text-sky-600 hover:text-sky-800 font-black underline cursor-pointer inline-flex items-center gap-1 mx-1"
+                >
+                  Términos y Condiciones de Uso y Tratamiento de Datos Personales
+                  <v-icon name="bi-box-arrow-up-right" scale="0.75" />
+                </button>
+                de MedGo+.
+              </span>
+            </label>
+            <p v-if="!aceptoTerminos" class="text-[10px] text-amber-700 font-bold tracking-wide pl-7">
+              ⚠️ Debe leer y aceptar los términos y condiciones antes de confirmar la reserva médica.
+            </p>
+          </div>
         </div>
 
         <!-- Botones de Navegación del Formulario -->
         <div class="flex justify-between items-center pt-6 border-t border-slate-50 mt-auto select-none">
-          <button type="button" :disabled="currentStep === 1" @click="currentStep--" :class="currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'" class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">Atrás</button>
-          <button type="button" v-if="currentStep < 4" @click="handleNextStep" class="px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white shadow-md shadow-sky-100 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.95] cursor-pointer">Siguiente</button>
-          <button type="submit" v-else class="px-8 py-3 bg-linear-to-r from-emerald-500 to-teal-600 hover:brightness-105 text-white shadow-md shadow-emerald-100 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.95] cursor-pointer">
+          <button
+            type="button"
+            :disabled="currentStep === 1"
+            @click="currentStep--"
+            :class="currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'"
+            class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+          >
+            Atrás
+          </button>
+
+          <button
+            type="button"
+            v-if="currentStep < 4"
+            @click="handleNextStep"
+            class="px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white shadow-md shadow-sky-100 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.95] cursor-pointer"
+          >
+            Siguiente
+          </button>
+
+          <button
+            type="submit"
+            v-else
+            :disabled="!aceptoTerminos"
+            :class="aceptoTerminos
+              ? 'bg-linear-to-r from-emerald-500 to-teal-600 hover:brightness-105 text-white shadow-md shadow-emerald-100 active:scale-[0.95] cursor-pointer'
+              : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60 shadow-none'"
+            class="px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+          >
             {{ form.metodoPago === 'Efectivo' ? 'Confirmar y Guardar Cita' : 'Proceder al Pago en Línea' }}
           </button>
         </div>
 
       </form>
+    </div>
+
+    <!-- MODAL / VISOR DE TÉRMINOS Y CONDICIONES -->
+    <div v-if="showModalTerminos" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in">
+      <div class="bg-white rounded-[2.5rem] w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] text-left">
+
+        <!-- ENCABEZADO DEL MODAL -->
+        <div class="p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-black text-xs">
+              MedGo+
+            </div>
+            <div>
+              <h3 class="text-base font-black text-white leading-tight">Términos y Condiciones de Uso</h3>
+              <p class="text-[10px] text-slate-400 font-medium">Inversiones Digitales SanRA S.A. — Versión 1.0 MVP</p>
+            </div>
+          </div>
+          <button type="button" @click="showModalTerminos = false" class="text-slate-400 hover:text-white text-xl font-bold p-1 cursor-pointer">
+            ✕
+          </button>
+        </div>
+
+        <!-- CUERPO DEL MODAL -->
+        <div class="p-6 overflow-y-auto space-y-5 flex-1 text-slate-700 text-xs leading-relaxed">
+
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+            <span class="text-[11px] font-black text-slate-600 uppercase tracking-wider">
+              Documento Oficial de Control Interno
+            </span>
+            <a
+              :href="pdfTerminosUrl"
+              target="_blank"
+              class="text-sky-600 hover:text-sky-800 font-bold text-[11px] underline flex items-center gap-1.5"
+            >
+              <v-icon name="bi-file-earmark-pdf-fill" class="h-4 w-4 text-rose-500" />
+              Descargar / Abrir PDF Completo
+            </a>
+          </div>
+
+          <!-- VISOR PDF EMBEBIDO CON <object> -->
+          <div class="w-full h-80 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100">
+            <object
+              :data="`${pdfTerminosUrl}#toolbar=1`"
+              type="application/pdf"
+              class="w-full h-full"
+            >
+              <div class="p-6 text-center text-slate-500 bg-slate-50 flex flex-col items-center justify-center h-full gap-2">
+                <span class="font-bold text-xs">Tu navegador no soporta la vista previa directa del PDF.</span>
+                <a :href="pdfTerminosUrl" target="_blank" class="text-sky-600 font-bold underline text-xs">
+                  Haz clic aquí para abrirlo en una nueva pestaña.
+                </a>
+              </div>
+            </object>
+          </div>
+
+          <!-- RESUMEN LEGAL ESTRUCTURADO -->
+          <div class="space-y-2.5 bg-slate-50/80 p-4.5 rounded-2xl border border-slate-100">
+            <h4 class="font-black text-slate-900 text-xs uppercase tracking-wider">Resumen de Puntos Clave:</h4>
+            <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600">
+              <li><strong>Tratamiento de Datos:</strong> MedGo+ recopila datos identificativos y sensibles de salud únicamente para prestar los servicios contratados con medidas reforzadas de seguridad y cifrado.</li>
+              <li><strong>Expediente Clínico:</strong> Los registros clínicos son elaborados por profesionales autorizados y no pueden ser alterados de forma no auditada.</li>
+              <li><strong>Responsabilidad:</strong> MedGo+ actúa como plataforma tecnológica intermediaria; la responsabilidad sobre diagnósticos y tratamientos corresponde al profesional tratante.</li>
+              <li><strong>Ley Aplicable:</strong> Regido conforme a las leyes aplicables de la República de Honduras.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- PIE DEL MODAL -->
+        <div class="p-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+          <p class="text-[10px] text-slate-500 font-medium text-center sm:text-left">
+            Al hacer clic en "Aceptar y Entendido", confirma que ha revisado la documentación legal correspondiente.
+          </p>
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              type="button"
+              @click="showModalTerminos = false"
+              class="w-1/2 sm:w-auto px-4 py-2.5 text-slate-500 hover:text-slate-700 font-bold text-xs cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              @click="confirmarAceptacionTerminos"
+              class="w-1/2 sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition cursor-pointer"
+            >
+              Aceptar y Entendido
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- MODAL PASARELA DE PAGO DIGITAL -->
@@ -692,17 +939,18 @@ import {
   BiBoxArrowRight, BiPeopleFill, BiCalendarEvent, BiFileEarmarkTextFill,
   BiFolderFill, BiSearch, BiCheck, BiHouseFill, BiChevronRight,
   BiCreditCard2FrontFill, BiCreditCardFill, BiBuilding, BiCheckCircleFill,
-  BiCashCoin, BiExclamationCircleFill, BiDownload, BiShareFill, BiPersonCheckFill, BiPhoneVibrate, BiBank
+  BiCashCoin, BiExclamationCircleFill, BiDownload, BiShareFill, BiPersonCheckFill, BiPhoneVibrate, BiBank,
+  BiFileEarmarkPdfFill, BiBoxArrowUpRight
 } from 'oh-vue-icons/icons';
 
 addIcons(
   BiBoxArrowRight, BiPeopleFill, BiCalendarEvent, BiFileEarmarkTextFill,
   BiFolderFill, BiSearch, BiCheck, BiHouseFill, BiChevronRight,
   BiCreditCard2FrontFill, BiCreditCardFill, BiBuilding, BiCheckCircleFill,
-  BiCashCoin, BiExclamationCircleFill, BiDownload, BiShareFill, BiPersonCheckFill, BiPhoneVibrate, BiBank
+  BiCashCoin, BiExclamationCircleFill, BiDownload, BiShareFill, BiPersonCheckFill, BiPhoneVibrate, BiBank,
+  BiFileEarmarkPdfFill, BiBoxArrowUpRight
 );
 
-// INTERFAZ AÑADIDA PARA EVITAR EL "Record<string, unknown>" Y SOPORTAR EL PAYLOAD
 interface GenericProfile {
   paciente?: GenericProfile;
   data?: GenericProfile;
@@ -717,11 +965,30 @@ interface GenericProfile {
   edad?: string | number; Edad?: string | number; fecha_nacimiento?: string | number;
   nombre_contacto_emergencia?: string; NombreContactoEmergencia?: string; contacto_emergencia_nombre?: string;
   telefono_contacto_emergencia?: string; TelefonoContactoEmergencia?: string; contacto_emergencia?: string;
+  esDependiente?: boolean; parentesco?: string; iniciales?: string;
 }
 
 interface PdfMakeCustomInstance {
   getBlob(callback: (blob: Blob) => void): void;
   download(defaultFileName?: string): void;
+}
+
+interface PerfilPaciente {
+  id: number;
+  pacienteId: number;
+  nombre: string;
+  email: string;
+  telefono: string;
+  genero: string;
+  tipoSangre: string;
+  aseguradora: string;
+  poliza: string;
+  edad: string | number;
+  contactoNombre: string;
+  contactoTel: string;
+  esDependiente: boolean;
+  parentesco: string;
+  iniciales: string;
 }
 
 const { t, locale } = useI18n();
@@ -742,12 +1009,103 @@ const appointmentRepo = new AppointmentRepository();
 const pgoRepository = new ApiPagoRepository();
 const toast = useToast();
 
+// =========================================================================
+// LÓGICA DE PACIENTES DEPENDIENTES Y TUTOR
+// =========================================================================
+const dropdownDependientes = ref(false);
+
+const tutorPrincipalPerfil = ref<PerfilPaciente>({
+  id: 0,
+  pacienteId: 0,
+  nombre: 'Tutor Principal',
+  email: '',
+  telefono: '',
+  genero: '',
+  tipoSangre: '',
+  aseguradora: '',
+  poliza: '',
+  edad: '',
+  contactoNombre: '',
+  contactoTel: '',
+  esDependiente: false,
+  parentesco: 'Tutor',
+  iniciales: 'T'
+});
+
+const listaDependientes = ref<PerfilPaciente[]>([]);
+const pacienteSeleccionado = ref<PerfilPaciente>(tutorPrincipalPerfil.value);
+
+const seleccionarPaciente = (perfil: PerfilPaciente) => {
+  pacienteSeleccionado.value = perfil;
+  dropdownDependientes.value = false;
+
+  // Cargar datos al formulario
+  userData.value = {
+    id: perfil.id,
+    nombre: perfil.nombre,
+    email: perfil.email
+  };
+
+  form.telefono = perfil.telefono;
+  form.edad = perfil.edad;
+  form.genero = perfil.genero;
+  form.tipoSangre = perfil.tipoSangre;
+  form.aseguradora = perfil.aseguradora;
+  form.poliza = perfil.poliza;
+  form.contactoNombre = perfil.contactoNombre;
+  form.contactoTel = perfil.contactoTel;
+
+  tieneSeguroMedico.value = !!(perfil.aseguradora || perfil.poliza);
+  toast.info(`Perfil cambiado a: ${perfil.nombre}`);
+};
+
+const cargarDependientesDesdeAPI = async (usuarioId: number) => {
+  try {
+    const res = await api.get(`/pacientes/usuario/${usuarioId}`);
+    const rootData = res.data;
+    const dependientesCrudos: GenericProfile[] = rootData.todos_los_dependientes || rootData.dependientes || [];
+
+    if (Array.isArray(dependientesCrudos) && dependientesCrudos.length > 0) {
+      listaDependientes.value = dependientesCrudos.map((dep: GenericProfile) => ({
+        id: Number(dep.UsuarioID || dep.id || 0),
+        pacienteId: Number(dep.PacienteID || dep.id || 0),
+        nombre: String(dep.Nombre || dep.nombre || 'Dependiente'),
+        email: String(dep.Email || dep.email || tutorPrincipalPerfil.value.email),
+        telefono: String(dep.Telefono || dep.telefono || tutorPrincipalPerfil.value.telefono),
+        genero: String(dep.Genero || dep.genero || ''),
+        tipoSangre: String(dep.TipoSangre || dep.tipo_sangre || 'A+'),
+        aseguradora: String(dep.Aseguradora || dep.aseguradora || ''),
+        poliza: String(dep.NumeroPoliza || dep.poliza || ''),
+        edad: String(dep.Edad || dep.edad || dep.fecha_nacimiento || '6'),
+        contactoNombre: String(dep.NombreContactoEmergencia || dep.nombre_contacto_emergencia || tutorPrincipalPerfil.value.contactoNombre),
+        contactoTel: String(dep.TelefonoContactoEmergencia || dep.telefono_contacto_emergencia || tutorPrincipalPerfil.value.contactoTel),
+        esDependiente: true,
+        parentesco: String(dep.parentesco || 'Hijo(a)'),
+        iniciales: String(dep.Nombre || dep.nombre || 'J').charAt(0).toUpperCase()
+      }));
+    }
+  } catch (err) {
+    console.warn("No se encontraron dependientes vinculados:", err);
+  }
+};
+// =========================================================================
+
 const userData = ref({ id: 0, nombre: '', email: '' });
 const currentStep = ref(1);
 
 const mostrarPasarelaModal = ref(false);
 const qrGenerado = ref('');
 const mostrarQrModal = ref(false);
+
+const pdfTerminosUrl = ref('/Terminos_condiciones_MedGo.pdf');
+
+const aceptoTerminos = ref<boolean>(false);
+const showModalTerminos = ref<boolean>(false);
+
+const confirmarAceptacionTerminos = (): void => {
+  aceptoTerminos.value = true;
+  showModalTerminos.value = false;
+};
 
 const billingDataLocal = ref({
   consultationId: '',
@@ -909,11 +1267,17 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (!aceptoTerminos.value) {
+    toast.warning("Debe leer y aceptar los términos y condiciones para continuar.");
+    return;
+  }
+
   const medicamentosTexto = form.medicamentosList.map(m => m.nombre).join(', ');
   const alergiasTexto = form.alergiasList.map(a => a.nombre).join(', ');
 
-  const payload: AppointmentRequest & { edad?: string | number; telefono?: string } = {
-    UsuarioID: userData.value.id, 
+  const payload: AppointmentRequest & { edad?: string | number; telefono?: string; paciente_id?: number } = {
+    UsuarioID: userData.value.id,
+    paciente_id: pacienteSeleccionado.value.pacienteId || undefined,
     doctor_id: Number(props.selectedDoctor.DoctorID),
     entidad_id: props.selectedDoctor.EntidadID || 1,
     fecha_hora: `${form.fecha} ${form.hora}:00`,
@@ -932,16 +1296,13 @@ const handleSubmit = async () => {
   };
 
   try {
-    // 1. Inserción de la cita en la base de datos
     await appointmentRepo.create(payload as AppointmentRequest);
 
     const docExt = props.selectedDoctor as DoctorExtended;
     const precioConsulta = docExt.CostoConsulta || docExt.Precio || 90;
 
-    // 2. Consulta defensiva del ID generado en el backend
     const idDetectado = await obtenerUltimaCitaCreada(userData.value.id);
 
-    // 3. Sincronizar estado local para compartir entre componentes
     const datosResumenLocal = {
       citaId: idDetectado,
       paciente: {
@@ -966,7 +1327,6 @@ const handleSubmit = async () => {
       basePrice: Number(precioConsulta)
     };
 
-    // 4. Mapeo de modalidad de pago
     if (form.metodoPago === 'Efectivo') {
       if (idDetectado > 0) {
         await pgoRepository.procesarPago({
@@ -1154,7 +1514,6 @@ const obtenerCorreoSesion = (): string => {
   return '';
 };
 
-// SE SUSTITUYE Record<string, unknown> POR NUESTRA INTERFAZ GenericProfile
 const asignarCamposFormulario = (perfil: PatientExtendedProfile | GenericProfile | undefined) => {
   if (!perfil) return;
 
@@ -1164,42 +1523,50 @@ const asignarCamposFormulario = (perfil: PatientExtendedProfile | GenericProfile
   const emailPerfil = String(p.email || p.Email || '').trim();
   const emailFinal = emailPerfil !== '' ? emailPerfil : obtenerCorreoSesion();
 
-  userData.value = {
-    id: Number(p.id || p.PacienteID || p.UsuarioID || p.usuario_id || userData.value.id || 0),
-    nombre: String(p.nombre || p.Nombre || (p.Nombre ? `${p.Nombre} ${p.Apellido || ''}` : '') || userData.value.nombre || 'Paciente'),
-    email: emailFinal
+  const nombreDet = String(p.nombre || p.Nombre || (p.Nombre ? `${p.Nombre} ${p.Apellido || ''}` : '') || 'Paciente');
+
+  // Configurar Perfil Tutor Base
+  tutorPrincipalPerfil.value = {
+    id: Number(p.id || p.UsuarioID || p.usuario_id || 0),
+    pacienteId: Number(p.PacienteID || p.id || 0),
+    nombre: nombreDet,
+    email: emailFinal,
+    telefono: String(p.telefono || p.Telefono || p.PacienteTelefono || ''),
+    genero: String(p.genero || p.Genero || ''),
+    tipoSangre: String(p.tipo_sangre || p.TipoSangre || p.tipoSangre || ''),
+    aseguradora: String(p.aseguradora || p.Aseguradora || ''),
+    poliza: String(p.poliza || p.NumeroPoliza || p.numero_poliza || ''),
+    edad: String(p.edad || p.Edad || p.fecha_nacimiento || ''),
+    contactoNombre: String(p.nombre_contacto_emergencia || p.NombreContactoEmergencia || p.contacto_emergencia_nombre || ''),
+    contactoTel: String(p.telefono_contacto_emergencia || p.TelefonoContactoEmergencia || p.contacto_emergencia || ''),
+    esDependiente: false,
+    parentesco: 'Tutor',
+    iniciales: nombreDet.charAt(0).toUpperCase()
   };
 
-  form.telefono = String(p.telefono || p.Telefono || p.PacienteTelefono || '');
-  form.genero = String(p.genero || p.Genero || '');
-  form.tipoSangre = String(p.tipo_sangre || p.TipoSangre || p.tipoSangre || '');
-  form.aseguradora = String(p.aseguradora || p.Aseguradora || '');
-  form.poliza = String(p.poliza || p.NumeroPoliza || p.numero_poliza || '');
-  
-  // Asignación de Edad fija probando ambas llaves
-  form.edad = String(p.edad || p.Edad || p.fecha_nacimiento || '');
+  // Asignar tutor como activo por defecto
+  pacienteSeleccionado.value = tutorPrincipalPerfil.value;
 
-  // Asignación de Contacto probando todas las combinaciones
-  form.contactoNombre = String(
-    p.nombre_contacto_emergencia ||
-    p.NombreContactoEmergencia ||
-    p.contacto_emergencia_nombre ||
-    ''
-  );
+  userData.value = {
+    id: tutorPrincipalPerfil.value.id,
+    nombre: tutorPrincipalPerfil.value.nombre,
+    email: tutorPrincipalPerfil.value.email
+  };
 
-  form.contactoTel = String(
-    p.telefono_contacto_emergencia ||
-    p.TelefonoContactoEmergencia ||
-    p.contacto_emergencia ||
-    ''
-  );
+  form.telefono = tutorPrincipalPerfil.value.telefono;
+  form.genero = tutorPrincipalPerfil.value.genero;
+  form.tipoSangre = tutorPrincipalPerfil.value.tipoSangre;
+  form.aseguradora = tutorPrincipalPerfil.value.aseguradora;
+  form.poliza = tutorPrincipalPerfil.value.poliza;
+  form.edad = tutorPrincipalPerfil.value.edad;
+  form.contactoNombre = tutorPrincipalPerfil.value.contactoNombre;
+  form.contactoTel = tutorPrincipalPerfil.value.contactoTel;
 
   if (form.aseguradora || form.poliza) {
     tieneSeguroMedico.value = true;
   }
 };
 
-// Reactividad cuando cambian los props desde el componente padre
 watch(() => props.patientProfile, (nuevoPerfil) => {
   if (nuevoPerfil && Object.keys(nuevoPerfil).length > 0) {
     asignarCamposFormulario(nuevoPerfil as GenericProfile);
@@ -1211,7 +1578,6 @@ onMounted(async () => {
   fetchCatalogoMedicamentos();
   fetchCatalogoAlergias();
 
-  // 1. Cargar usuario de LocalStorage
   const userJson = localStorage.getItem('user');
   let currentUserId = 0;
   if (userJson) {
@@ -1228,7 +1594,6 @@ onMounted(async () => {
     }
   }
 
-  // 2. Si hay ID de usuario, forzamos la llamada a la API para traer los datos FRESCOS de la BD
   if (currentUserId > 0) {
     try {
       const res = await api.get(`/pacientes/usuario/${currentUserId}`);
@@ -1237,6 +1602,8 @@ onMounted(async () => {
       } else if (res.data) {
         asignarCamposFormulario(res.data as GenericProfile);
       }
+      // Cargar lista de dependientes asociados desde el servidor
+      await cargarDependientesDesdeAPI(currentUserId);
     } catch (err) {
       console.error("Error al obtener paciente desde la API:", err);
       if (props.patientProfile) {

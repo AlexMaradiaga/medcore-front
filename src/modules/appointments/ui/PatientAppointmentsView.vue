@@ -231,14 +231,14 @@ const nuevaFechaHora = ref<string>('');
 
 const fetchAppointments = async (): Promise<void> => {
   const userJson = localStorage.getItem('user');
+  const pacienteIdLocal = localStorage.getItem('paciente_actual_id'); 
   let searchId: number | null = null;
 
-  if (userJson) {
+  if (pacienteIdLocal) {
+    searchId = Number(pacienteIdLocal);
+  } else if (userJson) {
     const parsed = JSON.parse(userJson);
     searchId = parsed.id;
-  } else {
-    const pacienteIdStr = localStorage.getItem('paciente_actual_id');
-    if (pacienteIdStr) searchId = Number(pacienteIdStr);
   }
 
   if (!searchId) return;
@@ -255,14 +255,12 @@ const fetchAppointments = async (): Promise<void> => {
               app.motivo !== 'Cancelada desde el portal'
       );
 
-      // Verificamos si ya le mostramos esta alerta en la sesión actual
       const yaNotificado = sessionStorage.getItem('medgo_cancelacion_notificada');
 
       if (canceladasPorMedico.length > 0 && !yaNotificado) {
         toast.error(`Notificación: Tienes ${canceladasPorMedico.length} cita(s) cancelada(s) recientemente por el personal médico.`, {
           timeout: 5000
         });
-        // Marcamos que ya se enteró durante esta sesión
         sessionStorage.setItem('medgo_cancelacion_notificada', 'true');
       }
     }

@@ -29,6 +29,8 @@ const newPatient = ref({
   Nombre: '',
   Apellido: '',
   Telefono: '',
+  nacionalidad: 'Hondureña',
+  tipo_sangre: '',
   tutor_dni: '',
   parentesco: ''
 });
@@ -45,6 +47,8 @@ const openEditModal = (patient: Patient) => {
     Apellido: patient.Apellido || '',
     DNI: patient.DNI || '',
     Telefono: patient.Telefono || '',
+    nacionalidad: (patientData['nacionalidad'] as string) || 'Hondureña',
+    tipo_sangre: (patientData['tipo_sangre'] as string) || '',
     email: (patientData['email'] as string) || (patientData['Email'] as string) || '',
     password: '',
     tutor_dni: (patientData['tutor_dni'] as string) || '',
@@ -108,6 +112,8 @@ const resetForm = () => {
     Nombre: '',
     Apellido: '',
     Telefono: '',
+    nacionalidad: 'Hondureña',
+    tipo_sangre: '',
     tutor_dni: '',
     parentesco: ''
   };
