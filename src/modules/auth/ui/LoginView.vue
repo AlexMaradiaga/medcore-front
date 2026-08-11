@@ -6,25 +6,28 @@
 
     <div class="w-full h-screen sm:h-auto sm:max-w-md bg-white sm:rounded-[2.5rem] sm:shadow-[0_30px_70px_rgba(0,50,150,0.18)] overflow-hidden z-10 flex flex-col border border-gray-50/80 backdrop-blur-md">
 
-      <div class="bg-medgo-gradient p-10 text-center text-white relative pt-14 pb-12">
-        <div class="absolute inset-0 opacity-5 pointer-events-none">
+      <div class="bg-linear-to-r from-[#2055a4] via-[#00a8b5] to-[#12d3c7] p-10 text-center text-white relative pt-14 pb-12">
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
           <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white"></path>
           </svg>
         </div>
 
         <div class="relative z-10 flex flex-col items-center">
-          <div class="contenedor-icono-3d mb-6 relative">
-            <div class="icono-cuerpo-3d">
-              <div class="texto-med">Med</div>
-              <div class="texto-go">Go+</div>
+          <div class="contenedor-logo-3d mb-6 relative cursor-pointer">
+            <div class="logo-cuerpo-3d">
+              <img
+                src="/logo-medgo.jpg"
+                alt="MedGo+ Logo"
+                class="w-full h-full object-cover rounded-3xl shadow-md"
+              />
             </div>
           </div>
 
-          <h2 class="text-3xl font-black tracking-tight drop-shadow-sm">
-          Bienvenido a MedGo+
+          <h2 class="text-3xl font-black tracking-tight drop-shadow-sm text-white">
+            Bienvenido a MedGo+
           </h2>
-          <h3 class="text-blue-50/90 text-xs mt-3 font-semibold max-w-70 leading-relaxed">
+          <h3 class="text-cyan-50/90 text-xs mt-3 font-semibold max-w-70 leading-relaxed">
             Tu plataforma integral de gestión médica. Conectando pacientes y profesionales de la salud.
           </h3>
         </div>
@@ -172,14 +175,16 @@
           >
             <div class="absolute inset-x-0 -bottom-1 h-full bg-black/15 rounded-2xl blur-[1px]"></div>
             <div
-              :class="userType === 'paciente' ? 'bg-medgo-blue hover:bg-blue-600 shadow-[0_8px_20px_rgba(0,102,204,0.3)]' : 'bg-medgo-teal hover:bg-cyan-600 shadow-[0_8px_20px_rgba(0,196,204,0.3)]'"
+              :class="userType === 'paciente'
+                ? 'bg-linear-to-r from-[#0077b6] via-[#00b4d8] to-[#12d3c7] hover:opacity-95 shadow-[0_8px_20px_rgba(0,180,216,0.35)]'
+                : 'bg-linear-to-r from-[#0096c7] via-[#00c4cc] to-[#48cae4] hover:opacity-95 shadow-[0_8px_20px_rgba(0,196,204,0.35)]'"
               class="relative py-4 rounded-2xl text-white font-black text-sm uppercase tracking-widest active:translate-y-0.5 transition-all flex items-center justify-center space-x-2 cursor-pointer"
             >
               <span v-if="!loading">Entrar como {{ userType }}</span>
               <div v-else class="flex space-x-1">
-                  <div class="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                  <div class="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-.3s]"></div>
-                  <div class="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-.5s]"></div>
+                <div class="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-.3s]"></div>
+                <div class="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-.5s]"></div>
               </div>
             </div>
           </button>
@@ -333,50 +338,40 @@ const handleResetPassword = async () => {
 </script>
 
 <style scoped>
-.contenedor-icono-3d {
-  width: 92px;
-  height: 92px;
+.contenedor-logo-3d {
+  width: 96px;
+  height: 96px;
   perspective: 1000px;
-  animation: flotar 4.5s ease-in-out infinite;
+  /* Animación de flotado suave */
+  animation: flotarImagen 4.5s ease-in-out infinite;
 }
 
-.icono-cuerpo-3d {
+.logo-cuerpo-3d {
   width: 100%;
   height: 100%;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #007bff 0%, #00c4cc 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-family: sans-serif;
+  border-radius: 26px;
+  padding: 2px; /* Pequeño borde interno para resaltar la iluminación */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 100%);
 
+  /* Sombras para dar profundidad y volumen real a la imagen */
   box-shadow:
-    0 12px 24px rgba(0, 50, 150, 0.25),
-    inset 0 4px 6px rgba(255, 255, 255, 0.45),
-    inset 0 -6px 12px rgba(0, 0, 0, 0.18);
+    0 16px 32px rgba(0, 120, 160, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8);
 
-  transform: rotateX(8deg) rotateY(-4deg);
+  /* Inclinación 3D */
+  transform: rotateX(8deg) rotateY(-5deg);
   transform-style: preserve-3d;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
-.texto-med {
-  font-size: 21px;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  line-height: 1;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+/* Efecto hover opcional: se endereza ligeramente cuando pasas el cursor */
+.contenedor-logo-3d:hover .logo-cuerpo-3d {
+  transform: rotateX(0deg) rotateY(0deg) scale(1.05);
+  box-shadow:
+    0 20px 40px rgba(0, 160, 200, 0.45),
+    0 6px 12px rgba(0, 0, 0, 0.12);
 }
-
-.texto-go {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
 .etiqueta-nuevo {
   top: -8px;
   right: -12px;
@@ -393,15 +388,15 @@ const handleResetPassword = async () => {
   transform: rotateZ(8deg);
 }
 
-@keyframes flotar {
+@keyframes flotarImagen {
   0% {
-    transform: translateY(0px) rotateX(8deg) rotateY(-4deg);
+    transform: translateY(0px) rotateX(8deg) rotateY(-5deg);
   }
   50% {
-    transform: translateY(-10px) rotateX(12deg) rotateY(2deg);
+    transform: translateY(-10px) rotateX(12deg) rotateY(3deg);
   }
   100% {
-    transform: translateY(0px) rotateX(8deg) rotateY(-4deg);
+    transform: translateY(0px) rotateX(8deg) rotateY(-5deg);
   }
 }
 </style>

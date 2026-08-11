@@ -3,10 +3,13 @@
 
     <header class="bg-linear-to-r from-[#005596] to-[#00345c] text-white px-8 py-3 flex justify-between items-center shadow-lg border-b border-white/5">
       <div class="flex items-center gap-4">
-        <div class="contenedor-header-icono-3d relative shrink-0">
-          <div class="header-icono-cuerpo-3d">
-            <div class="header-texto-med">Med</div>
-            <div class="header-texto-go">Go+</div>
+        <div class="contenedor-header-logo-3d relative shrink-0">
+          <div class="header-logo-cuerpo-3d">
+            <img
+              src="/logo-medgo.jpg"
+              alt="MedGo+ Logo"
+              class="w-full h-full object-cover rounded-[9px] shadow-xs"
+            />
           </div>
         </div>
 
@@ -321,49 +324,39 @@ const confirmarLogout = () => {
   animation: bounce-gentle 2s ease-in-out infinite;
 }
 
-.contenedor-header-icono-3d {
+.contenedor-header-logo-3d {
   width: 42px;
   height: 42px;
   perspective: 600px;
-  animation: headerFlotar 4s ease-in-out infinite;
+  animation: headerFlotarImagen 4s ease-in-out infinite;
 }
 
-.header-icono-cuerpo-3d {
+.header-logo-cuerpo-3d {
   width: 100%;
   height: 100%;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #007bff 0%, #00c4cc 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-family: sans-serif;
+  border-radius: 11px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.15) 100%);
+
+  /* Sombras y profundidad adaptadas al header */
   box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.3),
-    inset 0 1.5px 3px rgba(255, 255, 255, 0.5),
-    inset 0 -2.5px 5px rgba(0, 0, 0, 0.2);
+    0 6px 14px rgba(0, 0, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1.5px 3px rgba(255, 255, 255, 0.7);
+
   transform: rotateX(8deg) rotateY(-4deg);
   transform-style: preserve-3d;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.header-texto-med {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  line-height: 1;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+.contenedor-header-logo-3d:hover .header-logo-cuerpo-3d {
+  transform: rotateX(0deg) rotateY(0deg) scale(1.05);
+  box-shadow:
+    0 8px 18px rgba(0, 180, 216, 0.4),
+    0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
-.header-texto-go {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  line-height: 1.1;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-}
-
-@keyframes headerFlotar {
+@keyframes headerFlotarImagen {
   0% { transform: translateY(0px) rotateX(8deg) rotateY(-4deg); }
   50% { transform: translateY(-3.5px) rotateX(10deg) rotateY(0deg); }
   100% { transform: translateY(0px) rotateX(8deg) rotateY(-4deg); }

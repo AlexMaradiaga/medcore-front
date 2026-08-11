@@ -13,7 +13,8 @@ export default {
         // ... otros colores
       },
       backgroundImage: {
-        'medgo-gradient': 'linear-gradient(135deg, #0066CC 0%, #00A3A3 100%)',
+        'medgo-gradient': 'linear-gradient(to right, #1d4ed8, #00a8b5, #12d3c7)',
+        'roatan-turquoise': 'linear-gradient(135deg, #0077b6 0%, #00b4d8 50%, #48cae4 100%)',
       }
     },
   },

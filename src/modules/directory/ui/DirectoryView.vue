@@ -6,10 +6,13 @@
       <div class="space-y-8">
         <div class="flex items-center gap-4 px-2 cursor-pointer group/logo" @click="activeTab = 'home'; subViewInstituciones = 'clinicas'">
 
-          <div class="contenedor-mini-icono-3d relative shrink-0">
-            <div class="mini-icono-cuerpo-3d">
-              <div class="mini-texto-med">Med</div>
-              <div class="mini-texto-go">Go+</div>
+          <div class="contenedor-mini-logo-3d relative shrink-0">
+            <div class="mini-logo-cuerpo-3d">
+              <img
+                src="/logo-medgo.jpg"
+                alt="MedGo+ Logo"
+                class="w-full h-full object-cover rounded-[11px] shadow-xs"
+              />
             </div>
           </div>
           <div class="flex flex-col">
@@ -967,14 +970,43 @@ onMounted(async () => {
 .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-.contenedor-mini-icono-3d { width: 48px; height: 48px; perspective: 600px; animation: miniFlotar 4.5s ease-in-out infinite; }
-.mini-icono-cuerpo-3d { width: 100%; height: 100%; border-radius: 12px; background: linear-gradient(135deg, #007bff 0%, #00c4cc 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-family: sans-serif; box-shadow: 0 6px 12px rgba(0, 50, 150, 0.18), inset 0 2px 3px rgba(255, 255, 255, 0.45), inset 0 -3px 6px rgba(0, 0, 0, 0.15); transform: rotateX(8deg) rotateY(-4deg); transform-style: preserve-3d; }
-.mini-texto-med { font-size: 11px; font-weight: 900; letter-spacing: -0.3px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
-.mini-texto-go { font-size: 10.5px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.1; text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+/* Mini Logo con Efecto 3D y Flotación para el Sidebar */
+.contenedor-mini-logo-3d {
+  width: 46px;
+  height: 46px;
+  perspective: 600px;
+  animation: miniFlotarImagen 4.5s ease-in-out infinite;
+}
 
-@keyframes miniFlotar {
-  0% { transform: translateY(0px) rotateX(8deg) rotateY(-4deg); }
-  50% { transform: translateY(-4px) rotateX(11deg) rotateY(1deg); }
-  100% { transform: translateY(0px) rotateX(8deg) rotateY(-4deg); }
+.mini-logo-cuerpo-3d {
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.15) 100%);
+
+  /* Sombras y bisel para efecto de volumen miniaturizado */
+  box-shadow:
+    0 8px 16px rgba(0, 120, 160, 0.22),
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    inset 0 1.5px 3px rgba(255, 255, 255, 0.8);
+
+  transform: rotateX(8deg) rotateY(-5deg);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto al pasar el cursor sobre el área del logo */
+.group\/logo:hover .mini-logo-cuerpo-3d {
+  transform: rotateX(0deg) rotateY(0deg) scale(1.06);
+  box-shadow:
+    0 10px 20px rgba(0, 150, 190, 0.32),
+    0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes miniFlotarImagen {
+  0% { transform: translateY(0px) rotateX(8deg) rotateY(-5deg); }
+  50% { transform: translateY(-4px) rotateX(11deg) rotateY(2deg); }
+  100% { transform: translateY(0px) rotateX(8deg) rotateY(-5deg); }
 }
 </style>
