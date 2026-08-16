@@ -151,7 +151,13 @@ import { useToast } from 'vue-toastification';
 import { PharmacyRepository } from '../infrastructure/PharmacyRepository';
 import type { RecetaFarmaciaDTO, EstadoReceta } from '../domain/PharmacyModels';
 import { useAuthStore } from '@/stores/auth';
+import { usePolling } from '@/shared/infrastructure/usePolling';
 
+usePolling(async () => {
+  if (criterioBusqueda.value.trim()) {
+    await buscarRecetas();
+  }
+}, 5000);
 const repo = new PharmacyRepository();
 const toast = useToast();
 const authStore = useAuthStore();

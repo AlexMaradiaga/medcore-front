@@ -1,3 +1,4 @@
+<!-- src/modules/patients/ui/components/MedicalHistoryView.vue -->
 <template>
   <div class="space-y-8 animate-fade-in text-left font-premium select-none">
 
@@ -24,13 +25,13 @@
         class="px-5 pb-4 uppercase text-xs tracking-widest transition-all cursor-pointer flex items-center gap-2 shrink-0"
       >
         <v-icon v-if="subTab.id === 'consultas'" name="bi-calendar-event" scale="0.9" />
-        <v-icon v-else-if="subTab.id === 'laboratorio'" name="bi-cone-striped" scale="0.9" />
+        <v-icon v-else-if="subTab.id === 'laboratorio'" name="bi-file-earmark-medical" scale="0.9" />
         <v-icon v-else-if="subTab.id === 'recetas'" name="bi-credit-card-fill" scale="0.9" />
         {{ subTab.label }}
       </button>
     </div>
 
-    <!-- INDICADOR DE CARGA -->
+    <!-- INDICADOR DE CARGA GENERAL -->
     <div v-if="loading" class="py-24 text-center flex justify-center items-center">
       <OrbsLoader />
     </div>
@@ -127,21 +128,87 @@
         </div>
       </div>
 
-      <!-- SUBTAB 2: LABORATORIO -->
-      <div v-if="activeSubTab === 'laboratorio'" class="py-20 bg-white border border-slate-100 rounded-[2.5rem] text-center space-y-5 shadow-2xs animate-fade-in my-4">
-        <div class="w-24 h-24 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center mx-auto border border-amber-100 shadow-inner">
-          <v-icon name="bi-cone-striped" scale="3.0" />
+      <!-- SUBTAB 2: LABORATORIO (CON FILTRADO Y MUESTRA SOLO DE EXÁMENES ACTIVOS) -->
+      <div v-if="activeSubTab === 'laboratorio'" class="space-y-6 animate-fade-in my-4">
+        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <v-icon name="bi-file-earmark-medical" class="text-[#005596]" />
+              Seguimiento de Órdenes y Resultados de Laboratorio
+            </h3>
+            <p class="text-xs font-bold text-slate-400 mt-0.5">
+              Consulte el estado en tiempo real y descargue los informes clínicos oficiales en PDF
+            </p>
+          </div>
+          <button
+            @click="loadLabOrders"
+            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-2 cursor-pointer border border-slate-200 shrink-0"
+          >
+            <v-icon name="bi-arrow-clockwise" /> Actualizar Estado
+          </button>
         </div>
-        <div class="space-y-2 max-w-md mx-auto px-4">
-          <h3 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Próximamente</h3>
-          <p class="text-slate-500 font-bold text-sm leading-relaxed">
-            El módulo de <strong class="text-slate-700">Exámenes de Laboratorio</strong> se encuentra actualmente en desarrollo y estará disponible en una próxima actualización.
-          </p>
+
+        <div v-if="loadingLabOrders" class="py-16 text-center text-xs font-black text-slate-400 animate-pulse uppercase tracking-widest">
+          Sincronizando estado de exámenes clínicos...
         </div>
-        <div>
-          <span class="inline-flex items-center gap-2 px-4 py-2 bg-amber-100/70 text-amber-800 rounded-xl text-xs font-black uppercase tracking-wider border border-amber-200/60 shadow-3xs">
-            <v-icon name="bi-tools" scale="0.85" /> Módulo en Construcción
-          </span>
+
+        <div v-else-if="ordenesLaboratorioFiltradas.length === 0" class="py-16 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">
+          {{ laboratorioId && laboratorioId > 0 ? 'No registra exámenes ni órdenes procesadas en este laboratorio.' : 'No registra solicitudes ni órdenes de laboratorio en su historial.' }}
+        </div>
+
+        <div v-else class="space-y-4">
+          <div
+            v-for="orden in ordenesLaboratorioFiltradas"
+            :key="orden.OrdenID"
+            class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs hover:border-blue-300 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+          >
+            <div class="space-y-2 text-left">
+              <div class="flex items-center gap-3">
+                <span class="font-mono font-black text-xs text-[#005596] bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                  {{ orden.CodigoOrden || `#ORD-${orden.OrdenID}` }}
+                </span>
+                <span :class="getLabBadgeClass(orden.Estado)" class="text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-2xs">
+                  {{ orden.Estado }}
+                </span>
+              </div>
+              <div>
+                <p v-if="orden.Laboratorio || orden.NombreLaboratorio" class="text-xs font-bold text-slate-500">
+                  Laboratorio: <span class="text-[#005596] font-black uppercase">{{ orden.Laboratorio || orden.NombreLaboratorio }}</span>
+                </p>
+                <p class="text-xs font-bold text-slate-500">
+                  Fecha de Registro: <span class="text-slate-800 font-mono">{{ orden.FechaOrden || 'Hoy' }}</span>
+                </p>
+                <p v-if="orden.Doctor" class="text-xs font-bold text-slate-500">
+                  Solicitado por: <span class="text-slate-800 uppercase">{{ orden.Doctor }}</span>
+                </p>
+                <p class="text-xs font-bold text-slate-500">
+                  Estudios Activos:
+                  <span class="text-slate-800 font-black">
+                    {{ obtenerExamenesActivosTexto(orden) }}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div class="w-full md:w-auto flex flex-col sm:flex-row items-center gap-3">
+              <div v-if="orden.Estado === 'Aceptada'" class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span> Orden Aceptada por el Laboratorio
+              </div>
+
+              <a
+                v-if="orden.Estado === 'Completada' && orden.ArchivoPdfPath"
+                :href="`/storage/${orden.ArchivoPdfPath}`"
+                target="_blank"
+                class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <v-icon name="bi-file-earmark-pdf-fill" /> Descargar Resultados (PDF)
+              </a>
+
+              <span v-else-if="orden.Estado !== 'Completada'" class="text-xs font-bold text-slate-400 italic">
+                Resultados pendientes de emisión
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -232,7 +299,7 @@
 
     </div>
 
-    <!-- MODAL DE EXPEDIENTE (AQUÍ SÍ SE MUESTRAN DIAGNÓSTICO, EXAMEN FÍSICO Y RECETA) -->
+    <!-- MODAL DE EXPEDIENTE -->
     <Teleport to="body">
       <div v-if="selectedItem" class="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
         <div class="bg-white w-full max-w-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl border border-slate-100 my-auto flex flex-col justify-between max-h-[90vh]">
@@ -256,7 +323,7 @@
               </button>
             </div>
 
-            <!-- Segmented Control Interno (Diagnóstico, Examen Físico, Receta) -->
+            <!-- Segmented Control Interno -->
             <div class="grid grid-cols-3 gap-2 bg-slate-100/80 p-1.5 rounded-2xl mt-5">
               <button
                 @click="modalTab = 'diagnostico'"
@@ -315,7 +382,7 @@
               </div>
             </div>
 
-            <!-- PESTAÑA MODAL 2: EXAMEN FÍSICO POR SISTEMAS (DE ESTA CITA) -->
+            <!-- PESTAÑA MODAL 2: EXAMEN FÍSICO POR SISTEMAS -->
             <div v-else-if="modalTab === 'examenes'" class="space-y-3 animate-fade-in my-auto">
               <div v-if="examenesDeCita.length === 0" class="text-center py-10 bg-slate-50 rounded-3xl border border-slate-100 text-slate-400 text-xs font-bold uppercase tracking-wider">
                 No se registraron evaluaciones de examen físico en esta cita.
@@ -430,7 +497,9 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useToast } from 'vue-toastification';
 import { AppointmentRepository } from '../infrastructure/AppointmentRepo';
+import { LaboratoryRepository } from '../../laboratories/infrastructure/LaboratoryRepository';
 import type { MedicalRecord, Exam, Prescription } from '../../appointments/domain/Appointment';
+import type { LaboratoryOrderDTO, EstadoOrdenLaboratorio } from '../../laboratories/domain/LaboratoryModels';
 import api from '@/shared/infrastructure/api';
 
 import OrbsLoader from '../../../components/common/OrbsLoader.vue';
@@ -444,13 +513,13 @@ import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
 import {
   BiFolderFill, BiCalendarEvent, BiFileEarmarkTextFill, BiCreditCardFill,
   BiBuilding, BiCheckCircleFill, BiExclamationCircleFill, BiSearch, BiPeopleFill,
-  BiDownload, BiShareFill, BiConeStriped, BiTools
+  BiDownload, BiShareFill, BiFileEarmarkMedical, BiArrowClockwise, BiFileEarmarkPdfFill
 } from 'oh-vue-icons/icons';
 
 addIcons(
   BiFolderFill, BiCalendarEvent, BiFileEarmarkTextFill, BiCreditCardFill,
   BiBuilding, BiCheckCircleFill, BiExclamationCircleFill, BiSearch, BiPeopleFill,
-  BiDownload, BiShareFill, BiConeStriped, BiTools
+  BiDownload, BiShareFill, BiFileEarmarkMedical, BiArrowClockwise, BiFileEarmarkPdfFill
 );
 
 interface PdfMakeCustomInstance {
@@ -464,11 +533,14 @@ pdfMakeContext.vfs = vfsFonts.pdfMake ? vfsFonts.pdfMake.vfs : vfsFonts.vfs;
 const props = withDefaults(defineProps<{
   usuarioId: number;
   viewMode?: 'completo' | 'recetas';
+  laboratorioId?: number;
 }>(), {
-  viewMode: 'completo'
+  viewMode: 'completo',
+  laboratorioId: 0
 });
 
 const repo = new AppointmentRepository();
+const labRepo = new LaboratoryRepository();
 const toast = useToast();
 
 const history = ref<MedicalRecord[]>([]);
@@ -476,9 +548,10 @@ const exams = ref<Exam[]>([]);
 const prescriptions = ref<Prescription[]>([]);
 const selectedItem = ref<MedicalRecord | null>(null);
 
-// Estado de navegación interna del Modal (3 pestañas)
-const modalTab = ref<'diagnostico' | 'examenes' | 'recetas'>('diagnostico');
+const labOrders = ref<LaboratoryOrderDTO[]>([]);
+const loadingLabOrders = ref<boolean>(false);
 
+const modalTab = ref<'diagnostico' | 'examenes' | 'recetas'>('diagnostico');
 const activeSubTab = ref<string>(props.viewMode === 'recetas' ? 'recetas' : 'consultas');
 const loading = ref<boolean>(false);
 
@@ -489,29 +562,57 @@ const pdfUrl = ref<string | null>(null);
 const pdfLoading = ref<boolean>(false);
 const recetaSeleccionadaId = ref<number>(0);
 
-// PESTAÑAS BASE DISPONIBLES
 const subTabs = [
   { id: 'consultas', label: 'Consultas' },
   { id: 'laboratorio', label: 'Laboratorio' },
   { id: 'recetas', label: 'Recetas' }
 ];
 
-// FILTRADO DE PESTAÑAS PRINCIPALES SEGÚN EL VIEWMODE
 const filtradosSubTabs = computed(() => {
   if (props.viewMode === 'recetas') {
-    // Modo "Mis Recetas": muestra únicamente el tab de Recetas
     return subTabs.filter(tab => tab.id === 'recetas');
   }
-  // Modo "Historial Clínico": muestra únicamente Consultas y Laboratorio
   return subTabs.filter(tab => tab.id !== 'recetas');
 });
+
+// COMPUTADA CORREGIDA: Sin errores de TypeScript y con casteo seguro
+const ordenesLaboratorioFiltradas = computed<LaboratoryOrderDTO[]>(() => {
+  if (!props.laboratorioId || props.laboratorioId === 0) {
+    return labOrders.value;
+  }
+  return labOrders.value.filter((orden: LaboratoryOrderDTO) => {
+    const rawOrd = orden as unknown as Record<string, unknown>;
+    const targetLabId = Number(
+      orden.LaboratorioID ||
+      orden.LaboratorioId ||
+      orden.EntidadID ||
+      rawOrd.entidad_id ||
+      0
+    );
+    return targetLabId === Number(props.laboratorioId);
+  });
+});
+
+// Devuelve únicamente la cadena de texto con los exámenes activos (NO cancelados)
+const obtenerExamenesActivosTexto = (orden: LaboratoryOrderDTO): string => {
+  if (orden.examenes && orden.examenes.length > 0) {
+    const activos = orden.examenes.filter(e => e.Estado !== 'Cancelado');
+    if (activos.length > 0) {
+      return activos.map(e => e.NombreExamen).join(', ');
+    }
+  }
+  return orden.Examen || 'Sin información de exámenes';
+};
 
 watch(() => props.viewMode, (newMode) => {
   activeSubTab.value = newMode === 'recetas' ? 'recetas' : 'consultas';
 });
 
-watch(activeSubTab, () => {
+watch(activeSubTab, (newTab) => {
   paginaRecetas.value = 1;
+  if (newTab === 'laboratorio') {
+    void loadLabOrders();
+  }
 });
 
 const totalPaginasRecetas = computed(() => Math.ceil(prescriptions.value.length / tarjetasPorPagina));
@@ -520,7 +621,30 @@ const recetasPaginadas = computed(() => {
   return prescriptions.value.slice(inicio, inicio + tarjetasPorPagina);
 });
 
-// CRUCE DE EXÁMENES DE LA CITA
+const getLabBadgeClass = (estado: EstadoOrdenLaboratorio | string): string => {
+  switch (estado) {
+    case 'Emitida': return 'bg-blue-100 text-blue-800 border border-blue-200';
+    case 'Aceptada': return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+    case 'Paciente Recibido': return 'bg-amber-100 text-amber-800 border border-amber-200';
+    case 'Completada': return 'bg-sky-100 text-sky-800 border border-sky-200';
+    default: return 'bg-slate-100 text-slate-600 border border-slate-200';
+  }
+};
+
+const loadLabOrders = async (): Promise<void> => {
+  if (!props.usuarioId || props.usuarioId === 0) return;
+  loadingLabOrders.value = true;
+  try {
+    const rawOrders = await labRepo.getOrdenesPaciente(props.usuarioId);
+    labOrders.value = rawOrders as unknown as LaboratoryOrderDTO[];
+  } catch (error: unknown) {
+    console.error("Error al obtener las órdenes de laboratorio:", error);
+    toast.error("No se pudo obtener el historial de laboratorio.");
+  } finally {
+    loadingLabOrders.value = false;
+  }
+};
+
 const examenesDeCita = computed(() => {
   if (!selectedItem.value) return [];
   const targetCitaId = Number(selectedItem.value.CitaID);
@@ -545,7 +669,6 @@ const examenesDeCita = computed(() => {
   return Array.from(mapaUnicos.values());
 });
 
-// CRUCE DE RECETAS DE LA CITA
 const recetasDeCita = computed(() => {
   if (!selectedItem.value) return [];
   const targetCitaId = Number(selectedItem.value.CitaID);
@@ -745,6 +868,9 @@ const showDetail = (item: MedicalRecord): void => {
 
 onMounted(() => {
   void loadData();
+  if (activeSubTab.value === 'laboratorio') {
+    void loadLabOrders();
+  }
 });
 </script>
 

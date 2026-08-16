@@ -202,6 +202,7 @@ import type { DoctorAppointment } from '../domain/DoctorAppointment';
 import { useMedicalStore } from '@/stores/medicalStore';
 import type { Patient } from '@/modules/patients/domain/entities/Patient';
 import api from '@/shared/infrastructure/api';
+import { usePolling } from '@/shared/infrastructure/usePolling';
 import type { Doctor } from '@/modules/directory/domain/entities/Doctor';
 
 const router = useRouter();
@@ -219,6 +220,9 @@ const motivoRechazo = ref<string>('');
 const selectedCitaId = ref<number | null>(null);
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
+usePolling(async () => {
+  await loadDoctorData();
+}, 5000);
 const mostrarGestionTarifas = computed<boolean>(() => {
   const userRaw = localStorage.getItem('user');
   let entidadId: number | null = null;

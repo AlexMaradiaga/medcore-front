@@ -6,20 +6,20 @@
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
         <div class="text-left">
           <h2 class="text-xl font-black text-[#005596] tracking-tight uppercase flex items-center gap-2">
-            <VIcon name="bi-file-earmark-medical" scale="1.1" /> Prescripción Médica
+            <VIcon name="bi-file-earmark-medical" scale="1.1" /> {{ tituloDocumento }}
           </h2>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-          <button @click="compartirDocumentoFisico" :disabled="cargandoReceta || medicamentosPrescritos.length === 0 || procesandoFisico" class="h-9 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3.5 rounded-xl font-black uppercase text-[9px] tracking-wider shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 border-b-4 border-b-emerald-300 active:translate-y-0.5 active:border-b-0 disabled:opacity-40">
+          <button @click="compartirDocumentoFisico" :disabled="cargandoReceta || (medicamentosPrescritos.length === 0 && examenesPrescritos.length === 0) || procesandoFisico" class="h-9 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3.5 rounded-xl font-black uppercase text-[9px] tracking-wider shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 border-b-4 border-b-emerald-300 active:translate-y-0.5 active:border-b-0 disabled:opacity-40">
             <VIcon name="bi-share-fill" scale="0.8" /> Compartir
           </button>
 
-          <button @click="descargarPdfDirecto" :disabled="cargandoReceta || medicamentosPrescritos.length === 0 || procesandoFisico" class="h-9 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 rounded-xl font-black uppercase text-[9px] tracking-wider shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 border-b-4 border-b-purple-300 active:translate-y-0.5 active:border-b-0 disabled:opacity-40">
+          <button @click="descargarPdfDirecto" :disabled="cargandoReceta || (medicamentosPrescritos.length === 0 && examenesPrescritos.length === 0) || procesandoFisico" class="h-9 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 rounded-xl font-black uppercase text-[9px] tracking-wider shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 border-b-4 border-b-purple-300 active:translate-y-0.5 active:border-b-0 disabled:opacity-40">
             <VIcon name="bi-download" scale="0.8" /> Descargar
           </button>
 
-          <button @click="imprimirDocumentoReceta" :disabled="cargandoReceta || medicamentosPrescritos.length === 0 || procesandoFisico" class="h-9 bg-cyan-50 hover:bg-cyan-100 text-[#005596] border border-cyan-200 px-3.5 rounded-xl font-black uppercase text-[9px] tracking-wider shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 border-b-4 border-b-cyan-300 active:translate-y-0.5 active:border-b-0 disabled:opacity-40">
+          <button @click="imprimirDocumentoReceta" :disabled="cargandoReceta || (medicamentosPrescritos.length === 0 && examenesPrescritos.length === 0) || procesandoFisico" class="h-9 bg-cyan-50 hover:bg-cyan-100 text-[#005596] border border-cyan-200 px-3.5 rounded-xl font-black uppercase text-[9px] tracking-wider shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 border-b-4 border-b-cyan-300 active:translate-y-0.5 active:border-b-0 disabled:opacity-40">
             <VIcon name="bi-printer-fill" scale="0.8" /> Imprimir
           </button>
 
@@ -40,7 +40,7 @@
           <div style="border-bottom: 4px solid #005596; padding-bottom: 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="text-align: left;">
               <span style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(to right, #ebf3fc, #f3effa, #eaf7ee); color: #005596; border: 1px solid #b3d1eb; padding: 6px 12px; border-radius: 0.75rem; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
-                <VIcon name="bi-file-earmark-medical" scale="0.8" /> Receta Médica Autorizada
+                <VIcon name="bi-file-earmark-medical" scale="0.8" /> {{ badgeDocumento }}
               </span>
               <h3 style="font-size: 18px; font-weight: 900; color: #1e293b; text-transform: uppercase; margin: 0; line-height: 1.2;">
                 Dr. {{ nombreDoctor }}
@@ -64,7 +64,6 @@
                 <VIcon name="bi-person-badge-fill" scale="0.85" /> Información del Paciente Asignado
               </h4>
             </div>
-            <!-- CAMBIO: Se ajusta a 4 columnas en grid para agregar Sangre -->
             <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
               <div class="space-y-1">
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
@@ -78,7 +77,6 @@
                 </p>
                 <p class="text-sm font-black text-slate-700 font-mono">{{ edadPaciente }} Años</p>
               </div>
-              <!-- BLOQUE DE SANGRE AÑADIDO EN LA VISTA WEB -->
               <div class="space-y-1">
                 <p class="text-[9px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1">
                   🩸 Tipo Sangre
@@ -94,7 +92,7 @@
             </div>
           </div>
 
-          <!-- BLOQUE DE CITA DE SEGUIMIENTO PROGRAMADA (WEB RECETA) -->
+          <!-- BLOQUE DE CITA DE SEGUIMIENTO PROGRAMADA -->
           <div v-if="fechaSeguimiento" style="background-color: #f3e8ff; border: 1px solid #d8b4fe; border-left: 6px solid #9333ea; border-radius: 1rem; padding: 14px 20px; margin-bottom: 24px;">
             <p style="margin: 0; font-size: 11px; font-weight: 900; color: #581c87; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
               <VIcon name="bi-calendar-event" scale="0.9" /> Próxima Cita de Revisión / Seguimiento Programada
@@ -105,7 +103,8 @@
             </p>
           </div>
 
-          <div style="border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; margin-bottom: 32px;">
+          <!-- TABLA DE MEDICAMENTOS PRESCRITOS -->
+          <div v-if="medicamentosPrescritos.length > 0" style="border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; margin-bottom: 32px;">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
               <thead style="background-color: #e6eff7; border-bottom: 1px solid #ccdfef;">
                 <tr>
@@ -125,6 +124,39 @@
                   </td>
                   <td style="padding: 16px; font-size: 12px; font-weight: 900; color: #1e293b;">{{ med.Dosis }}</td>
                   <td style="padding: 16px; font-size: 12px; color: #64748b; font-style: italic;">{{ med.Indicaciones }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TABLA DE EXÁMENES DE LABORATORIO INDICADOS -->
+          <div v-if="examenesPrescritos.length > 0" style="border: 1px solid #bbf7d0; border-radius: 1rem; overflow: hidden; margin-bottom: 32px; background-color: #ffffff;">
+            <div style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0; padding: 12px 16px;">
+              <h4 style="font-size: 11px; font-weight: 900; color: #15803d; text-transform: uppercase; margin: 0;">
+                🔬 Orden / Indicación de Exámenes de Laboratorio
+              </h4>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                <tr>
+                  <th style="padding: 12px 16px; font-size: 10px; font-weight: 900; color: #15803d; text-transform: uppercase;">#</th>
+                  <th style="padding: 12px 16px; font-size: 10px; font-weight: 900; color: #15803d; text-transform: uppercase;">Estudio / Examen Analítico</th>
+                  <th style="padding: 12px 16px; font-size: 10px; font-weight: 900; color: #15803d; text-transform: uppercase;">Categoría</th>
+                  <th style="padding: 12px 16px; font-size: 10px; font-weight: 900; color: #15803d; text-transform: uppercase;">Condiciones / Ayuno</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(ex, index) in examenesPrescritos" :key="index" style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="padding: 12px 16px; font-size: 12px; color: #94a3b8;">{{ index + 1 }}</td>
+                  <td style="padding: 12px 16px; font-size: 12px; font-weight: 900; color: #1e293b; text-transform: uppercase;">{{ ex.NombreExamen }}</td>
+                  <td style="padding: 12px 16px;">
+                    <span style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 0.5rem; color: #475569; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+                      {{ ex.Categoria || 'Análisis Clínico' }}
+                    </span>
+                  </td>
+                  <td style="padding: 12px 16px; font-size: 11px; color: #15803d; font-style: italic;">
+                    {{ ex.CondicionesPaciente || 'Sin condiciones especiales' }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -154,7 +186,7 @@
     <div class="hidden print:block w-full text-black font-sans bg-white p-0 text-left leading-normal">
       <div class="border-b-4 border-black pb-4 mb-6 flex justify-between items-start">
         <div>
-          <h1 class="text-2xl font-bold uppercase tracking-tight">Receta Médica Autorizada</h1>
+          <h1 class="text-2xl font-bold uppercase tracking-tight">{{ badgeDocumento }}</h1>
           <h2 class="text-lg font-bold mt-1 uppercase">Dr. {{ nombreDoctor }}</h2>
           <p class="text-xs font-semibold tracking-wide">ESPECIALIDAD: {{ doctorEspecialidad }}</p>
         </div>
@@ -176,7 +208,6 @@
             <tr>
               <td class="p-2 border border-black w-1/4 font-bold bg-slate-50">Edad:</td>
               <td class="p-2 border border-black">{{ edadPaciente }} Años</td>
-              <!-- CAMBIO: Tipo de sangre en la tabla impresa -->
               <td class="p-2 border border-black w-1/4 font-bold bg-slate-50">Tipo de Sangre:</td>
               <td class="p-2 border border-black font-bold text-red-600 uppercase">{{ tipoSangrePaciente }}</td>
             </tr>
@@ -196,7 +227,8 @@
         </p>
       </div>
 
-      <div class="mb-8">
+      <!-- SECCIÓN II: MEDICAMENTOS EN IMPRESIÓN -->
+      <div v-if="medicamentosPrescritos.length > 0" class="mb-8">
         <h3 class="text-xs font-bold uppercase tracking-wider border-b border-black pb-1 mb-2">II. Prescripción Médica</h3>
         <table class="w-full text-xs border border-black text-left">
           <thead>
@@ -213,6 +245,29 @@
               <td class="p-2 border border-black font-bold uppercase">{{ med.NombreMedicamento }}</td>
               <td class="p-2 border border-black font-semibold">{{ med.Dosis }}</td>
               <td class="p-2 border border-black italic">{{ med.Indicaciones }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECCIÓN III: EXÁMENES DE LABORATORIO EN IMPRESIÓN -->
+      <div v-if="examenesPrescritos.length > 0" class="mb-8">
+        <h3 class="text-xs font-bold uppercase tracking-wider border-b border-black pb-1 mb-2">III. Exámenes de Laboratorio Indicados</h3>
+        <table class="w-full text-xs border border-black text-left">
+          <thead>
+            <tr class="bg-slate-100 font-bold">
+              <th class="p-2 border border-black w-10 text-center">#</th>
+              <th class="p-2 border border-black w-1/3">Estudio / Examen</th>
+              <th class="p-2 border border-black w-1/4">Categoría</th>
+              <th class="p-2 border border-black">Condiciones / Ayuno</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(ex, idx) in examenesPrescritos" :key="idx">
+              <td class="p-2 border border-black text-center font-bold">{{ idx + 1 }}</td>
+              <td class="p-2 border border-black font-bold uppercase">{{ ex.NombreExamen }}</td>
+              <td class="p-2 border border-black font-semibold uppercase">{{ ex.Categoria || 'Análisis Clínico' }}</td>
+              <td class="p-2 border border-black italic">{{ ex.CondicionesPaciente || 'Sin preparación especial' }}</td>
             </tr>
           </tbody>
         </table>
@@ -281,6 +336,12 @@ interface FilaReceta {
   CodigoCanje?: string;
 }
 
+interface ExamenPrescrito {
+  NombreExamen: string;
+  Categoria?: string;
+  CondicionesPaciente?: string;
+}
+
 const pdfMakeTyped = pdfMake as unknown as ExtendedPdfMake;
 pdfMakeTyped.vfs = (pdfFonts as unknown as { vfs: Record<string, string> }).vfs;
 
@@ -291,16 +352,38 @@ const medicalStore = useMedicalStore();
 const repo = new DoctorRepository();
 
 const medicamentosPrescritos = ref<FilaReceta[]>([]);
+const examenesPrescritos = ref<ExamenPrescrito[]>([]);
 const cargandoReceta = ref<boolean>(true);
 const procesandoFisico = ref<boolean>(false);
-// CAMBIO 1: Se añade 'tipoSangre' en la ref del paciente
 const pacienteBackup = ref({ nombre: '', edad: '', tel: '', tipoSangre: '' });
 const fechaSeguimiento = ref<string>('');
+
+const tieneMedicamentos = computed(() => medicamentosPrescritos.value.length > 0);
+const tieneExamenes = computed(() => examenesPrescritos.value.length > 0);
+
+const tituloDocumento = computed(() => {
+  if (tieneMedicamentos.value && tieneExamenes.value) {
+    return 'Prescripción Médica & Orden de Laboratorio';
+  }
+  if (tieneExamenes.value) {
+    return 'Orden de Exámenes de Laboratorio';
+  }
+  return 'Prescripción Médica Autorizada';
+});
+
+const badgeDocumento = computed(() => {
+  if (tieneMedicamentos.value && tieneExamenes.value) {
+    return 'Receta Médica & Orden de Laboratorio';
+  }
+  if (tieneExamenes.value) {
+    return 'Orden de Laboratorio Autorizada';
+  }
+  return 'Receta Médica Autorizada';
+});
 
 const nombrePaciente = computed(() => pacienteBackup.value.nombre || 'Paciente');
 const edadPaciente = computed(() => pacienteBackup.value.edad || '---');
 const telefonoPaciente = computed(() => pacienteBackup.value.tel || '---');
-// CAMBIO 2: Computed para Sangre
 const tipoSangrePaciente = computed(() => pacienteBackup.value.tipoSangre || 'N/A');
 
 const doctorMapeado = computed<Record<string, unknown>>(() => {
@@ -361,14 +444,13 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
     pageSize: 'LETTER',
     pageMargins: [40, 40, 40, 40],
     content: [
-      { text: 'RECETA MÉDICA AUTORIZADA', style: 'header' },
+      { text: badgeDocumento.value.toUpperCase(), style: 'header' },
       { text: `Doctor: ${nombreDoctor.value}`, style: 'info' },
       { text: `Especialidad: ${doctorEspecialidad.value}`, style: 'info' },
       { text: `Nº Colegiado: ${numeroColegiadoDoctor.value}`, style: 'info', margin: [0, 0, 0, 20] },
       { text: 'INFORMACIÓN DEL PACIENTE', style: 'subheader' },
       {
         table: {
-          // CAMBIO 3: Se incluye Tipo Sangre en la grilla del PDF generado por pdfmake
           widths: ['*', 'auto', 'auto', 'auto'],
           body: [
             ['Nombre', 'Edad', 'Tipo Sangre', 'Teléfono'],
@@ -403,20 +485,43 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
     });
   }
 
+  if (medicamentosPrescritos.value.length > 0) {
+    (def.content as Array<unknown>).push(
+      { text: 'MEDICAMENTOS PRESCRITOS', style: 'subheader' },
+      {
+        table: {
+          widths: [20, 150, 100, '*'],
+          body: [
+            ['#', 'Medicamento', 'Dosis', 'Indicaciones'],
+            ...medicamentosPrescritos.value.map((med, i) => [
+              i + 1, med.NombreMedicamento, med.Dosis, med.Indicaciones
+            ])
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      }
+    );
+  }
+
+  if (examenesPrescritos.value.length > 0) {
+    (def.content as Array<unknown>).push(
+      { text: 'EXÁMENES DE LABORATORIO INDICADOS', style: 'subheader' },
+      {
+        table: {
+          widths: [20, 170, 100, '*'],
+          body: [
+            ['#', 'Estudio / Examen', 'Categoría', 'Condiciones / Ayuno'],
+            ...examenesPrescritos.value.map((ex, i) => [
+              i + 1, ex.NombreExamen, ex.Categoria || 'Análisis Clínico', ex.CondicionesPaciente || 'Sin preparación especial'
+            ])
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      }
+    );
+  }
+
   (def.content as Array<unknown>).push(
-    { text: 'MEDICAMENTOS PRESCRITOS', style: 'subheader' },
-    {
-      table: {
-        widths: [20, 150, 100, '*'],
-        body: [
-          ['#', 'Medicamento', 'Dosis', 'Indicaciones'],
-          ...medicamentosPrescritos.value.map((med, i) => [
-            i + 1, med.NombreMedicamento, med.Dosis, med.Indicaciones
-          ])
-        ]
-      },
-      margin: [0, 0, 0, 30]
-    },
     {
       table: {
         widths: ['auto', '*'],
@@ -456,27 +561,69 @@ onMounted(async () => {
     const resGuardado = localStorage.getItem('MedGo+_resumen_compartir') || localStorage.getItem('medcore_resumen_compartir');
 
     if (resGuardado) {
-      const d = JSON.parse(resGuardado);
-      medicamentosPrescritos.value = d.detalle_medicamentos || [];
-      // CAMBIO 4: Se asigna la propiedad del tipo de sangre desde el localStorage
+      const d = JSON.parse(resGuardado) as Record<string, unknown>;
+      console.log('[PrescriptionPage] Estructura recuperada:', d);
+
+      // 1. Extraer y normalizar Medicamentos
+      const rawMeds = (d.detalle_medicamentos || d.medicamentos || d.prescripcion || []) as Record<string, unknown>[];
+      medicamentosPrescritos.value = rawMeds.map((med) => ({
+        NombreMedicamento: String(med.NombreMedicamento || med.nombre || med.medicamento || 'Medicamento'),
+        Dosis: String(med.Dosis || med.dosis || med.posologia || 'Según indicación'),
+        Indicaciones: String(med.Indicaciones || med.indicaciones || med.instrucciones || 'Sin especificación'),
+        CodigoCanje: String(med.CodigoCanje || med.codigo_canje || d.codigoCanje || '')
+      }));
+
+      // 2. Extraer y normalizar Exámenes de Laboratorio
+      const rawExamenes = (d.examenes ||
+                          d.detalle_examenes ||
+                          d.examenesLaboratorio ||
+                          d.examenes_laboratorio ||
+                          d.selectedExams ||
+                          d.examenesSeleccionados ||
+                          d.estudios ||
+                          d.laboratorio || []) as Record<string, unknown>[];
+
+      examenesPrescritos.value = rawExamenes.map((ex) => ({
+        NombreExamen: String(ex.NombreExamen || ex.nombreExamen || ex.nombre || ex.Nombre || ex.examen || 'Estudio Clínico'),
+        Categoria: String(ex.Categoria || ex.categoria || 'Análisis Clínico'),
+        CondicionesPaciente: String(ex.CondicionesPaciente || ex.condiciones || ex.indicaciones || ex.Condiciones || 'Sin preparación especial')
+      }));
+
+      // 3. Datos del Paciente
       pacienteBackup.value = {
-        nombre: d.paciente || '',
-        edad: d.edad || '',
-        tel: d.telefono || '',
-        tipoSangre: d.tipoSangre || d.TipoSangre || 'N/A'
+        nombre: String(d.paciente || d.nombrePaciente || d.nombre || ''),
+        edad: String(d.edad || d.edadPaciente || ''),
+        tel: String(d.telefono || d.telefonoPaciente || d.tel || ''),
+        tipoSangre: String(d.tipoSangre || d.TipoSangre || 'N/A')
       };
 
-      fechaSeguimiento.value = d.fechaSeguimiento || '';
+      fechaSeguimiento.value = String(d.fechaSeguimiento || d.fecha_seguimiento || '');
     }
 
+    // Fallback de carga desde el Repositorio/Backend
     if (medicamentosPrescritos.value.length === 0 && idUrl > 0) {
       const res = await repo.getRecetaPorConsulta(idUrl);
       if (res.estado === 'success' && res.datos) {
-        medicamentosPrescritos.value = res.datos;
+        const datosBackend = res.datos as unknown;
+        if (Array.isArray(datosBackend)) {
+          medicamentosPrescritos.value = datosBackend as FilaReceta[];
+        } else if (typeof datosBackend === 'object' && datosBackend !== null) {
+          const backendObj = datosBackend as Record<string, unknown>;
+          medicamentosPrescritos.value = (backendObj.medicamentos || backendObj.detalle_medicamentos || []) as FilaReceta[];
+
+          if (backendObj.examenes || backendObj.detalle_examenes) {
+            const rawBackEx = (backendObj.examenes || backendObj.detalle_examenes) as Record<string, unknown>[];
+            examenesPrescritos.value = rawBackEx.map((ex) => ({
+              NombreExamen: String(ex.NombreExamen || ex.nombre || 'Estudio Clínico'),
+              Categoria: String(ex.Categoria || 'Análisis Clínico'),
+              CondicionesPaciente: String(ex.CondicionesPaciente || 'Sin preparación especial')
+            }));
+          }
+        }
       }
     }
   } catch (err) {
-    console.error("Error:", err);
+    console.error("Error al cargar la receta y orden:", err);
   } finally {
     cargandoReceta.value = false;
   }
@@ -512,13 +659,8 @@ const compartirDocumentoFisico = async () => {
   if (procesandoFisico.value) return;
   procesandoFisico.value = true;
   try {
-    const listadoMedicamentos = medicamentosPrescritos.value.map((med, i) =>
-      `${i + 1}. 💊 *${med.NombreMedicamento.toUpperCase()}*\n   Dosis: ${med.Dosis}\n   Indicaciones: _${med.Indicaciones}_`
-    ).join('\n\n');
-
-    // CAMBIO 5: Se añade Tipo de Sangre al mensaje compartido
     let textoCompartir =
-      `🏥 *MedGo+* \n*PRESCRIPCIÓN MÉDICA AUTORIZADA*\n\n` +
+      `🏥 *MedGo+* \n*${badgeDocumento.value.toUpperCase()}*\n\n` +
       `👤 *Paciente:* ${nombrePaciente.value}\n` +
       `🩸 *Tipo Sangre:* ${tipoSangrePaciente.value}\n` +
       `👨‍⚕️ *Doctor:* ${nombreDoctor.value}\n📅 *Fecha:* ${fechaActual.value}\n\n`;
@@ -527,14 +669,27 @@ const compartirDocumentoFisico = async () => {
       textoCompartir += `⚠️ *REVISIÓN / CITA DE SEGUIMIENTO (REGRESAR):* ${formatearFechaEspecifica(fechaSeguimiento.value)}\n\n`;
     }
 
+    if (medicamentosPrescritos.value.length > 0) {
+      const listadoMedicamentos = medicamentosPrescritos.value.map((med, i) =>
+        `${i + 1}. 💊 *${med.NombreMedicamento.toUpperCase()}*\n   Dosis: ${med.Dosis}\n   Indicaciones: _${med.Indicaciones}_`
+      ).join('\n\n');
+      textoCompartir += `📋 *MEDICAMENTOS:* \n\n${listadoMedicamentos}\n\n`;
+    }
+
+    if (examenesPrescritos.value.length > 0) {
+      const listadoExamenes = examenesPrescritos.value.map((ex, i) =>
+        `${i + 1}. 🔬 *${ex.NombreExamen.toUpperCase()}*\n   Categoría: ${ex.Categoria || 'Análisis Clínico'}\n   Indicaciones: _${ex.CondicionesPaciente || 'Sin preparación especial'}_`
+      ).join('\n\n');
+      textoCompartir += `🧪 *EXÁMENES DE LABORATORIO INDICADOS:* \n\n${listadoExamenes}\n\n`;
+    }
+
     textoCompartir +=
-      `📋 *MEDICAMENTOS:* \n\n${listadoMedicamentos}\n\n` +
       `------------------------------------------\n` +
       `🔐 *ID:* ${codigoCanjeReal.value}\n🌐 *Ver receta oficial:* \n${window.location.href}`;
 
     if (navigator.share) {
       await navigator.share({
-        title: `Receta Médica - ${nombrePaciente.value}`,
+        title: `${badgeDocumento.value} - ${nombrePaciente.value}`,
         text: textoCompartir,
         url: window.location.href
       });

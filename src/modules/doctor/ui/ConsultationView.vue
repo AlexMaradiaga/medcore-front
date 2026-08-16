@@ -1,11 +1,10 @@
+<!-- src/modules/doctor/ui/ConsultationView.vue -->
 <template>
   <DoctorLayout>
     <main class="h-screen max-h-screen bg-slate-50/50 font-premium selection:bg-[#005596]/10 flex flex-col overflow-hidden">
-
       <!-- Cabecera de Paciente -->
       <div class="bg-linear-to-r from-[#005596] via-[#004b84] to-[#00345c] text-white px-12 py-5 flex flex-col md:flex-row justify-between items-start md:items-center shadow-lg relative overflow-hidden shrink-0">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-blue-400/20 via-transparent to-transparent pointer-events-none"></div>
-
         <div class="flex items-center gap-8 relative z-10">
           <button @click="router.back()" class="flex items-center gap-2 text-[10px] font-black bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-xl transition-all uppercase tracking-widest cursor-pointer active:scale-95 border border-white/10">
             <v-icon name="bi-arrow-left" scale="0.8" /> Volver
@@ -13,11 +12,10 @@
           <div class="text-left border-l border-white/20 pl-8">
             <h2 class="text-2xl font-black tracking-tight uppercase leading-none mb-1.5">{{ appointment?.Paciente }}</h2>
             <span class="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/10 text-blue-50">
-              <v-icon name="bi-person-badge-fill" scale="0.7" /> {{ appointment?.Edad }} Años • {{ appointment?.Genero === 'M' ? 'Masculino' : 'Femenino' }}
+              <v-icon name="bi-person-badge-fill" scale="0.7" /> {{ appointment?.Edad }} Años | {{ appointment?.Genero === 'M' ? 'Masculino' : 'Femenino' }}
             </span>
           </div>
         </div>
-
         <div class="flex flex-col items-end gap-2 mt-4 md:mt-0 w-full md:w-auto relative z-10">
           <div class="flex items-center gap-4 w-full md:w-auto bg-black/10 px-4 py-2.5 rounded-2xl border border-white/5">
             <span class="text-[10px] font-black uppercase tracking-wider text-blue-100">Progreso de Ficha: {{ progress }}%</span>
@@ -28,15 +26,15 @@
         </div>
       </div>
 
-      <!-- Pestañas de Navegación del Historial -->
+      <!-- Pestañas de Navegación -->
       <nav class="bg-white border-b border-slate-200/80 px-12 flex justify-center shadow-xs shrink-0 z-30 backdrop-blur-md">
-        <div class="flex gap-3 py-3 w-full max-w-2xl justify-center">
+        <div class="flex gap-3 py-3 w-full max-w-3xl justify-center">
           <button
-            v-for="tab in ['Subjetivo', 'Objetivo', 'Evaluación', 'Plan']"
+            v-for="tab in ['Subjetivo', 'Objetivo', 'Evaluación', 'Laboratorio', 'Plan']"
             :key="tab"
             @click="activeTab = tab"
             :class="[
-              'px-6 py-3 text-[11px] font-black uppercase tracking-widest transition-all duration-300 rounded-xl cursor-pointer active:scale-95 flex items-center justify-center gap-2 flex-1 sm:flex-initial',
+              'px-5 py-3 text-[11px] font-black uppercase tracking-widest transition-all duration-300 rounded-xl cursor-pointer active:scale-95 flex items-center justify-center gap-2 flex-1 sm:flex-initial',
               activeTab === tab
                 ? 'bg-linear-to-r from-[#005596] to-blue-600 text-white shadow-md shadow-blue-500/15 scale-102'
                 : 'text-slate-600 hover:text-[#005596] hover:bg-slate-100/80 font-bold'
@@ -50,12 +48,12 @@
       <div class="flex-1 overflow-y-auto p-8 max-w-7xl w-full mx-auto animate-fade-in custom-scrollbar pb-32">
         <div class="bg-white border border-slate-200/60 rounded-[2.5rem] p-10 shadow-xl min-h-125 relative overflow-hidden">
 
+          <!-- PESTAÑA: SUBJETIVO -->
           <div v-if="activeTab === 'Subjetivo'" class="space-y-8 animate-fade-in text-left">
             <div class="border-b border-slate-100 pb-3">
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Datos Subjetivos del Paciente</h3>
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Sintomatología reportada en la entrevista inicial</p>
             </div>
-
             <div class="bg-linear-to-r from-slate-50/50 to-white rounded-3xl p-8 border-l-4 border-l-[#005596] border-y border-r border-slate-200/60 space-y-5 relative shadow-xs">
               <div class="flex justify-between items-center">
                 <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -68,8 +66,6 @@
                   </button>
                 </div>
               </div>
-
-              <!-- ANTECEDENTES Y PATOLOGÍAS CORREGIDOS -->
               <div class="space-y-6">
                 <PatientBackgroundTabs
                   :enfermedadesText="obtenerEnfermedadesCronicas"
@@ -77,13 +73,11 @@
                   :medicamentosText="appointment?.MedicamentosActuales || null"
                 />
               </div>
-
               <div v-if="!isEditingSubjetivo" class="animate-fade-in pt-1">
                 <p class="text-slate-600 font-semibold leading-relaxed text-sm bg-white p-5 rounded-2xl border border-slate-100 shadow-inner">
                   {{ editableSubjetivo || (appointment?.Motivo + ' - ' + (appointment?.Sintomas || 'Sin síntomas registrados')) }}
                 </p>
               </div>
-
               <div class="space-y-4 animate-fade-in" v-else>
                 <textarea v-model="tempSubjetivo" class="w-full bg-white border-2 border-slate-200 rounded-2xl p-5 outline-hidden focus:border-blue-300 transition-all font-bold text-slate-700 min-h-32 shadow-inner"></textarea>
                 <div class="flex gap-3">
@@ -101,7 +95,6 @@
                 <h3 class="text-lg font-black text-slate-900 tracking-tight">Signos Vitales Actuales</h3>
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Constantes fisiológicas tomadas en el triaje clínico</p>
               </div>
-
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div v-for="campo in listaCamposSignos" :key="campo.key" class="bg-slate-50/60 border border-slate-200/70 rounded-2xl p-4 flex items-center justify-between shadow-3xs hover:bg-white hover:border-slate-300 transition-all duration-200">
                   <div class="space-y-1 flex-1">
@@ -110,7 +103,7 @@
                       <input
                         type="text"
                         v-model="form.signos_vitales[campo.key]"
-                        :placeholder="campo.key === 'temp' ? '36.5°C' : '120/80'"
+                        :placeholder="campo.key === 'temp' ? '36.5 °C' : '120/80'"
                         class="w-full bg-white border border-slate-200/80 focus:border-[#005596] outline-hidden rounded-xl py-2 pl-9 pr-3 font-black text-slate-800 text-xs shadow-inner font-mono transition-all focus:ring-2 focus:ring-blue-50"
                       >
                       <span class="absolute left-3 flex items-center pointer-events-none">
@@ -134,10 +127,8 @@
                 <h3 class="text-lg font-black text-slate-900 tracking-tight">Examen Físico Anatómico</h3>
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Exploración segmentaria y hallazgos patológicos</p>
               </div>
-
               <div class="space-y-3.5">
                 <div v-for="(sistema, index) in sistemasFisicos" :key="sistema.id" class="border border-slate-200 rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all duration-200">
-
                   <div @click="toggleSistema(index)" class="w-full flex justify-between items-center p-4 hover:bg-slate-50/70 transition-all cursor-pointer text-left select-none">
                     <div class="flex items-center gap-4">
                       <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border shadow-3xs', getSistemaStyles(sistema.nombre).bgClass]">
@@ -151,13 +142,11 @@
                     </div>
                     <v-icon name="bi-chevron-down" :class="['text-slate-400 transition-transform duration-200 mr-2', sistema.open ? 'rotate-180' : '']" scale="0.8" />
                   </div>
-
                   <div v-if="sistema.open" class="p-6 bg-slate-50/40 border-t border-slate-100 animate-fade-in space-y-5 text-left">
                     <label class="flex items-center gap-3 cursor-pointer group bg-white p-3.5 rounded-xl border border-slate-100 shadow-3xs w-fit">
                       <input type="checkbox" v-model="sistema.isNormal" @change="handleNormalChange(index)" class="w-4 h-4 rounded border-slate-300 text-[#005596] focus:ring-0">
                       <span class="text-xs font-black uppercase tracking-wide text-slate-600 group-hover:text-slate-900 transition-colors">Marcar Sistema como Sano / Normal</span>
                     </label>
-
                     <div v-if="!sistema.isNormal && form.examen_fisico_opciones[sistema.id]" class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-3xs animate-fade-in">
                       <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Catálogo Clínico de Hallazgos Auxiliares:</p>
                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -167,13 +156,11 @@
                         </label>
                       </div>
                     </div>
-
                     <div class="space-y-1.5 pt-2">
                       <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Notas Médicas Adicionales:</label>
                       <textarea v-model="form.examen_fisico_notes[sistema.id]" placeholder="Describa la anomalía con sus especificaciones clínicas..." class="w-full bg-white border border-slate-200 rounded-xl p-4 outline-hidden focus:border-blue-400 font-bold text-slate-700 min-h-20 transition-all text-xs shadow-inner"></textarea>
                     </div>
                   </div>
-
                 </div>
               </div>
             </section>
@@ -185,7 +172,6 @@
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Juicio Diagnóstico de la Sesión</h3>
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Mapeo automatizado de patologías OMS CIE-11 y análisis facultativo libre</p>
             </div>
-
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               <div class="space-y-5">
                 <div class="relative w-full">
@@ -199,7 +185,6 @@
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     </span>
                   </div>
-
                   <div v-if="mostrarDropdown && resultadosDiagnosticos.length > 0" v-click-outside="cerrarDropdown" class="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-56 overflow-y-auto animate-fade-in custom-scrollbar">
                     <ul class="divide-y divide-slate-100">
                       <li v-for="diag in resultadosDiagnosticos" :key="diag.codigo" @click="seleccionarDiagnostico(diag)" class="flex justify-between items-center px-5 py-3.5 hover:bg-slate-50 text-xs font-bold text-slate-700 transition-all cursor-pointer group">
@@ -208,7 +193,6 @@
                     </ul>
                   </div>
                 </div>
-
                 <div class="space-y-2.5 max-h-76 overflow-y-auto pr-1 custom-scrollbar">
                   <div class="text-center py-12 border border-dashed border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-400 tracking-widest flex flex-col items-center justify-center gap-2" v-if="form.diagnostico.length === 0">
                     <v-icon name="bi-folder-x" scale="1.2" class="text-slate-300" /> Ningún código OMS anexado a la consulta.
@@ -224,12 +208,19 @@
                   </div>
                 </div>
               </div>
-
               <div class="flex flex-col h-full space-y-2">
                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block">Notas de Evolución y Criterio Clínico Libre</label>
                 <textarea v-model="form.diagnostico_extenso" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 outline-hidden focus:bg-white focus:border-[#005596] font-bold text-slate-700 transition-all shadow-inner resize-none min-h-60 lg:min-h-72 flex-1 text-xs leading-relaxed" placeholder="Redacte aquí detalles de la patología..."></textarea>
               </div>
             </div>
+          </div>
+
+          <!-- PESTAÑA: LABORATORIO -->
+          <div v-if="activeTab === 'Laboratorio'" class="space-y-6 animate-fade-in text-left">
+            <DoctorLabSelector
+              v-model:selectedExams="examenesLaboratorioSeleccionados"
+              v-model:selectedLabId="laboratorioDestinoId"
+            />
           </div>
 
           <!-- PESTAÑA: PLAN -->
@@ -238,13 +229,11 @@
               <h3 class="text-lg font-black text-slate-900 tracking-tight">Plan de Tratamiento Estructurado</h3>
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Prescripción de fármacos para la orden de farmacia digital</p>
             </div>
-
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
               <div class="xl:col-span-1 bg-linear-to-b from-blue-50/40 to-white border border-slate-200 rounded-3xl p-6 space-y-5 shadow-sm">
                 <h4 class="text-[10px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center gap-1.5">
                   <v-icon name="ri-capsule-fill" class="text-blue-600" /> Nueva Dosificación
                 </h4>
-
                 <div class="space-y-4 text-xs font-bold text-slate-600">
                   <div class="space-y-1.5">
                     <label class="uppercase text-[9px] text-slate-400 tracking-wider ml-0.5">Medicamento / Fármaco</label>
@@ -301,7 +290,7 @@
               </div>
             </div>
 
-            <!-- MÓDULO INTERACTIVO DE CITAS DE SEGUIMIENTO PROTEGIDO -->
+            <!-- MÓDULO DE CITAS DE SEGUIMIENTO -->
             <div
               class="bg-slate-50/60 border border-slate-200 rounded-3xl p-6 space-y-4 text-left shadow-2xs mt-4 relative"
               v-locked="{
@@ -314,26 +303,21 @@
                   <div class="w-10 h-10 bg-purple-50 text-purple-700 border border-purple-100 rounded-xl flex items-center justify-center shadow-3xs">
                     <v-icon name="bi-arrow-repeat" scale="1.0" />
                   </div>
-
                   <div>
                     <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">
                       Planificar Cita de Seguimiento / Revisión
                     </h4>
-
                     <p class="text-[10px] font-medium text-slate-400">
                       Determine si el estado clínico del paciente requiere una reevaluación programada
                     </p>
                   </div>
                 </div>
-
-                <!-- Toggle -->
                 <label class="relative inline-flex items-center cursor-pointer select-none">
                   <input
                     type="checkbox"
                     v-model="requiereSeguimiento"
                     class="sr-only peer"
                   />
-
                   <div
                     class="w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer
                     peer-checked:after:translate-x-full peer-checked:after:border-white
@@ -344,7 +328,6 @@
                 </label>
               </div>
 
-              <!-- Formulario -->
               <div
                 v-if="requiereSeguimiento"
                 class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 animate-fade-in"
@@ -353,38 +336,27 @@
                   <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">
                     Fecha del Seguimiento *
                   </label>
-
                   <input
                     type="date"
                     v-model="seguimientoData.fecha"
                     class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold font-mono text-slate-800 outline-hidden focus:border-purple-500 transition-all focus:ring-4 focus:ring-purple-50"
                   />
                 </div>
-
                 <div class="space-y-1.5">
                   <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-0.5">
                     Hora del Seguimiento *
                   </label>
-
                   <input
                     type="time"
                     v-model="seguimientoData.hora"
                     class="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-xs font-bold font-mono text-slate-800 outline-hidden focus:border-purple-500 transition-all focus:ring-4 focus:ring-purple-50"
                   />
                 </div>
-
-                <p
-                  class="sm:col-span-2 text-[10px] font-bold text-purple-700 bg-purple-50 border border-dashed border-purple-100 p-3 rounded-xl leading-relaxed"
-                >
-                 <strong>Nota de Automatización:</strong>
-                  Al confirmar esta acción, el backend agendará directamente la cita al
-                  paciente con el estado
-                  <span class="underline font-black">CONFIRMADA</span>,
-                  reflejándose de forma automática en su bandeja de Citas Activas.
+                <p class="sm:col-span-2 text-[10px] font-bold text-purple-700 bg-purple-50 border border-dashed border-purple-100 p-3 rounded-xl leading-relaxed">
+                  <strong>Nota de Automatización:</strong> Al confirmar esta acción, el backend agendará directamente la cita al paciente con el estado <span class="underline font-black">CONFIRMADA</span>.
                 </p>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -415,12 +387,18 @@ import { DoctorRepository } from '../infrastructure/DoctorRepository';
 import type { DoctorAppointment, DiagnosticoCIE11, SistemaExamenUI, OdontologyPayload } from '../domain/DoctorAppointment';
 import type { DirectiveBinding } from 'vue';
 import PatientBackgroundTabs from '../ui/components/PatientHistory/PatientBackgroundTabs.vue';
+
+import DoctorLabSelector from '@/modules/laboratories/ui/components/DoctorLabSelector.vue';
+import { LaboratoryRepository } from '@/modules/laboratories/infrastructure/LaboratoryRepository';
+import type { CatalogoExamen, CrearSolicitudPayload } from '@/modules/laboratories/domain/LaboratoryModels';
+
 import { GiLungs, GiStomach } from "oh-vue-icons/icons/gi";
 import { FaBrain, FaFemale, FaBone } from "oh-vue-icons/icons/fa";
 import { BiArrowRepeat } from "oh-vue-icons/icons/bi";
+import { SiFlask } from "oh-vue-icons/icons/si";
 import { addIcons } from "oh-vue-icons";
 
-addIcons(GiLungs, GiStomach, FaBrain, FaFemale, FaBone, BiArrowRepeat);
+addIcons(GiLungs, GiStomach, FaBrain, FaFemale, FaBone, BiArrowRepeat, SiFlask);
 
 const OdontologyModule = defineAsyncComponent(() =>
   import('../../consultations/ui/components/odontology/OdontologyModule.vue')
@@ -448,45 +426,35 @@ const toast = useToast();
 const authStore = useAuthStore();
 const medicalStore = useMedicalStore();
 const repo = new DoctorRepository();
+const labRepo = new LaboratoryRepository();
+
 const appointment = ref<DoctorAppointment | null>(null);
 const loading = ref(false);
 const activeTab = ref('Subjetivo');
 const isEditingSubjetivo = ref(false);
 const editableSubjetivo = ref('');
 const tempSubjetivo = ref('');
-
 const sistemasFisicos = ref<SistemaExamenUI[]>([]);
 const busquedaDiag = ref('');
 const buscandoAPI = ref(false);
 const mostrarDropdown = ref(false);
 const resultadosDiagnosticos = ref<DiagnosticoCIE11[]>([]);
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
-
 const presupuestoEspecialidad = ref<number>(0);
 const datosOdontologiaExtra = ref<OdontologyPayload | null>(null);
 
-// ESTADOS PARA LA PLANIFICACIÓN DE SEGUIMIENTO AUTOMÁTICO
+// ESTADOS DE LABORATORIO
+const examenesLaboratorioSeleccionados = ref<CatalogoExamen[]>([]);
+const laboratorioDestinoId = ref<number>(1);
+
+// ESTADOS DE SEGUIMIENTO
 const requiereSeguimiento = ref<boolean>(false);
 const seguimientoData = ref({ fecha: '', hora: '' });
 
 const esPlanRestringido = computed(() => {
-  const userAuth = authStore.user as Record<string, unknown> | null;
-  const doctorInfo = medicalStore.doctor as Record<string, unknown> | null;
-  const planGuardado = localStorage.getItem('user_plan');
-
-  const tipoEntidad = String(userAuth?.tipo_entidad ?? doctorInfo?.tipo_entidad ?? '').toLowerCase();
-  const esVerificado = String(doctorInfo?.EsVerificado ?? userAuth?.EsVerificado ?? '0') === '1';
-
-  const planBruto =
-    userAuth?.plan ||
-    planGuardado ||
-    doctorInfo?.plan ||
-    doctorInfo?.suscripcion ||
-    ((tipoEntidad === 'clinica' || esVerificado) ? 'Ejecutivo' : 'basico');
-
+  const planBruto = authStore.user?.plan || 'basico';
   const plan = String(planBruto).toLowerCase().trim();
   const planesGratuitos = ['basico', 'free', 'gratis', 'unassigned', 'undefined'];
-
   return planesGratuitos.includes(plan);
 });
 
@@ -497,11 +465,10 @@ const nuevoMedPlan = ref<FilaMedicamentoConsulta>({
 });
 
 const obtenerEspecialidadLogueada = computed<number>(() => {
-  if (medicalStore.doctor) {
-    const specId = medicalStore.doctor.EspecialidadID || medicalStore.doctor.especialidad_id;
-    if (specId) return Number(specId);
+  if (medicalStore.doctor?.EspecialidadID) {
+    return Number(medicalStore.doctor.EspecialidadID);
   }
-  if (appointment.value && appointment.value.EspecialidadID) {
+  if (appointment.value?.EspecialidadID) {
     return Number(appointment.value.EspecialidadID);
   }
   return 1;
@@ -512,27 +479,14 @@ const getTabIcon = (tab: string): string => {
     'Subjetivo': 'bi-file-earmark-text-fill',
     'Objetivo': 'bi-activity',
     'Evaluación': 'bi-check-circle-fill',
+    'Laboratorio': 'si-flask',
     'Plan': 'ri-capsule-fill'
   };
   return icons[tab] || 'bi-activity';
 };
 
 const obtenerEnfermedadesCronicas = computed(() => {
-  if (!appointment.value) {
-    const selectedCitaRaw = localStorage.getItem('selectedAppointment') || localStorage.getItem('current_appointment');
-    if (selectedCitaRaw) {
-      try {
-        const parsed = JSON.parse(selectedCitaRaw);
-        return parsed.EnfermedadesCronicas || parsed.enfermedadesCronicas || parsed.enfermedades_cronicas || null;
-      } catch  {
-        return null;
-      }
-    }
-    return null;
-  }
-
-  const app = appointment.value as Record<string, unknown>;
-  return app.EnfermedadesCronicas || app.enfermedadesCronicas || app.enfermedades_cronicas || null;
+  return appointment.value?.EnfermedadesCronicas || null;
 });
 
 const getSignoIcon = (key: string): { icon: string; color: string; bgColor: string } => {
@@ -547,7 +501,6 @@ const getSignoIcon = (key: string): { icon: string; color: string; bgColor: stri
 
 const getSistemaStyles = (nombre: string): { icon: string; bgClass: string } => {
   const n = nombre.toUpperCase();
-
   if (n.includes('APARIENCIA') || n.includes('GENERAL')) {
     return { icon: 'bi-person-fill', bgClass: 'bg-blue-50 text-blue-600 border-blue-100' };
   }
@@ -575,7 +528,6 @@ const getSistemaStyles = (nombre: string): { icon: string; bgClass: string } => 
   if (n.includes('GENITALES') || n.includes('UROLOGICO') || n.includes('UROLÓGICO')) {
     return { icon: 'bi-gender-ambiguous', bgClass: 'bg-slate-100 text-slate-700 border-slate-200' };
   }
-
   return { icon: 'bi-activity', bgClass: 'bg-slate-50 text-slate-600 border-slate-100' };
 };
 
@@ -588,13 +540,20 @@ const obtenerBorradorInicial = () => {
     diagnostico: [] as string[],
     diagnostico_extenso: '',
     notas_medicas: '',
-    detalle_medicamentos: [] as FilaMedicamentoConsulta[]
+    detalle_medicamentos: [] as FilaMedicamentoConsulta[],
+    examenes_laboratorio: [] as CatalogoExamen[],
+    laboratorio_id: 1
   };
-
   const borradorGuardado = localStorage.getItem('draft_consulta_actual');
   if (borradorGuardado) {
     try {
       const parsed = JSON.parse(borradorGuardado);
+      if (parsed.examenes_laboratorio) {
+        examenesLaboratorioSeleccionados.value = parsed.examenes_laboratorio;
+      }
+      if (parsed.laboratorio_id) {
+        laboratorioDestinoId.value = Number(parsed.laboratorio_id) || 1;
+      }
       return {
         cita_id: parsed.cita_id ?? defaultForm.cita_id,
         signos_vitales: { ...defaultForm.signos_vitales, ...parsed.signos_vitales },
@@ -603,7 +562,9 @@ const obtenerBorradorInicial = () => {
         diagnostico: parsed.diagnostico || [],
         diagnostico_extenso: parsed.diagnostico_extenso || '',
         notas_medicas: parsed.notas_medicas || '',
-        detalle_medicamentos: parsed.detalle_medicamentos || []
+        detalle_medicamentos: parsed.detalle_medicamentos || [],
+        examenes_laboratorio: parsed.examenes_laboratorio || [],
+        laboratorio_id: Number(parsed.laboratorio_id) || 1
       };
     } catch (e) {
       console.error("Error al parsear borrador clínico:", e);
@@ -614,8 +575,19 @@ const obtenerBorradorInicial = () => {
 
 const form = ref(obtenerBorradorInicial());
 
+watch(laboratorioDestinoId, (val) => {
+  if (typeof val !== 'number') {
+    laboratorioDestinoId.value = Number(val) || 1;
+  }
+});
+
 watch(form, (nuevoEstado) => {
   localStorage.setItem('draft_consulta_actual', JSON.stringify(nuevoEstado));
+}, { deep: true });
+
+watch([examenesLaboratorioSeleccionados, laboratorioDestinoId], () => {
+  form.value.examenes_laboratorio = examenesLaboratorioSeleccionados.value;
+  form.value.laboratorio_id = Number(laboratorioDestinoId.value) || 1;
 }, { deep: true });
 
 const listaCamposSignos = [
@@ -630,7 +602,6 @@ const onBusquedaInput = () => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   const query = busquedaDiag.value.trim();
   if (query.length < 3) { resultadosDiagnosticos.value = []; return; }
-
   buscandoAPI.value = true;
   debounceTimeout = setTimeout(async () => {
     try { resultadosDiagnosticos.value = await repo.buscarDiagnosticosCIE11(query); }
@@ -647,11 +618,10 @@ const seleccionarDiagnostico = (diag: DiagnosticoCIE11) => {
 
 const removerDiagnostico = (index: number) => { form.value.diagnostico.splice(index, 1); };
 const cerrarDropdown = () => { setTimeout(() => { mostrarDropdown.value = false; }, 250); };
+
 const toggleSistema = (index: number) => {
   const s = sistemasFisicos.value[index];
-  if (s) {
-    s.open = !s.open;
-  }
+  if (s) { s.open = !s.open; }
 };
 
 const handleNormalChange = (index: number) => {
@@ -670,7 +640,7 @@ const countHallazgos = (index: number): number => {
 };
 
 const progress = computed(() => {
-  const tabs = ['Subjetivo', 'Objetivo', 'Evaluación', 'Plan'];
+  const tabs = ['Subjetivo', 'Objetivo', 'Evaluación', 'Laboratorio', 'Plan'];
   const index = tabs.indexOf(activeTab.value) !== -1 ? tabs.indexOf(activeTab.value) : 1;
   return Math.round(((index + 1) / tabs.length) * 100);
 });
@@ -683,13 +653,11 @@ const capturarDataEspecialidad = (data: OdontologyPayload) => {
 onMounted(async () => {
   try {
     const catalogoCrudo = await repo.getCatalogoExamenFisico();
-
     sistemasFisicos.value = catalogoCrudo.map((sistema) => ({
       ...sistema,
       open: false,
       isNormal: true
     }));
-
     sistemasFisicos.value.forEach((sistema) => {
       if (!form.value.examen_fisico_opciones[sistema.id]) {
         form.value.examen_fisico_opciones[sistema.id] = {};
@@ -708,7 +676,6 @@ onMounted(async () => {
     return;
   }
   appointment.value = JSON.parse(saved);
-
   if (appointment.value) {
     form.value.cita_id = appointment.value.CitaID;
     if (form.value.notas_medicas) {
@@ -748,6 +715,7 @@ const agregarMedicamentoAlPlan = (): void => {
 };
 
 const removerMedicamentoDelPlan = (index: number) => { form.value.detalle_medicamentos.splice(index, 1); };
+
 const handleSaveDraft = () => {
   localStorage.setItem('draft_consulta_actual', JSON.stringify(form.value));
   toast.success('Borrador clínico respaldado de forma segura.');
@@ -762,7 +730,6 @@ const handleSubmit = async () => {
     toast.error('Por favor agregue al menos un medicamento en la pestaña de Plan.');
     return;
   }
-
   if (requiereSeguimiento.value && (!seguimientoData.value.fecha || !seguimientoData.value.hora)) {
     toast.error('Por favor especifique la fecha y la hora para la cita de seguimiento.');
     return;
@@ -770,6 +737,30 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
+    // 1. GENERACIÓN FORMAL DE SOLICITUD DE LABORATORIO (SI APLICA)
+    if (examenesLaboratorioSeleccionados.value.length > 0) {
+      const pacienteIdNum = Number(appointment.value?.PacienteID || 0);
+      const doctorIdNum = Number(medicalStore.doctor?.DoctorID || authStore.user?.id || 0);
+
+      const notasParaLab = form.value.diagnostico_extenso
+        ? `Diagnóstico: ${form.value.diagnostico.join(', ')} | Criterio: ${form.value.diagnostico_extenso}`
+        : (appointment.value?.Motivo || 'Indicación médica desde consulta');
+
+      const payloadLab: CrearSolicitudPayload = {
+        laboratorio_id: Number(laboratorioDestinoId.value) || 1,
+        paciente_id: pacienteIdNum,
+        doctor_id: doctorIdNum,
+        consulta_id: Number(appointment.value?.CitaID || form.value.cita_id || 0),
+        notas_clinicas: notasParaLab,
+        nombre_paciente: appointment.value?.Paciente || 'Paciente',
+        codigo_expediente: `PAC-${pacienteIdNum}`,
+        examenes: examenesLaboratorioSeleccionados.value.map(e => e.ExamID),
+        monto_total: examenesLaboratorioSeleccionados.value.reduce((acc, item) => acc + Number(item.Precio || 0), 0)
+      };
+      await labRepo.crearSolicitudDigital(payloadLab);
+    }
+
+    // 2. PROCESAMIENTO CLÍNICO PRINCIPAL
     const payload = JSON.parse(JSON.stringify(form.value));
     payload.cita_id = Number(payload.cita_id);
 
@@ -777,21 +768,14 @@ const handleSubmit = async () => {
       || editableSubjetivo.value
       || tempSubjetivo?.value
       || (appointment.value ? `${appointment.value.Motivo} - ${appointment.value.Sintomas || 'Sin síntomas registrados'}` : 'Sin síntomas registrados');
-
     payload.notas_medicas = notaMedicaFinal;
 
     const sv = form.value.signos_vitales || {};
-
     payload.signos_vitales = {
-      PresionArterial: sv.presion || sv.PresionArterial || null,
+      PresionArterial: sv.presion || null,
       FrecuenciaCardiaca: sv.pulso ? parseInt(String(sv.pulso), 10) : null,
       FrecuenciaRespiratoria: sv.respiracion ? parseInt(String(sv.respiracion), 10) : null,
-      Temperatura: sv.temp ? parseFloat(String(sv.temp)) : null,
-      
-      // Copias redundantes en minúscula
-      pulso: sv.pulso ? parseInt(String(sv.pulso), 10) : null,
-      respiracion: sv.respiracion ? parseInt(String(sv.respiracion), 10) : null,
-      temp: sv.temp ? parseFloat(String(sv.temp)) : null
+      Temperatura: sv.temp ? parseFloat(String(sv.temp)) : null
     };
 
     let diagnosticoFinal = form.value.diagnostico.join(', ');
@@ -808,22 +792,19 @@ const handleSubmit = async () => {
       payload.examenes_odontologicos_json = datosOdontologiaExtra.value.examenesBase || [];
     }
 
-    // 🌟 OPTIMIZACIÓN DE FECHA Y HORA DE SEGUIMIENTO PARA SQL SERVER
+    // FECHA Y HORA DE SEGUIMIENTO
     let fechaHoraSeguimiento: string | null = null;
-
     if (requiereSeguimiento.value && seguimientoData.value.fecha && seguimientoData.value.hora) {
       const horaLimpia = seguimientoData.value.hora.trim();
       const horaFormateada = horaLimpia.length === 5 ? `${horaLimpia}:00` : horaLimpia;
       fechaHoraSeguimiento = `${seguimientoData.value.fecha.trim()} ${horaFormateada}`;
     }
 
-    // 🌟 ASIGNACIÓN BOOLEANA STRICTA
     payload.crear_seguimiento = Boolean(requiereSeguimiento.value && fechaHoraSeguimiento);
     payload.seguimiento_fecha_hora = fechaHoraSeguimiento;
 
     await repo.completeConsultation(payload);
-
-    toast.success('¡Consulta finalizada y cita de seguimiento agendada con éxito!');
+    toast.success('¡Consulta finalizada e indicación de laboratorio procesada!');
 
     const hallazgosExamenFisico: Array<{
       sistema: string;
@@ -837,7 +818,6 @@ const handleSubmit = async () => {
         const id = sistema.id;
         const notes = form.value.examen_fisico_notes?.[id]?.trim() || '';
         const opcionesSeleccionadas: string[] = [];
-
         const opciones = form.value.examen_fisico_opciones?.[id];
         if (opciones) {
           Object.keys(opciones).forEach((opc) => {
@@ -846,7 +826,6 @@ const handleSubmit = async () => {
             }
           });
         }
-
         hallazgosExamenFisico.push({
           sistema: sistema.nombre,
           isNormal: !!sistema.isNormal,
@@ -856,29 +835,23 @@ const handleSubmit = async () => {
       });
     }
 
-    const prevResumenRaw = localStorage.getItem('MedGo+_resumen_compartir');
-    const prevResumen = prevResumenRaw ? JSON.parse(prevResumenRaw) : {};
-    const sangreDetectada = appointment.value?.TipoSangre || prevResumen.tipoSangre || prevResumen.TipoSangre || 'N/A';
-
     const objetoResumen = {
       paciente: appointment.value?.Paciente || 'Paciente',
       edad: appointment.value?.Edad || 'No registrada',
       genero: appointment.value?.Genero || 'No especificado',
       telefono: appointment.value?.Telefono || 'No disponible',
       email: appointment.value?.EmailPaciente || 'No disponible',
-      tipoSangre: sangreDetectada,
+      tipoSangre: appointment.value?.TipoSangre || 'N/A',
       diagnostico: payload.diagnostico,
       detalle_medicamentos: form.value.detalle_medicamentos || [],
-
+      examenes_laboratorio: examenesLaboratorioSeleccionados.value,
       signos_vitales: {
-        presion: sv.presion || payload.signos_vitales.PresionArterial || '',
-        pulso: sv.pulso || payload.signos_vitales.FrecuenciaCardiaca || '',
-        temp: sv.temp || payload.signos_vitales.Temperatura || '',
-        respiracion: sv.respiracion || payload.signos_vitales.FrecuenciaRespiratoria || ''
+        presion: sv.presion || '',
+        pulso: sv.pulso || '',
+        temp: sv.temp || '',
+        respiracion: sv.respiracion || ''
       },
-
       fechaSeguimiento: fechaHoraSeguimiento,
-
       antecedentes: {
         cronicas: obtenerEnfermedadesCronicas.value || 'No registra',
         alergias: appointment.value?.Alergias || 'Ninguna conocida',
@@ -896,7 +869,6 @@ const handleSubmit = async () => {
     medicalStore.setConsultationActive(false);
     medicalStore.clearPatient();
     localStorage.removeItem('current_appointment');
-
     router.push(`/medico/consulta/${payload.cita_id}/resumen`);
   } catch (error) {
     console.error('Error al completar consulta:', error);
@@ -922,35 +894,9 @@ const vClickOutside = {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Inter:wght@400;600;800&display=swap');
 .font-premium { font-family: 'Montserrat', 'Inter', system-ui, sans-serif; }
-
 .shadow-3xs { box-shadow: 0 1px 2px rgba(0,0,0,0.01); }
 .shadow-2xs { box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-
 .custom-scrollbar::-webkit-scrollbar { height: 5px; width: 5px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    background-image: none !important;
-  }
-  @page {
-    size: letter;
-    margin: 15mm 15mm 15mm 15mm !important;
-  }
-  .layout-medico-print :deep(header),
-  .layout-medico-print :deep(nav),
-  .layout-medico-print :deep(aside),
-  .layout-medico-print :deep(footer),
-  div.fixed,
-  div.sticky,
-  button,
-  iframe {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-  }
-}
 </style>

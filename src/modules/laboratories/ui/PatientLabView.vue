@@ -1,6 +1,7 @@
 <template>
   <div class="space-y-8 animate-fade-in text-left font-sans select-none p-4 md:p-8 bg-[#f8fafc]">
     <div v-if="!mostrarComprobante" class="space-y-8">
+
       <!-- CABECERA DE BÚSQUEDA Y TÍTULO -->
       <div class="bg-blue-50 border border-blue-100 p-6 rounded-3xl flex items-center gap-4 shadow-2xs">
         <div class="w-12 h-12 bg-[#005596] text-white rounded-2xl flex items-center justify-center text-xl shadow-xs">
@@ -24,7 +25,8 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div class="lg:col-span-2 space-y-10">
-          <!-- LABORATORIOS DISPONIBLES (OBTENIDOS DE BASE DE DATOS) -->
+
+          <!-- LABORATORIOS HABILITADOS -->
           <div class="space-y-4">
             <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Laboratorios Habilitados</h4>
             <div v-if="cargandoLaboratorios" class="text-xs font-bold text-slate-400 animate-pulse">
@@ -35,7 +37,7 @@
             </div>
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div v-for="lab in laboratorios" :key="lab.EntidadID" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex items-start gap-4">
-                <span class="text-2xl">🔬</span>
+                <span class="text-2xl">🏥</span>
                 <div>
                   <h5 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
                     {{ lab.NombreEntidad }}
@@ -71,7 +73,7 @@
             </div>
           </div>
 
-          <!-- LOTE DE EXÁMENES CON PRECIOS DESDE BD -->
+          <!-- LOTE DE EXÁMENES ANALÍTICOS -->
           <div class="space-y-4">
             <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Lote de Exámenes Analíticos</h4>
             <div v-if="cargando" class="py-12 text-center text-xs font-black text-slate-400 animate-pulse uppercase tracking-widest">
@@ -103,7 +105,6 @@
                     </div>
                   </div>
                 </div>
-                <!-- PRECIO REAL EXTRAÍDO DE BASE DE DATOS -->
                 <span class="text-base font-black text-blue-600">${{ Number(examen.Precio || 0).toFixed(2) }}</span>
               </label>
             </div>
@@ -119,6 +120,7 @@
               <p class="text-[11px] font-bold text-slate-400">{{ carrito.length }} exámenes agregados</p>
             </div>
           </div>
+
           <div class="space-y-4 text-left">
             <div class="space-y-1.5">
               <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Paciente Asegurado *</label>
@@ -139,6 +141,7 @@
               />
             </div>
           </div>
+
           <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1 text-left">
             <p v-if="carrito.length === 0" class="text-xs text-slate-400 font-bold italic py-2">No has seleccionado exámenes en el catálogo.</p>
             <div v-for="item in carrito" :key="item.ExamID" class="bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-100 flex justify-between items-center text-xs">
@@ -146,16 +149,18 @@
               <span class="font-black text-slate-900">${{ Number(item.Precio || 0).toFixed(2) }}</span>
             </div>
           </div>
+
           <div class="border-t border-slate-100 pt-4 flex justify-between items-center">
             <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Total Estimado:</span>
             <span class="text-2xl font-black text-blue-600">${{ totalEstimado.toFixed(2) }}</span>
           </div>
+
           <button
             @click="procesarSolicitudDigital"
-            :disabled="carrito.length === 0 || !formSolicitud.nombre"
+            :disabled="carrito.length === 0 || !formSolicitud.nombre || guardandoSolicitud"
             class="w-full bg-linear-to-r from-blue-600 to-[#005596] hover:brightness-105 disabled:brightness-90 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>+ Generar Solicitud Digital</span>
+            <span>{{ guardandoSolicitud ? 'Procesando...' : '+ Generar Solicitud Digital' }}</span>
           </button>
         </div>
       </div>
@@ -201,7 +206,7 @@
       </div>
 
       <div class="space-y-3 pt-2">
-        <button @click="mostrarComprobante = false; carrito = [];" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md">
+        <button @click="finalizarYVolver" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md">
           <v-icon name="bi-check-circle-fill" /> Finalizar y Volver al Directorio
         </button>
       </div>
@@ -212,36 +217,47 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
-import { LaboratoryRepository } from '../infrastructure/LaboratoryRepository';
-import type { CatalogoExamen } from '../domain/LaboratoryModels';
-import api from '@/shared/infrastructure/api';
 import * as QRCode from 'qrcode';
 
-interface EntidadLaboratorio {
-  EntidadID: number;
-  NombreEntidad: string;
-  Direccion?: string;
-  Telefono?: string;
-  TipoEntidad: string;
+// Capa de Dominio e Infraestructura DDD
+import { LaboratoryRepository } from '../infrastructure/LaboratoryRepository';
+import type {
+  CatalogoExamen,
+  EntidadLaboratorio,
+  SolicitudDigitalProcesada,
+  CrearSolicitudPayload
+} from '../domain/LaboratoryModels';
+
+interface LocalStorageUser {
+  id?: number;
+  nombre?: string;
+  nombreCompleto?: string;
+  pacienteId?: number;
+  PacienteID?: number;
+  usuarioId?: number;
+  UsuarioID?: number;
 }
 
 const repo = new LaboratoryRepository();
 const toast = useToast();
+
 const catalogos = ref<CatalogoExamen[]>([]);
 const laboratorios = ref<EntidadLaboratorio[]>([]);
 const carrito = ref<CatalogoExamen[]>([]);
 const cargando = ref<boolean>(true);
 const cargandoLaboratorios = ref<boolean>(true);
+const guardandoSolicitud = ref<boolean>(false);
+
 const busqueda = ref<string>('');
 const categoriaSeleccionada = ref<string>('Todos');
 const mostrarComprobante = ref<boolean>(false);
 const qrDataUrl = ref<string>('');
 
-const solicitudProcesada = ref({
+const solicitudProcesada = ref<SolicitudDigitalProcesada>({
   paciente: '',
   codigoExpediente: '',
   fecha: '',
-  items: [] as CatalogoExamen[],
+  items: [],
   total: 0
 });
 
@@ -250,13 +266,12 @@ const formSolicitud = reactive({
   identificador: ''
 });
 
-// Categorías calculadas dinámicamente según la base de datos
-const categoriasCalculadas = computed(() => {
+const categoriasCalculadas = computed<string[]>(() => {
   const cats = new Set(catalogos.value.map(item => item.Categoria));
   return Array.from(cats);
 });
 
-const examenesFiltrados = computed(() => {
+const examenesFiltrados = computed<CatalogoExamen[]>(() => {
   return catalogos.value.filter(ex => {
     const cumpleCat = categoriaSeleccionada.value === 'Todos' || ex.Categoria.toLowerCase() === categoriaSeleccionada.value.toLowerCase();
     const cumpleBusqueda = !busqueda.value || ex.NombreExamen.toLowerCase().includes(busqueda.value.toLowerCase());
@@ -264,16 +279,28 @@ const examenesFiltrados = computed(() => {
   });
 });
 
-// Cálculo dinámico del total acumulado sumando el precio real
-const totalEstimado = computed(() => {
+const totalEstimado = computed<number>(() => {
   return carrito.value.reduce((acc, item) => acc + Number(item.Precio || 0), 0);
 });
 
-const cargarLaboratoriosPublicos = async () => {
+/**
+ * Recupera de forma tolerante el objeto de usuario de la sesión
+ */
+const obtenerUsuarioSesion = (): LocalStorageUser | null => {
+  const localUserRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
+  if (!localUserRaw) return null;
+  try {
+    return JSON.parse(localUserRaw) as LocalStorageUser;
+  } catch (e) {
+    console.error("Error parseando objeto de usuario desde storage:", e);
+    return null;
+  }
+};
+
+const cargarLaboratoriosPublicos = async (): Promise<void> => {
   try {
     cargandoLaboratorios.value = true;
-    const response = await api.get('/entidades-publicas');
-    const data: EntidadLaboratorio[] = response.data || [];
+    const data = await repo.getEntidadesPublicas();
     laboratorios.value = data.filter(e => e.TipoEntidad === 'Laboratorio');
   } catch (err) {
     console.error("Error al obtener laboratorios de la BD:", err);
@@ -282,11 +309,10 @@ const cargarLaboratoriosPublicos = async () => {
   }
 };
 
-const cargarCatalogoExamenes = async () => {
+const cargarCatalogoExamenes = async (): Promise<void> => {
   try {
     cargando.value = true;
-    const data = await repo.getCatalogo();
-    catalogos.value = data || [];
+    catalogos.value = await repo.getCatalogo();
   } catch (err) {
     console.error(err);
     toast.error("Error al sincronizar el catálogo de exámenes médicos.");
@@ -295,39 +321,87 @@ const cargarCatalogoExamenes = async () => {
   }
 };
 
-const procesarSolicitudDigital = async () => {
+/**
+ * Guarda la solicitud en la BD vía API y genera el comprobante con QR oficial
+ */
+const procesarSolicitudDigital = async (): Promise<void> => {
+  if (carrito.value.length === 0 || !formSolicitud.nombre) return;
+
+  guardandoSolicitud.value = true;
   try {
+    // 1. Tomar ID del laboratorio seleccionado (o el primero activo)
+    const labId = laboratorios.value[0]?.EntidadID || 1;
+
+    // 2. Resolver el paciente_id real dinámicamente desde el objeto de sesión activo
+    const userSession = obtenerUsuarioSesion();
+    let pacienteId: number | undefined = undefined;
+
+    if (userSession) {
+      pacienteId = userSession.pacienteId ?? userSession.PacienteID ?? userSession.id ?? userSession.usuarioId ?? userSession.UsuarioID;
+    }
+
+    // 3. Formatear la carga útil manteniendo compatibilidad con la firma del Backend
+    const payload: CrearSolicitudPayload = {
+      laboratorio_id: labId,
+      paciente_id: pacienteId,
+      nombre_paciente: formSolicitud.nombre.trim(),
+      codigo_expediente: formSolicitud.identificador.trim(),
+      examenes: carrito.value.map(i => i.ExamID),
+      monto_total: totalEstimado.value
+    };
+
+    // 4. Invocar endpoint del repositorio
+    const res = await repo.crearSolicitudDigital(payload);
+
     const ahora = new Date();
     solicitudProcesada.value = {
       paciente: formSolicitud.nombre,
-      codigoExpediente: formSolicitud.identificador,
+      codigoExpediente: res.codigo_orden || formSolicitud.identificador,
       fecha: ahora.toLocaleString('es-HN'),
       items: [...carrito.value],
       total: totalEstimado.value
     };
+
+    // 5. Generar el código QR de confirmación con la metadata de la orden
     const payloadQR = JSON.stringify({
+      codigo_orden: res.codigo_orden,
+      orden_id: res.orden_id,
       paciente: solicitudProcesada.value.paciente,
-      expediente: solicitudProcesada.value.codigoExpediente,
-      fecha: solicitudProcesada.value.fecha,
-      total: solicitudProcesada.value.total,
-      examenes: solicitudProcesada.value.items.map(i => i.ExamID)
+      total: solicitudProcesada.value.total
     });
+
     qrDataUrl.value = await QRCode.toDataURL(payloadQR, { margin: 1, width: 250 });
     mostrarComprobante.value = true;
-    toast.success("Solicitud digital preparada correctamente.");
+    toast.success("Solicitud digital registrada exitosamente.");
   } catch (err) {
-    console.error(err);
-    toast.error("Fallo al construir la orden QR.");
+    console.error("Error registrando orden:", err);
+    toast.error("Fallo al guardar la orden en la base de datos.");
+  } finally {
+    guardandoSolicitud.value = false;
   }
 };
 
+const finalizarYVolver = (): void => {
+  mostrarComprobante.value = false;
+  carrito.value = [];
+};
+
 onMounted(() => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user && user.nombre) {
-    formSolicitud.nombre = user.nombre;
-    formSolicitud.identificador = user.id ? `PAC-${user.id}` : '';
+  // Inicialización de los datos del formulario basándose en el usuario autenticado
+  const userSession = obtenerUsuarioSesion();
+  if (userSession) {
+    const nombreUsuario = userSession.nombre || userSession.nombreCompleto;
+    if (nombreUsuario) {
+      formSolicitud.nombre = nombreUsuario;
+    }
+
+    const idVal = userSession.pacienteId ?? userSession.PacienteID ?? userSession.id ?? userSession.usuarioId ?? userSession.UsuarioID;
+    if (idVal) {
+      formSolicitud.identificador = `PAC-${idVal}`;
+    }
   }
-  cargarLaboratoriosPublicos();
-  cargarCatalogoExamenes();
+
+  void cargarLaboratoriosPublicos();
+  void cargarCatalogoExamenes();
 });
 </script>

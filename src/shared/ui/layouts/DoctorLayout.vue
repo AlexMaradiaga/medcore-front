@@ -256,15 +256,15 @@ const menuItems = [
     bgIndicatorClass: 'bg-indigo-600',
     soloMedico: true
   },
-  {
-    name: 'Laboratorio',
-    path: '/medico/laboratorio',
-    icon: 'bi-droplet-half',
-    colorClass: 'text-blue-500',
-    hoverColorClass: 'group-hover:text-blue-400',
-    bgIndicatorClass: 'bg-blue-500',
-    soloMedico: true
-  }
+  // {
+  //   name: 'Laboratorio',
+  //   path: '/medico/laboratorio',
+  //   icon: 'bi-droplet-half',
+  //   colorClass: 'text-blue-500',
+  //   hoverColorClass: 'group-hover:text-blue-400',
+  //   bgIndicatorClass: 'bg-blue-500',
+  //   soloMedico: true
+  // }
 ];
 
 const menuFiltrado = computed(() => {

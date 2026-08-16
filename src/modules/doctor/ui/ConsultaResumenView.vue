@@ -24,7 +24,6 @@
               <span class="text-slate-300 font-normal">|</span>
               <span class="flex items-center gap-1.5"><VIcon name="bi-gender-ambiguous" scale="0.85" /> Género: {{ datos.genero === 'M' || datos.genero === 'Masculino' ? 'Masculino' : (datos.genero === 'F' || datos.genero === 'Femenino' ? 'Femenino' : '--') }}</span>
               <span class="text-slate-300 font-normal">|</span>
-              <!-- TIPO DE SANGRE DESTACADO EN CABECERA -->
               <span class="flex items-center gap-1 text-rose-600 font-black bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-200/60 shadow-3xs">🩸 Sangre: {{ datos.tipoSangre || 'N/A' }}</span>
             </p>
             <div class="flex flex-wrap items-center gap-3 pt-1">
@@ -92,7 +91,6 @@
                 </div>
               </div>
 
-              <!-- REGISTRO DESTACADO TIPO SANGRE -->
               <div class="bg-rose-50/60 border border-rose-100/80 p-3 rounded-2xl flex justify-between items-center">
                 <span class="text-[10px] font-black text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
                   🩸 Grupo Sanguíneo y RH:
@@ -122,7 +120,7 @@
             </div>
           </div>
 
-          <!-- SIGNOS VITALES COMPLETOS (5 PARÁMETROS) -->
+          <!-- SIGNOS VITALES COMPLETOS -->
           <div class="bg-white border border-slate-200/80 rounded-4xl shadow-[0_12px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
             <div class="bg-linear-to-r from-purple-50/15 via-purple-50/5 to-transparent border-b border-purple-100 px-6 py-4">
               <h4 class="text-xs font-black text-purple-700 uppercase tracking-widest flex items-center gap-2">
@@ -147,11 +145,6 @@
                   <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Frec. Resp.</p>
                   <p class="text-xs font-black text-emerald-900 mt-1 font-mono">{{ datos.signos_vitales.respiracion || '--' }} <span v-if="datos.signos_vitales.respiracion && datos.signos_vitales.respiracion !== '--'" class="text-[8px] font-bold text-emerald-400 font-sans">RPM</span></p>
                 </div>
-                <!-- 5to PARÁMETRO: SATURACIÓN DE OXÍGENO -->
-                <!-- <div class="col-span-2 bg-linear-to-b from-indigo-50/40 to-white border border-indigo-200/50 rounded-xl p-3 shadow-3xs flex items-center justify-between">
-                  <p class="text-[9px] font-black text-indigo-600 uppercase tracking-widest">Saturación de Oxígeno (SpO2)</p>
-                  <p class="text-xs font-black text-indigo-950 font-mono">{{ datos.signos_vitales.saturacion || '--' }} <span v-if="datos.signos_vitales.saturacion && datos.signos_vitales.saturacion !== '--'" class="text-[8px] font-bold text-indigo-500 font-sans">%</span></p>
-                </div> -->
               </div>
 
               <div v-if="datos.hallazgos_examen_fisico && datos.hallazgos_examen_fisico.length > 0" class="border-t border-slate-100 pt-3 space-y-2">
@@ -175,6 +168,7 @@
             </div>
           </div>
 
+          <!-- EVALUACIÓN Y DIAGNÓSTICO -->
           <div class="bg-white border border-slate-200/80 rounded-4xl shadow-[0_12px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col md:col-span-2 lg:col-span-1">
             <div class="bg-linear-to-r from-orange-500/15 via-orange-500/5 to-transparent border-b border-orange-100 px-6 py-4">
               <h4 class="text-xs font-black text-orange-700 uppercase tracking-widest flex items-center gap-2">
@@ -195,6 +189,46 @@
           </div>
         </div>
 
+        <!-- ORDEN DE EXÁMENES DE LABORATORIO SOLICITADOS -->
+        <div v-if="datos.examenes_laboratorio && datos.examenes_laboratorio.length > 0" class="bg-white border border-slate-200/90 rounded-4xl shadow-[0_20px_45px_rgba(0,0,0,0.03)] overflow-hidden text-left">
+          <div class="bg-linear-to-r from-teal-100/80 via-emerald-100/50 to-cyan-100/70 border-b border-slate-200/80 border-t-8 border-t-teal-600 px-8 py-6 flex justify-between items-center">
+            <div>
+              <h3 class="text-xl font-black text-slate-900 tracking-tight">Exámenes de Laboratorio Solicitados</h3>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Indicaciones y pruebas clínicas auxiliares</p>
+            </div>
+            <span class="text-[10px] font-black bg-teal-600 text-white px-4 py-2 rounded-xl uppercase tracking-widest shadow-sm font-mono border border-teal-500/20 flex items-center gap-1.5">
+              <VIcon name="si-flask" scale="0.9" /> Total: {{ datos.examenes_laboratorio.length }} exámenes
+            </span>
+          </div>
+          <div class="p-8">
+            <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/10">
+              <table class="w-full text-left border-collapse min-w-140">
+                <thead>
+                  <tr class="bg-teal-500/15 text-teal-800 font-black text-[10px] uppercase tracking-widest border-b border-teal-100">
+                    <th class="py-4 px-5 w-12 text-center border-r border-teal-100/40">#</th>
+                    <th class="py-4 px-5 border-r border-teal-100/40">Nombre del Examen</th>
+                    <th class="py-4 px-5 w-1/4 border-r border-teal-100/40">Categoría</th>
+                    <th class="py-4 px-5 w-1/2">Condiciones / Indicaciones para el Paciente</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(exam, idx) in datos.examenes_laboratorio" :key="idx" class="border-b border-slate-100 last:border-0 bg-white text-slate-700 text-xs">
+                    <td class="py-5 px-5 text-center text-slate-400 font-mono font-black border-r border-slate-100">{{ idx + 1 }}</td>
+                    <td class="py-5 px-5 border-r border-slate-100">
+                      <div class="bg-teal-50/70 border border-teal-200/60 px-4 py-2.5 rounded-xl text-teal-900 font-black uppercase text-[11px] tracking-tight w-fit">
+                        {{ exam?.NombreExamen || '--' }}
+                      </div>
+                    </td>
+                    <td class="py-5 px-5 text-slate-800 font-black border-r border-slate-100">{{ exam?.Categoria || 'General' }}</td>
+                    <td class="py-5 px-5 text-slate-600 font-medium leading-relaxed">{{ exam?.CondicionesPaciente || 'Sin indicaciones especiales.' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECETA MÉDICA DIGITAL -->
         <div class="bg-white border border-slate-200/90 rounded-4xl shadow-[0_20px_45px_rgba(0,0,0,0.03)] overflow-hidden text-left">
           <div class="bg-linear-to-r from-blue-100/80 via-purple-100/50 to-emerald-100/70 border-b border-slate-200/80 border-t-8 border-t-[#005596] px-8 py-6 flex justify-between items-center">
             <div>
@@ -341,10 +375,6 @@
                 <td class="p-1.5 border border-slate-300">Frecuencia Respiratoria</td>
                 <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.respiracion || '--' }} {{ datos.signos_vitales.respiracion && datos.signos_vitales.respiracion !== '--' ? 'RPM' : '' }}</td>
               </tr>
-              <!-- <tr>
-                <td class="p-1.5 border border-slate-300">Saturación de Oxígeno (SpO2)</td>
-                <td class="p-1.5 border border-slate-300 text-center font-mono font-bold">{{ datos.signos_vitales.saturacion || '--' }} {{ datos.signos_vitales.saturacion && datos.signos_vitales.saturacion !== '--' ? '%' : '' }}</td>
-              </tr> -->
             </tbody>
           </table>
         </div>
@@ -365,9 +395,32 @@
         </div>
       </div>
 
-      <!-- V. PLAN TERAPEUTICO -->
+      <!-- V. EXAMENES DE LABORATORIO SOLICITADOS (IMPRESIÓN) -->
+      <div v-if="datos.examenes_laboratorio && datos.examenes_laboratorio.length > 0" class="mt-6">
+        <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">V. Exámenes de Laboratorio Solicitados</h3>
+        <table class="w-full text-xs border border-slate-400 text-left">
+          <thead>
+            <tr class="bg-slate-100 font-bold border-b border-slate-400 text-[10px]">
+              <th class="p-1.5 border border-slate-400 w-12 text-center">#</th>
+              <th class="p-1.5 border border-slate-400 w-1/3">Nombre del Examen</th>
+              <th class="p-1.5 border border-slate-400 w-1/4">Categoría</th>
+              <th class="p-1.5 border border-slate-400">Indicaciones de Preparación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(exam, idx) in datos.examenes_laboratorio" :key="idx" class="border-b border-slate-300">
+              <td class="p-1.5 border border-slate-300 text-center font-bold">{{ idx + 1 }}</td>
+              <td class="p-1.5 border border-slate-300 font-bold uppercase text-[#005596]">{{ exam?.NombreExamen || '--' }}</td>
+              <td class="p-1.5 border border-slate-300 font-semibold text-slate-800">{{ exam?.Categoria || 'General' }}</td>
+              <td class="p-1.5 border border-slate-300 text-slate-700 italic">{{ exam?.CondicionesPaciente || 'Ninguna' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- VI. PLAN TERAPEUTICO -->
       <div class="mt-6">
-        <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">V. Plan Terapéutico (Receta Médica Digital)</h3>
+        <h3 class="text-xs font-bold uppercase text-[#005596] tracking-wider border-b border-slate-200 pb-1 mb-2">VI. Plan Terapéutico (Receta Médica Digital)</h3>
         <table class="w-full text-xs border border-slate-400 text-left">
           <thead>
             <tr class="bg-slate-100 font-bold border-b border-slate-400 text-[10px]">
@@ -414,11 +467,13 @@ import {
   BiCheckCircleFill, BiShieldCheck, BiCalendarEvent, FaHourglassHalf, BiGenderAmbiguous,
   BiTelephoneFill, BiPersonBoundingBox, BiHeartPulseFill, BiBookmarkStarFill, BiFileEarmarkMedical
 } from 'oh-vue-icons/icons';
+import { SiFlask } from 'oh-vue-icons/icons/si';
 
 addIcons(
   BiDownload, BiShareFill, IoLogoWhatsapp, HiMail, BiHouseDoorFill, BiPrinterFill,
   BiCheckCircleFill, BiShieldCheck, BiCalendarEvent, FaHourglassHalf, BiGenderAmbiguous,
-  BiTelephoneFill, BiPersonBoundingBox, BiHeartPulseFill, BiBookmarkStarFill, BiFileEarmarkMedical
+  BiTelephoneFill, BiPersonBoundingBox, BiHeartPulseFill, BiBookmarkStarFill, BiFileEarmarkMedical,
+  SiFlask
 );
 
 const router = useRouter();
@@ -440,7 +495,8 @@ const datos = ref({
   signos_vitales: { presion: '', pulso: '', temp: '', respiracion: '', saturacion: '' },
   antecedentes: { cronicas: '', alergias: '', medicamentos: '' },
   hallazgos_examen_fisico: [] as Array<{ sistema: string; isNormal: boolean; opciones: string[]; notas: string; }>,
-  detalle_medicamentos: [] as Array<{ NombreMedicamento: string; Dosis: string; Indications?: string; Indicaciones: string; }>
+  detalle_medicamentos: [] as Array<{ NombreMedicamento: string; Dosis: string; Indications?: string; Indicaciones: string; }>,
+  examenes_laboratorio: [] as Array<{ NombreExamen: string; Categoria?: string; CondicionesPaciente?: string; Precio?: string | number; }>
 });
 
 const fechaFormateada = computed(() => {
@@ -482,9 +538,6 @@ const criterioExtenso = computed(() => {
   return partes[1] ? partes[1].trim() : '';
 });
 
-/**
- * Helper para obtener valores de un objeto sin importar el casing de la propiedad.
- */
 const obtenerValorRobusto = (obj: Record<string, unknown> | null | undefined, llaves: string[]): string => {
   if (!obj) return '';
 
@@ -513,11 +566,9 @@ onMounted(() => {
       fallbackMotivo = `Evaluación clínica por: ${deags.split(', ')[0]}`;
     }
 
-    // Detección tolerante del Tipo de Sangre evaluando paciente.TipoSangre o raíz
     const sangreDetectada = obtenerValorRobusto(parsed.paciente, ['tipoSangre', 'TipoSangre', 'tipo_sangre']) ||
                             obtenerValorRobusto(parsed, ['tipoSangre', 'TipoSangre', 'tipo_sangre', 'bloodType']) || 'N/A';
 
-    // Extracción de Signos Vitales evaluando signos_vitales, signosVitales o vitals
     const svRaw = parsed.signos_vitales || parsed.signosVitales || parsed.vitals || {};
 
     const presionVal = obtenerValorRobusto(svRaw, ['presion', 'PresionArterial', 'presionarterial', 'pa', 'presion_arterial']);
@@ -551,7 +602,8 @@ onMounted(() => {
         medicamentos: parsed.antecedentes?.medicamentos || 'Ninguno'
       },
       hallazgos_examen_fisico: parsed.hallazgos_examen_fisico || [],
-      detalle_medicamentos: parsed.detalle_medicamentos || []
+      detalle_medicamentos: parsed.detalle_medicamentos || [],
+      examenes_laboratorio: parsed.examenes_laboratorio || []
     };
   } else {
     toast.error("No se detectaron datos de la consulta completada.");
@@ -567,7 +619,6 @@ const construirTextoResumen = () => {
   texto += `*Presión Arterial:* ${datos.value.signos_vitales.presion || 'N/R'}\n`;
   texto += `*Pulso / FC:* ${datos.value.signos_vitales.pulso || 'N/R'} LPM\n`;
   texto += `*Temperatura:* ${datos.value.signos_vitales.temp || 'N/R'} °C\n`;
-  //texto += `*Saturación O2:* ${datos.value.signos_vitales.saturacion || 'N/R'} %\n`;
   texto += `*Diagnósticos OMS:* ${listaDiagnosticos.value.join(', ') || 'Ninguno'}\n`;
   if (criterioExtenso.value) {
     texto += `*Criterio Clínico:* ${criterioExtenso.value}\n`;
@@ -575,11 +626,20 @@ const construirTextoResumen = () => {
   if (datos.value.fechaSeguimiento) {
     texto += `\n*⚠️ CITA DE REVISIÓN PROGRAMADA:* ${formatearFechaEspecifica(datos.value.fechaSeguimiento)}\n`;
   }
-  texto += `\n*TRATAMIENTO PRESCRITO:*\n`;
 
-  datos.value.detalle_medicamentos.forEach((med, idx) => {
-    texto += `${idx + 1}. ${med.NombreMedicamento} - ${med.Dosis}\n    _Indicaciones:_ ${med.Indicaciones}\n`;
-  });
+  if (datos.value.examenes_laboratorio && datos.value.examenes_laboratorio.length > 0) {
+    texto += `\n*EXÁMENES DE LABORATORIO SOLICITADOS:*\n`;
+    datos.value.examenes_laboratorio.forEach((ex, idx) => {
+      texto += `${idx + 1}. ${ex.NombreExamen} (${ex.Categoria || 'General'})\n    _Indicaciones:_ ${ex.CondicionesPaciente || 'Ninguna'}\n`;
+    });
+  }
+
+  if (datos.value.detalle_medicamentos && datos.value.detalle_medicamentos.length > 0) {
+    texto += `\n*TRATAMIENTO PRESCRITO:*\n`;
+    datos.value.detalle_medicamentos.forEach((med, idx) => {
+      texto += `${idx + 1}. ${med.NombreMedicamento} - ${med.Dosis}\n    _Indicaciones:_ ${med.Indicaciones}\n`;
+    });
+  }
 
   return texto;
 };
@@ -622,7 +682,6 @@ const ejecutarCompartir = (tipo: 'whatsapp' | 'correo') => {
 .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-/* REGLAS ABSOLUTAS DE IMPRESION */
 @media print {
   :global(body > *:not(#app)),
   :global(.layout-medico-print header),

@@ -1,3 +1,5 @@
+// src/modules/laboratories/domain/LaboratoryModels.ts
+
 export type EstadoOrdenLaboratorio = 'Emitida' | 'Aceptada' | 'Paciente Recibido' | 'Completada';
 
 export interface CatalogoExamen {
@@ -5,7 +7,8 @@ export interface CatalogoExamen {
   Categoria: string;
   NombreExamen: string;
   CondicionesPaciente?: string | null;
-  Precio?: number;
+  Estado: number;
+  Precio: number;
 }
 
 export interface OrdenLaboratorio {
@@ -27,6 +30,14 @@ export interface ResultadoLaboratorio {
   ArchivoPdfPath: string | null;
 }
 
+export interface ExamenItemDTO {
+  ExamID: number;
+  NombreExamen: string;
+  Categoria: string;
+  Precio?: number;
+  Estado?: string; // 'Pendiente' | 'Cancelado' | 'Realizado'
+}
+
 export interface LaboratoryOrderDTO {
   OrdenID: number;
   CodigoOrden?: string;
@@ -34,10 +45,54 @@ export interface LaboratoryOrderDTO {
   PacienteDNI?: string;
   PacienteTelefono?: string;
   Doctor?: string;
+  Examen?: string;
   Estado: EstadoOrdenLaboratorio;
   MontoTotal: number;
   ComisionMonto: number;
   ArchivoPdfPath?: string | null;
   FechaOrden?: string;
   FechaCompletado?: string | null;
+  NotasClinicas?: string | null;
+  examenes?: ExamenItemDTO[];
+
+  LaboratorioID?: number;
+  LaboratorioId?: number;
+  EntidadID?: number;
+  Laboratorio?: string;
+  NombreLaboratorio?: string;
+}
+
+export interface EntidadLaboratorio {
+  EntidadID: number;
+  NombreEntidad: string;
+  Direccion?: string;
+  Telefono?: string;
+  TipoEntidad: string;
+}
+
+export interface SolicitudDigitalProcesada {
+  paciente: string;
+  codigoExpediente: string;
+  fecha: string;
+  items: CatalogoExamen[];
+  total: number;
+}
+
+export interface CrearSolicitudPayload {
+  laboratorio_id: number;
+  paciente_id?: number;
+  doctor_id?: number;
+  consulta_id?: number;
+  notas_clinicas?: string;
+  nombre_paciente?: string;
+  codigo_expediente?: string;
+  examenes: number[];
+  monto_total: number;
+}
+
+export interface RespuestaSolicitudDigital {
+  status: string;
+  message: string;
+  codigo_orden: string;
+  orden_id: number;
 }
