@@ -1,253 +1,218 @@
+<!-- ui/components/ClinicDashboard.vue -->
 <template>
-  <div class="text-left font-premium animate-fade-in select-none">
-
-    <div class="flex flex-wrap bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 shadow-inner mb-8 w-fit gap-1">
-      <button
-        @click="activeTab = 'resumen'"
-        :class="activeTab === 'resumen' ? 'bg-slate-900 text-white font-black shadow-sm ring-1 ring-black/20 scale-102' : 'text-slate-400 font-bold hover:text-slate-200'"
-        class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2"
-      >
-        <v-icon name="bi-bar-chart-fill" scale="0.85" /> Resumen Operativo
-      </button>
-
-      <button
-        @click="activeTab = 'doctores'"
-        :class="activeTab === 'doctores' ? 'bg-slate-900 text-white font-black shadow-sm ring-1 ring-black/20 scale-102' : 'text-slate-400 font-bold hover:text-slate-200'"
-        class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2"
-      >
-        <v-icon name="gi-stethoscope" scale="0.85" /> Personal Médico
-      </button>
-
-      <button
-        @click="activeTab = 'calidad'"
-        :class="activeTab === 'calidad' ? 'bg-slate-900 text-white font-black shadow-sm ring-1 ring-black/20 scale-102' : 'text-slate-400 font-bold hover:text-slate-200'"
-        class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2"
-      >
-        <v-icon name="bi-shield-fill-check" scale="0.85" /> Auditoría y Calidad
-      </button>
-
-      <button
-        @click="activeTab = 'especialidades'"
-        :class="activeTab === 'especialidades' ? 'bg-slate-900 text-white font-black shadow-sm ring-1 ring-black/20 scale-102' : 'text-slate-400 font-bold hover:text-slate-200'"
-        class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2"
-      >
-        <v-icon name="bi-folder-fill" scale="0.85" /> Especialidades
-      </button>
+  <div class="text-left font-premium animate-fade-in select-none space-y-6">
+    <!-- Encabezado -->
+    <div>
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight">Resumen Operativo</h1>
+      <p class="text-xs font-bold text-slate-400 mt-0.5">Métricas clave del día</p>
     </div>
 
-    <!-- PESTAÑA: RESUMEN OPERATIVO -->
-    <div v-if="activeTab === 'resumen'" class="space-y-8 animate-fade-in">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Citas</p>
-          <h3 class="text-3xl font-black text-white mt-2">{{ dashboardData.kpis?.TotalCitas ?? 0 }}</h3>
-          <v-icon name="bi-calendar-event" class="absolute right-4 bottom-4 text-slate-800" scale="2.5" />
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Citas Pendientes</p>
-          <h3 class="text-3xl font-black text-amber-400 mt-2">{{ dashboardData.kpis?.CitasPendientes ?? 0 }}</h3>
-          <v-icon name="bi-clock-history" class="absolute right-4 bottom-4 text-slate-800" scale="2.5" />
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cuerpo Médico</p>
-          <h3 class="text-3xl font-black text-teal-400 mt-2">{{ dashboardData.kpis?.TotalDoctoresActivos ?? 0 }}</h3>
-          <v-icon name="gi-stethoscope" class="absolute right-4 bottom-4 text-slate-800" scale="2.5" />
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ingresos Totales</p>
-          <h3 class="text-3xl font-black text-emerald-400 mt-2">L. {{ dashboardData.kpis?.IngresosTotales ?? 0 }}</h3>
-          <v-icon name="bi-cash-stack" class="absolute right-4 bottom-4 text-slate-800" scale="2.5" />
-        </div>
-      </div>
-
-      <div class="bg-slate-900 rounded-[2.5rem] border border-slate-800 shadow-xs p-8 text-left">
-        <h3 class="text-xl font-black text-white uppercase tracking-tight mb-6">Agenda y Citas Recientes</h3>
-        <div class="overflow-x-auto border border-slate-800 rounded-2xl">
-          <table class="w-full text-sm text-left text-slate-300">
-            <thead class="text-[10px] text-slate-400 uppercase tracking-wider bg-slate-800/50 border-b border-slate-800">
-              <tr>
-                <th class="px-6 py-4">Paciente</th>
-                <th class="px-6 py-4">Médico</th>
-                <th class="px-6 py-4">Fecha y Hora</th>
-                <th class="px-6 py-4">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="cita in dashboardData.citas_recientes" :key="cita.CitaID" class="border-b border-slate-800/60 bg-slate-900 hover:bg-slate-800/40 transition-colors">
-                <td class="px-6 py-4 font-black text-white uppercase text-xs">{{ cita.Paciente }}</td>
-                <td class="px-6 py-4 font-bold text-slate-300 text-xs">Dr. {{ cita.Doctor }}</td>
-                <td class="px-6 py-4 text-xs font-mono text-slate-400">{{ formatDate(cita.FechaHora) }}</td>
-                <td class="px-6 py-4">
-                  <span :class="getEstadoClass(cita.EstadoCita)" class="px-2.5 py-1 text-[9px] font-black uppercase rounded-lg border shadow-3xs">
-                    {{ cita.EstadoCita }}
-                  </span>
-                </td>
-              </tr>
-              <tr v-if="dashboardData.citas_recientes.length === 0">
-                <td colspan="4" class="px-6 py-12 text-center text-slate-500 font-bold text-xs uppercase tracking-widest">
-                  No se registran movimientos recientes de agenda.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA: PERSONAL MÉDICO -->
-    <div v-if="activeTab === 'doctores'" class="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-fade-in">
-
-      <div class="bg-slate-900 rounded-[2.5rem] border border-slate-800 shadow-xs p-8">
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <h3 class="text-xl font-black text-white uppercase tracking-tight">Cuerpo Médico Activo</h3>
-            <p class="text-xs text-slate-400 font-bold mt-1">Especialistas asignados a su entidad</p>
-          </div>
-          <button @click="cargarDoctoresClinica" class="p-2 bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-colors cursor-pointer border-none">
-            <v-icon name="bi-arrow-clockwise" scale="1.2" :class="{'animate-spin': loadingDoctores}" />
-          </button>
-        </div>
-
-        <div v-if="loadingDoctores" class="py-12 text-center">
-          <div class="animate-spin inline-block w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full"></div>
-        </div>
-
-        <div v-else class="grid grid-cols-1 gap-4">
-          <div v-for="doc in doctoresClinica" :key="doc.UsuarioID" class="p-5 border border-slate-800 rounded-2xl bg-slate-800/50 hover:bg-slate-800 hover:shadow-md transition-all flex justify-between items-center gap-4">
-            <div>
-              <p class="text-sm font-black text-white uppercase tracking-tight">{{ doc.NombreCompleto }}</p>
-              <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
-                {{ doc.Especialidad || 'Médico' }} • Reg: <span class="font-mono text-slate-500">{{ doc.NumeroColegiado || 'N/A' }}</span>
-              </p>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <!-- BOTÓN DE CONFIGURACIÓN DE TARIFAS POR LA CLÍNICA -->
-              <button
-                @click="abrirModalTarifasDoctor(doc)"
-                title="Configurar Tarifas de Consulta"
-                class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <v-icon name="bi-cash-stack" scale="0.85" />
-                <span>Tarifas</span>
-              </button>
-
-              <span :class="doc.Estado === 1 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'" class="px-2.5 py-1 text-[9px] font-black uppercase rounded-lg shadow-3xs">
-                {{ doc.Estado === 1 ? 'Activo' : 'Inactivo' }}
-              </span>
-            </div>
+    <!-- TARJETAS DE KPIS PRINCIPALES -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Total Citas -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">TOTAL CITAS</span>
+          <div class="text-3xl font-black text-slate-900 tracking-tight">
+            {{ dashboardData.kpis?.TotalCitas ?? 0 }}
           </div>
 
-          <div v-if="doctoresClinica.length === 0" class="py-8 text-center text-slate-500 font-bold text-xs uppercase tracking-widest border-2 border-dashed border-slate-800 rounded-2xl">
-            No hay médicos registrados en esta clínica.
-          </div>
+          <!-- Variación Dinámica (Se elimina el 12% estático) -->
+          <p v-if="variacionCitasText" :class="isVariacionCitasPositiva ? 'text-emerald-600' : 'text-rose-600'" class="text-[10px] font-bold flex items-center gap-1 pt-1">
+            <span>{{ isVariacionCitasPositiva ? '↗' : '↘' }} {{ variacionCitasText }}</span>
+          </p>
+          <p v-else class="text-[10px] font-bold text-slate-400 pt-1">
+            Total histórico registrado
+          </p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-[#0a52be] text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+          <v-icon name="bi-calendar-event" scale="1.2" />
         </div>
       </div>
 
-      <div class="space-y-6">
-        <RegisterPatientForm @success="loadDashboard" />
-
-        <RegisterDoctorForm :entidadId="clinicId" @success="cargarDoctoresClinica" />
+      <!-- Citas Pendientes (Esfera fija + Agujas giratorias) -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">CITAS PENDIENTES</span>
+          <div class="text-3xl font-black text-slate-900 tracking-tight">
+            {{ dashboardData.kpis?.CitasPendientes ?? 0 }}
+          </div>
+          <p class="text-[10px] font-bold text-slate-400 pt-1">Para el día de hoy</p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-[#fedec5] text-[#b35912] flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <g class="agujas-reloj">
+              <line x1="12" y1="12" x2="12" y2="7" />
+              <line x1="12" y1="12" x2="15.5" y2="12" />
+            </g>
+          </svg>
+        </div>
       </div>
 
+      <!-- Cuerpo Médico -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">CUERPO MÉDICO</span>
+          <div class="text-3xl font-black text-slate-900 tracking-tight">
+            {{ dashboardData.kpis?.TotalDoctoresActivos ?? 0 }}
+          </div>
+          <p class="text-[10px] font-bold text-teal-600 pt-1">Especialistas activos</p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+          <v-icon name="gi-stethoscope" scale="1.2" />
+        </div>
+      </div>
+
+      <!-- Ingreso Total -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">INGRESO TOTAL</span>
+          <div class="text-3xl font-black text-slate-900 tracking-tight">
+            L. {{ dashboardData.kpis?.IngresosTotales ?? '0.00' }}
+          </div>
+
+          <!-- Variación Dinámica (Se elimina el 5.4% estático) -->
+          <p v-if="variacionIngresosText" :class="isVariacionIngresosPositiva ? 'text-emerald-600' : 'text-rose-600'" class="text-[10px] font-bold flex items-center gap-1 pt-1">
+            <span>{{ isVariacionIngresosPositiva ? '↗' : '↘' }} {{ variacionIngresosText }}</span>
+          </p>
+          <p v-else class="text-[10px] font-bold text-slate-400 pt-1">
+            Monto acumulado general
+          </p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-[#50e9a2] text-slate-900 flex items-center justify-center shrink-0 font-black">
+          <v-icon name="bi-cash-stack" scale="1.2" />
+        </div>
+      </div>
     </div>
 
-    <div v-if="activeTab === 'calidad'" class="animate-fade-in">
-      <QualityAuditModule entityType="Clinica" :entityId="clinicId" />
+    <!-- TABLA AGENDA Y CITAS RECIENTES -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-black text-slate-900">Agenda y Citas Recientes</h2>
+          <p class="text-xs font-bold text-slate-400 mt-0.5">Control de flujo de pacientes y asignación de consultorios</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 border-b border-slate-100">
+            <tr>
+              <th class="py-3.5 px-6">PACIENTE</th>
+              <th class="py-3.5 px-6">MÉDICO</th>
+              <th class="py-3.5 px-6">FECHA Y HORA</th>
+              <th class="py-3.5 px-6">ESTADO</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            <tr v-for="cita in citasFiltradas" :key="cita.CitaID" class="hover:bg-slate-50/80 transition-colors">
+              <td class="py-4 px-6 font-bold text-slate-900 text-xs uppercase">{{ cita.Paciente }}</td>
+              <td class="py-4 px-6 font-bold text-slate-700 text-xs">Dr. {{ cita.Doctor }}</td>
+              <td class="py-4 px-6 text-xs font-mono text-slate-500">{{ formatDate(cita.FechaHora) }}</td>
+              <td class="py-4 px-6">
+                <span :class="getEstadoClass(cita.EstadoCita)" class="px-3 py-1 text-[10px] font-black uppercase rounded-full border">
+                  • {{ cita.EstadoCita }}
+                </span>
+              </td>
+            </tr>
+            <tr v-if="citasFiltradas.length === 0">
+              <td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">
+                No se encontraron citas o pacientes que coincidan con los criterios.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <div v-if="activeTab === 'especialidades'" class="animate-fade-in">
-      <ClinicSpecialties />
-    </div>
-
-    <!-- MODAL FLOTANTE DE CONFIGURACIÓN DE TARIFAS DEL DOCTOR SELECCIONADO -->
-    <DoctorTarifasModal
-      :show="showTarifasModal"
-      :doctorId="selectedDoctorId"
-      :nombreDoctor="selectedDoctorNombre"
-      @close="showTarifasModal = false"
-    />
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import { useToast } from 'vue-toastification';
 import { useAuthStore } from '@/stores/auth';
-import api from '@/shared/infrastructure/api';
-import RegisterPatientForm from '@/shared/ui/components/RegisterPatientForm.vue';
 import type { SessionUser } from '../../../../shared/Domain/dashboard.interface';
-import type { ClinicDashboardData, DoctorClinica } from '../../Domain/Clinic';
-
-// Modal de Tarifas
-import DoctorTarifasModal from '../../../doctor/ui/DoctorTarifasModal.vue';
-
-// Componentes Reutilizables
-import QualityAuditModule from '../../../../shared/ui/components/QualityAuditModule.vue';
-import RegisterDoctorForm from '../../../../shared/ui/components/RegisterDoctorForm.vue';
-import ClinicSpecialties from './ClinicSpecialties.vue';
+import type { ClinicDashboardData } from '../../Domain/Clinic';
 import { ClinicRepository } from '../../infrastructure/ClinicRepository';
-
-// Iconos
 import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
-import {
-  BiCalendarEvent,
-  BiClockHistory,
-  BiCashStack,
-  BiShieldFillCheck,
-  BiBarChartFill,
-  BiArrowClockwise,
-  BiFolderFill,
-  BiXLg
-} from 'oh-vue-icons/icons';
+import { BiCalendarEvent, BiCashStack } from 'oh-vue-icons/icons';
 import { GiStethoscope } from 'oh-vue-icons/icons';
 
-addIcons(
-  BiCalendarEvent,
-  BiClockHistory,
-  BiCashStack,
-  GiStethoscope,
-  BiShieldFillCheck,
-  BiBarChartFill,
-  BiArrowClockwise,
-  BiFolderFill,
-  BiXLg
-);
+addIcons(BiCalendarEvent, BiCashStack, GiStethoscope);
 
-const toast = useToast();
+interface Props {
+  searchQuery?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  searchQuery: ''
+});
+
 const authStore = useAuthStore();
 const repo = new ClinicRepository();
-
-const activeTab = ref<'resumen' | 'doctores' | 'calidad' | 'especialidades'>('resumen');
-const loadingDoctores = ref(false);
-
-// Estado de Modal de Tarifas por Médico
-const showTarifasModal = ref(false);
-const selectedDoctorId = ref<number | null>(null);
-const selectedDoctorNombre = ref<string>('');
 
 const clinicId = computed<number>(() => {
   const user = authStore.user as SessionUser | null;
   let idRaw = user?.EntidadID;
-
   if (!idRaw) {
     const localUserRaw = localStorage.getItem('user');
     if (localUserRaw) {
-      const localUser = JSON.parse(localUserRaw);
-      idRaw = localUser.entidadId ?? localUser.EntidadID ?? localUser.entidad_id;
+      const localUser = JSON.parse(localUserRaw) as Record<string, unknown>;
+      idRaw = (localUser.entidadId ?? localUser.EntidadID ?? localUser.entidad_id) as number | string;
     }
   }
-
   const parsedId = Number(idRaw);
   return isNaN(parsedId) ? 0 : parsedId;
 });
 
 const dashboardData = ref<ClinicDashboardData>({ kpis: null, citas_recientes: [] });
-const doctoresClinica = ref<DoctorClinica[]>([]);
+
+// Helper para extraer campos dinámicos sin usas 'any'
+const getKpiExtra = (key: string): unknown => {
+  if (!dashboardData.value.kpis) return undefined;
+  return (dashboardData.value.kpis as Record<string, unknown>)[key];
+};
+
+// Evaluación dinámica de variación de Citas
+const variacionCitas = computed<number | null>(() => {
+  const val = getKpiExtra('VariacionCitas') ?? getKpiExtra('PorcentajeCitas');
+  return typeof val === 'number' ? val : null;
+});
+
+const isVariacionCitasPositiva = computed(() => (variacionCitas.value ?? 0) >= 0);
+
+const variacionCitasText = computed(() => {
+  if (variacionCitas.value === null) return null;
+  const sign = variacionCitas.value > 0 ? '+' : '';
+  return `${sign}${variacionCitas.value}% vs mes anterior`;
+});
+
+// Evaluación dinámica de variación de Ingresos
+const variacionIngresos = computed<number | null>(() => {
+  const val = getKpiExtra('VariacionIngresos') ?? getKpiExtra('PorcentajeIngresos');
+  return typeof val === 'number' ? val : null;
+});
+
+const isVariacionIngresosPositiva = computed(() => (variacionIngresos.value ?? 0) >= 0);
+
+const variacionIngresosText = computed(() => {
+  if (variacionIngresos.value === null) return null;
+  const sign = variacionIngresos.value > 0 ? '+' : '';
+  return `${sign}${variacionIngresos.value}% vs mes anterior`;
+});
+
+// Filtro reactivo para la barra de búsqueda superior
+const citasFiltradas = computed(() => {
+  const query = props.searchQuery.toLowerCase().trim();
+  if (!query) return dashboardData.value.citas_recientes;
+
+  return dashboardData.value.citas_recientes.filter((cita) => {
+    const paciente = cita.Paciente.toLowerCase();
+    const doctor = cita.Doctor.toLowerCase();
+    const estado = cita.EstadoCita.toLowerCase();
+    return paciente.includes(query) || doctor.includes(query) || estado.includes(query);
+  });
+});
 
 const loadDashboard = async (): Promise<void> => {
   if (!clinicId.value || clinicId.value === 0) return;
@@ -258,28 +223,6 @@ const loadDashboard = async (): Promise<void> => {
   }
 };
 
-const cargarDoctoresClinica = async (): Promise<void> => {
-  if (!clinicId.value || clinicId.value === 0) return;
-  loadingDoctores.value = true;
-  try {
-    const response = await api.get('/admin/doctores/entidad', {
-      params: { entidad_id: clinicId.value }
-    });
-    doctoresClinica.value = response.data.data || [];
-  } catch (error) {
-    console.error("Error al cargar doctores de la clínica", error);
-    toast.error("No se pudo cargar la lista de médicos activos.");
-  } finally {
-    loadingDoctores.value = false;
-  }
-};
-
-const abrirModalTarifasDoctor = (doc: DoctorClinica) => {
-  selectedDoctorId.value =  doc.UsuarioID || null;
-  selectedDoctorNombre.value = doc.NombreCompleto || 'Médico';
-  showTarifasModal.value = true;
-};
-
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleString('es-HN', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -288,19 +231,17 @@ const formatDate = (dateString: string): string => {
 
 const getEstadoClass = (estado: string) => {
   const e = estado.toLowerCase();
-  if (e.includes('pendiente')) return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-  if (e.includes('completada') || e.includes('finalizada')) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-  if (e.includes('cancelada')) return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-  return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+  if (e.includes('pendiente')) return 'bg-amber-50 text-amber-700 border-amber-200';
+  if (e.includes('completada') || e.includes('finalizada')) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  if (e.includes('cancelada')) return 'bg-rose-50 text-rose-700 border-rose-200';
+  return 'bg-blue-50 text-blue-700 border-blue-200';
 };
 
 watch(
   () => authStore.user,
-  (newUser) => {
-    console.log("[ClinicDashboard] Sincronizando estado Pinia:", newUser);
+  () => {
     if (clinicId.value && clinicId.value !== 0) {
       void loadDashboard();
-      void cargarDoctoresClinica();
     }
   },
   { deep: true, immediate: true }
@@ -309,17 +250,25 @@ watch(
 onMounted(() => {
   if (clinicId.value && clinicId.value !== 0) {
     void loadDashboard();
-    void cargarDoctoresClinica();
   }
 });
 </script>
 
 <style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.25s ease-out forwards;
+.animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.agujas-reloj {
+  transform-origin: 12px 12px;
+  animation: girarAgujas 6s linear infinite;
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+
+@keyframes girarAgujas {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
