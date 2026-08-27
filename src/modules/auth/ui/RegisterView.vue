@@ -10,29 +10,30 @@
       <div class="hidden lg:block absolute bottom-[18%] left-[12%] text-6xl opacity-20 hover:opacity-30 transition-all select-none animate-bounce" style="animation-duration: 5s;">🎈</div>
       <div class="hidden lg:block absolute top-[10%] right-[12%] text-7xl opacity-20 hover:opacity-30 transition-all select-none animate-bounce" style="animation-duration: 4.5s;">🚀</div>
       <div class="hidden lg:block absolute bottom-[14%] right-[8%] text-6xl opacity-20 hover:opacity-30 transition-all select-none animate-bounce" style="animation-duration: 5.5s;">✈️</div>
-      <div class="hidden lg:block absolute top-[38%] left-[4%] text-5xl opacity-15 select-none animate-pulse">🧸</div>
-      <div class="hidden lg:block absolute bottom-[42%] right-[5%] text-5xl opacity-15 select-none animate-pulse">🎈</div>
     </template>
 
     <div class="w-full h-screen sm:h-auto sm:max-w-md bg-white sm:rounded-[2.5rem] shadow-xl overflow-hidden z-10 flex flex-col border-t sm:border border-gray-100 my-8 relative transition-all duration-500">
 
-      <div class="absolute right-6 top-6 z-20 w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center shadow-lg transition-all duration-500 hover:scale-110 hover:rotate-6 select-none pointer-events-none">
+      <div class="absolute right-6 top-6 z-20 w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center shadow-lg transition-all duration-500 hover:scale-110 select-none pointer-events-none">
         <span v-if="isPediatric" class="text-3xl filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.15)]">🧸</span>
         <v-icon
           v-else
           name="bi-person-lines-fill"
           class="text-white filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.15)]"
-          scale="2"
+          scale="1.8"
         />
       </div>
 
-      <!-- ENCABEZADO -->
-      <div class="bg-medgo-gradient p-10 text-center text-white relative pt-14 pb-12 transition-all duration-700 overflow-hidden">
+      <!-- ENCABEZADO ESTILO ROATÁN TURQUESA -->
+      <div class="bg-linear-to-r from-[#2055a4] via-[#00a8b5] to-[#12d3c7] p-10 text-center text-white relative pt-14 pb-12 transition-all duration-700 overflow-hidden">
         <div class="relative z-10 flex flex-col items-center">
-          <div class="contenedor-icono-3d mb-6 relative">
-            <div class="icono-cuerpo-3d transition-all duration-700" :class="isPediatric ? 'bg-gradient-pediatric' : ''">
-              <div class="texto-med">Med</div>
-              <div class="texto-go">Go+</div>
+          <div class="contenedor-logo-3d mb-6 relative cursor-pointer">
+            <div class="logo-cuerpo-3d">
+              <img
+                src="/logo-medgo.jpg"
+                alt="MedGo+ Logo"
+                class="w-full h-full object-cover rounded-3xl shadow-md"
+              />
             </div>
           </div>
 
@@ -365,53 +366,33 @@ const handleRegister = async (): Promise<void> => {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.scale-102 {
-  transform: scale(1.02);
-}
-
-.contenedor-icono-3d {
-  width: 92px;
-  height: 92px;
+.contenedor-logo-3d {
+  width: 96px;
+  height: 96px;
   perspective: 1000px;
-  animation: flotar 4.5s ease-in-out infinite;
+  animation: flotarImagen 4.5s ease-in-out infinite;
 }
 
-.icono-cuerpo-3d {
+.logo-cuerpo-3d {
   width: 100%;
   height: 100%;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #007bff 0%, #00c4cc 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
+  border-radius: 26px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 100%);
   box-shadow:
-    0 12px 24px rgba(0, 50, 150, 0.25),
-    inset 0 4px 6px rgba(255, 255, 255, 0.45),
-    inset 0 -6px 12px rgba(0, 0, 0, 0.18);
-  transform: rotateX(8deg) rotateY(-4deg);
+    0 16px 32px rgba(0, 120, 160, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  transform: rotateX(8deg) rotateY(-5deg);
   transform-style: preserve-3d;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
-.bg-gradient-pediatric {
-  background: linear-gradient(135deg, #ff7675 0%, #ffb142 100%) !important;
+.contenedor-logo-3d:hover .logo-cuerpo-3d {
+  transform: rotateX(0deg) rotateY(0deg) scale(1.05);
   box-shadow:
-    0 12px 24px rgba(235, 77, 75, 0.25),
-    inset 0 4px 6px rgba(255, 255, 255, 0.45),
-    inset 0 -6px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-.texto-med {
-  font-size: 21px;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.texto-go {
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1.1;
+    0 20px 40px rgba(0, 160, 200, 0.45),
+    0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
 @keyframes flotar {

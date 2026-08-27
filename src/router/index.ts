@@ -1,20 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-import LoginView from '@/modules/auth/ui/LoginView.vue'
+import LoginView from '@/modules/auth/ui/LoginView.vue';
 import DashboardView from '@/modules/auth/ui/DashboardView.vue';
-import RegisterView from '@/modules/auth/ui/RegisterView.vue'
-import DirectoryView from '@/modules/directory/ui/DirectoryView.vue'
+import RegisterView from '@/modules/auth/ui/RegisterView.vue';
+import DirectoryView from '@/modules/directory/ui/DirectoryView.vue';
 import PatientProfileView from '@/modules/doctor/ui/PatientProfileView.vue';
 import RegisterDoctorView from '@/modules/auth/ui/RegisterDoctorView.vue';
 import DoctorLabPage from '@/modules/doctor/ui/DoctorLabPage.vue';
 import ClinicAdminView from '@/modules/clinic/ui/ClinicAdminView.vue';
 
-
+// 1. Mapeo completo de roles según la tabla Roles de la BD
 const ROLE_MAP: Record<number, string> = {
   1: 'Admin',
   2: 'Doctor',
-  3: 'Paciente'
+  3: 'Paciente',
+  4: 'Farmacia',
+  5: 'Laboratorio',
+  6: 'Enfermeria'
 };
 
 const router = createRouter({
@@ -128,10 +131,16 @@ const router = createRouter({
       path: '/farmacia/dashboard',
       name: 'FarmaciaDashboard',
       component: () => import('@/modules/pharmacy/ui/FarmaciaDashboard.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, role: 'Farmacia' }
+    },
+    {
+      path: '/farmacia/inventario',
+      name: 'FarmaciaInventario',
+      component: () => import('@/modules/pharmacy/ui/component/InventarioView.vue'),
+      meta: { requiresAuth: true, role: 'Farmacia' }
     },
   ]
-})
+});
 
 router.beforeEach((to, _from) => {
   const authStore = useAuthStore();
@@ -146,11 +155,11 @@ router.beforeEach((to, _from) => {
     return '/';
   }
 
-  const roleId = user?.rol_id;
-  const userRoleStr = roleId ? ROLE_MAP[Number(roleId)] : null;
-  const entidadId = user?.entidadId;
+  const roleId = Number(user?.rol_id);
+  const userRoleStr = roleId ? ROLE_MAP[roleId] : null;
   const tipoEntidad = user?.tipo_entidad;
 
+  // Validación de permisos por rol
   if (to.meta.requiresAuth && to.meta.role) {
     if (userRoleStr !== to.meta.role) {
       console.warn(`Acceso denegado. Ruta requiere: ${to.meta.role}. Usuario tiene: ${userRoleStr}`);
@@ -160,18 +169,26 @@ router.beforeEach((to, _from) => {
     }
   }
 
+  // Redirección inteligente al entrar a /dashboard según el rol o tipo de entidad
   if (to.path === '/dashboard') {
     if (roleId === 2) {
       return '/medico/dashboard';
     }
 
-    if (roleId === 1 && entidadId && Number(entidadId) !== 1) {
-      if (tipoEntidad === 'Laboratorio') return '/laboratorio/dashboard';
-      if (tipoEntidad === 'Clinica') return '/clinica/dashboard';
+    if (roleId === 4 || tipoEntidad === 'Farmacia') {
+      return '/farmacia/dashboard';
+    }
+
+    if (roleId === 5 || tipoEntidad === 'Laboratorio') {
+      return '/laboratorio/dashboard';
+    }
+
+    if (tipoEntidad === 'Clinica') {
+      return '/clinica/dashboard';
     }
   }
 
   return true;
 });
 
-export default router
+export default router;

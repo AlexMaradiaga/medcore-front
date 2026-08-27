@@ -294,6 +294,9 @@ const handleLogin = async () => {
         case 3:
           router.push('/directorio');
           break;
+        case 4:
+          router.push('/farmacia/dashboard');
+          break;
         case 5:
           router.push('/laboratorio/dashboard');
           break;
