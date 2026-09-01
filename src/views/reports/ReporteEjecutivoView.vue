@@ -26,7 +26,7 @@
 
     <header class="border-b-4 border-[#005596] pb-6 mb-8 flex justify-between items-end">
       <div>
-        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#005596]">MedCore Global — Corporate Analytics</span>
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#005596]">MedGo+  Global — Corporate Analytics</span>
         <h1 class="text-3xl font-black text-slate-900 uppercase tracking-tight mt-1">Reporte Ejecutivo de Auditoría</h1>
         <p class="text-xs text-slate-400 font-bold mt-0.5">Control de Indicadores de Calidad e Infraestructura Médica</p>
       </div>
@@ -40,10 +40,10 @@
       <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 mb-2">Resumen Ejecutivo General</h3>
 
       <p v-if="tipoFiltro.startsWith('saas-')" class="text-xs text-slate-600 leading-relaxed font-medium">
-        El presente apartado detalla la auditoría de infraestructura transaccional y comercial correspondiente al aprovisionamiento de licencias SaaS del ecosistema MedCore Global. El análisis evalúa de forma estricta la recaudación del Ingreso Recurrente Mensual (MRR), la distribución volumétrica de los nodos institucionales activos y la participación comercial de cada plan para la optimización de servidores locales virtuales.
+        El presente apartado detalla la auditoría de infraestructura transaccional y comercial correspondiente al aprovisionamiento de licencias SaaS del ecosistema MedGo+ Global. El análisis evalúa de forma estricta la recaudación del Ingreso Recurrente Mensual (MRR), la distribución volumétrica de los nodos institucionales activos y la participación comercial de cada plan para la optimización de servidores locales virtuales.
       </p>
       <p v-else class="text-xs text-slate-600 leading-relaxed font-medium">
-        Este documento consolida las misiones y métricas críticas obtenidas transaccionalmente desde los repositorios de datos corporativos de MedCore Global. El objetivo de la presente auditoría es identificar desviaciones operativas, evaluar los niveles de respuesta clínica por departamento y garantizar el cumplimiento de los estándares internacionales de seguridad y atención médica.
+        Este documento consolida las misiones y métricas críticas obtenidas transaccionalmente desde los repositorios de datos corporativos de MedGo+ Global. El objetivo de la presente auditoría es identificar desviaciones operativas, evaluar los niveles de respuesta clínica por departamento y garantizar el cumplimiento de los estándares internacionales de seguridad y atención médica.
       </p>
     </div>
 
@@ -158,7 +158,7 @@
     </section>
 
     <footer class="border-t border-slate-200 pt-6 mt-12 flex justify-between text-[10px] text-slate-400 font-mono">
-      <p>MedCore Global S.A. — Documento de Auditoría Interna Confidencial</p>
+      <p>MedGo+ Global S.A. — Documento de Auditoría Interna Confidencial</p>
       <p>SaaS Engine Rev: 2026.06</p>
     </footer>
 

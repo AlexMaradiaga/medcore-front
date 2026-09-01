@@ -34,7 +34,7 @@
         <v-icon name="bi-moon-stars-fill" class="text-indigo-500" /> {{ locale === 'en' ? 'Display Mode' : 'Modo de Pantalla' }}
       </h3>
       <p class="text-xs text-slate-400 font-bold">
-        {{ locale === 'en' ? 'Switch between light and dark skin for the platform' : 'Cambie entre la apariencia clara y oscura para la plataforma MedCore' }}
+        {{ locale === 'en' ? 'Switch between light and dark skin for the platform' : 'Cambie entre la apariencia clara y oscura para la plataforma MedGo+' }}
       </p>
       <div class="grid grid-cols-2 gap-4">
         <button
@@ -56,7 +56,7 @@
 
     <hr class="border-slate-100" />
 
-    <!-- SECCIÓN NUEVA: PERSONALIZACIÓN DE TEMA BASE Y COLOR DE ACENTO -->
+    <!-- SECCIÓN: PERSONALIZACIÓN DE TEMA BASE -->
     <div class="space-y-4">
       <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
         <v-icon name="bi-palette-fill" class="text-teal-600" /> {{ t('settings.themeTitle') }}
@@ -81,7 +81,6 @@
         </select>
       </div>
 
-      <!-- Paleta rápida de color de acento (Solo visible al elegir Aura, Lara o Nora) -->
       <div v-if="mostrarPaletaRapida" class="pt-2 space-y-2">
         <p class="text-xs font-bold text-slate-600">{{ t('settings.accentColor') }}</p>
         <div class="flex gap-3">
@@ -122,31 +121,38 @@ import MiEdicionPreset from '@/theme/miEdicion';
 const { t, locale } = useI18n();
 const primevue = usePrimeVue();
 
-const esOscuro = ref(document.documentElement.classList.contains('p-dark') || document.documentElement.classList.contains('dark'));
+// Claves de almacenamiento local exclusivas de MedGo+
+const STORAGE_LANG = 'medgo_lang';
+const STORAGE_THEME = 'medgo_theme';
+
+const esOscuro = ref(
+  document.documentElement.classList.contains('p-dark') ||
+  document.documentElement.classList.contains('dark') ||
+  document.documentElement.classList.contains('my-app-dark')
+);
 const mostrarPaletaRapida = ref(false);
 
-// Cambio de idioma
 const cambiarIdiomaSistema = (nuevoIdioma: 'es' | 'en') => {
   locale.value = nuevoIdioma;
-  localStorage.setItem('medcore_lang', nuevoIdioma);
+  localStorage.setItem(STORAGE_LANG, nuevoIdioma);
 };
 
-// Alternar tema claro / oscuro
 const alternarModoOscuro = (activarDark: boolean) => {
   esOscuro.value = activarDark;
   const element = document.documentElement;
+  const valTema = activarDark ? 'dark' : 'light';
+
   if (activarDark) {
     element.classList.add('my-app-dark');
     element.classList.add('dark');
-    localStorage.setItem('medcore_theme', 'dark');
   } else {
     element.classList.remove('my-app-dark');
     element.classList.remove('dark');
-    localStorage.setItem('medcore_theme', 'light');
   }
+
+  localStorage.setItem(STORAGE_THEME, valTema);
 };
 
-// Cambiar preset del tema en PrimeVue
 const cambiarTemaBase = (event: Event) => {
   const target = event.target as HTMLSelectElement;
   const seleccion = target.value;
@@ -161,7 +167,6 @@ const cambiarTemaBase = (event: Event) => {
   }
 };
 
-// Cambiar color primario/acento en PrimeVue
 const cambiarColor = (nuevoColorHex: string) => {
   primevue.config.theme.setPrimary({
     500: nuevoColorHex

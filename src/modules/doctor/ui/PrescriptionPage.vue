@@ -358,6 +358,10 @@ const procesandoFisico = ref<boolean>(false);
 const pacienteBackup = ref({ nombre: '', edad: '', tel: '', tipoSangre: '' });
 const fechaSeguimiento = ref<string>('');
 
+// Claves estandarizadas para el almacenamiento local exclusivas de MedGo+
+const STORAGE_KEY_RESUMEN_NUEVA = 'medgo_resumen_compartir';
+const STORAGE_KEY_RESUMEN_LEGACY_1 = 'MedGo+_resumen_compartir';
+
 const tieneMedicamentos = computed(() => medicamentosPrescritos.value.length > 0);
 const tieneExamenes = computed(() => examenesPrescritos.value.length > 0);
 
@@ -558,11 +562,15 @@ const obtenerDefinicionPdf = (qrBase64: string): TDocumentDefinitions => {
 onMounted(async () => {
   try {
     const idUrl = Number(route.params.id);
-    const resGuardado = localStorage.getItem('MedGo+_resumen_compartir') || localStorage.getItem('medcore_resumen_compartir');
+
+    // Recuperación de resumen almacenado únicamente bajo llaves MedGo+
+    const resGuardado =
+      localStorage.getItem(STORAGE_KEY_RESUMEN_NUEVA) ||
+      localStorage.getItem(STORAGE_KEY_RESUMEN_LEGACY_1);
 
     if (resGuardado) {
       const d = JSON.parse(resGuardado) as Record<string, unknown>;
-      console.log('[PrescriptionPage] Estructura recuperada:', d);
+      console.log('[PrescriptionPage] Estructura recuperada (MedGo+):', d);
 
       // 1. Extraer y normalizar Medicamentos
       const rawMeds = (d.detalle_medicamentos || d.medicamentos || d.prescripcion || []) as Record<string, unknown>[];
@@ -713,6 +721,8 @@ const finalizarYIrAlPago = () => {
     return;
   }
 
+  // Guardado estandarizado bajo MedGo+ exclusivo
+  window.localStorage.setItem('medgo_current_consulta_id', idConsultaActual);
   window.localStorage.setItem('MedGo+_current_consulta_id', idConsultaActual);
 
   toast.success("Prescripción guardada. Procediendo al cierre de consulta.");

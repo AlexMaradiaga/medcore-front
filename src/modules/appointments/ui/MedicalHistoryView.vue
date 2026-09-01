@@ -463,7 +463,7 @@
           <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
             <div class="text-left">
               <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Prescripción Médica Digital</h3>
-              <p class="text-xs text-slate-400 font-bold uppercase">MedCore Global • Visor de Documentos Oficiales</p>
+              <p class="text-xs text-slate-400 font-bold uppercase">MedGo+ Global • Visor de Documentos Oficiales</p>
             </div>
             <button @click="cerrarVisualizador" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-black flex items-center justify-center cursor-pointer transition-all">
               ✕
@@ -482,7 +482,7 @@
             <button @click="cerrarVisualizador" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer transition-all">
               Cerrar Visor
             </button>
-            <a :href="pdfUrl" :download="'Receta_MedCore_' + recetaSeleccionadaId + '.pdf'" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider text-center block shadow-sm transition-all">
+            <a :href="pdfUrl" :download="'Receta_MedGoPlus_' + recetaSeleccionadaId + '.pdf'" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider text-center block shadow-sm transition-all">
               Descargar Copia Física
             </a>
           </div>
@@ -575,22 +575,22 @@ const filtradosSubTabs = computed(() => {
   return subTabs.filter(tab => tab.id !== 'recetas');
 });
 
-// COMPUTADA CORREGIDA: Sin errores de TypeScript y con casteo seguro
 const ordenesLaboratorioFiltradas = computed<LaboratoryOrderDTO[]>(() => {
   if (!props.laboratorioId || props.laboratorioId === 0) {
     return labOrders.value;
   }
-  return labOrders.value.filter((orden: LaboratoryOrderDTO) => {
-    const rawOrd = orden as unknown as Record<string, unknown>;
-    const targetLabId = Number(
-      orden.LaboratorioID ||
-      orden.LaboratorioId ||
-      orden.EntidadID ||
-      rawOrd.entidad_id ||
-      0
-    );
-    return targetLabId === Number(props.laboratorioId);
-  });
+
+  return labOrders.value.filter(
+    (orden: LaboratoryOrderDTO) => orden.LaboratorioID === Number(props.laboratorioId)
+  );
+});
+
+// Forzar la recarga inmediata de órdenes de laboratorio al activar la sub-pestaña
+watch(activeSubTab, (newTab) => {
+  paginaRecetas.value = 1;
+  if (newTab === 'laboratorio') {
+    void loadLabOrders();
+  }
 });
 
 // Devuelve únicamente la cadena de texto con los exámenes activos (NO cancelados)
@@ -671,25 +671,30 @@ const examenesDeCita = computed(() => {
 
 const recetasDeCita = computed(() => {
   if (!selectedItem.value) return [];
+
   const targetCitaId = Number(selectedItem.value.CitaID);
-  const targetFechaHora = selectedItem.value.FechaHora;
+  const targetFecha = selectedItem.value.FechaHora.split(' ')[0]; // Extrae solo 'YYYY-MM-DD'
 
   const filtrados = prescriptions.value.filter(p => {
-    const pCitaId = (p as Record<string, unknown>).CitaID;
-    if (pCitaId !== undefined && pCitaId !== null) {
-      return Number(pCitaId) === targetCitaId;
+    // 1. Relación directa usando la propiedad oficial ConsultaID del dominio
+    const idRelacionado = Number(p.ConsultaID || (p as unknown as { CitaID?: number }).CitaID || 0);
+    if (idRelacionado > 0 && targetCitaId > 0) {
+      return idRelacionado === targetCitaId;
     }
-    if (p.RecetaID && Number(p.RecetaID) === targetCitaId) {
-      return true;
+
+    // 2. Fallback por Fecha (YYYY-MM-DD) ignorando la variación de minutos/segundos de emisión
+    if (p.FechaEmision && targetFecha) {
+      return p.FechaEmision.split(' ')[0] === targetFecha;
     }
-    return p.FechaEmision === targetFechaHora;
+
+    return false;
   });
 
-  const mapaUnicos = new Map<string | number, Prescription>();
-  filtrados.forEach(item => {
-    const clave = item.RecetaID || item.NombreMedicamento;
-    if (!mapaUnicos.has(clave)) {
-      mapaUnicos.set(clave, item);
+  // Filtrar duplicados usando únicamente la llave primaria de la receta (RecetaID)
+  const mapaUnicos = new Map<number, Prescription>();
+  filtrados.forEach(p => {
+    if (p.RecetaID) {
+      mapaUnicos.set(p.RecetaID, p);
     }
   });
 
@@ -698,7 +703,7 @@ const recetasDeCita = computed(() => {
 
 const generarEstructuraPdfDef = async (item: MedicalRecord): Promise<TDocumentDefinitions> => {
   const payloadQrCripto = JSON.stringify({
-    plataforma: 'MedCore Global - Verificación Institucional',
+    plataforma: 'MedGo+ Global - Verificación Institucional',
     cita_id: item.CitaID,
     doctor: item.Doctor,
     fecha_emision: item.FechaHora
@@ -713,7 +718,7 @@ const generarEstructuraPdfDef = async (item: MedicalRecord): Promise<TDocumentDe
 
   const definicionRaw: unknown = {
     content: [
-      { text: 'MEDCORE GLOBAL SYSTEM', fontSize: 22, bold: true, color: '#005596', alignment: 'center' },
+      { text: 'MEDGO+ GLOBAL SYSTEM', fontSize: 22, bold: true, color: '#005596', alignment: 'center' },
       { text: 'REPORTE CLÍNICO DE CONSULTA FINALIZADA', fontSize: 9, bold: true, color: '#94a3b8', alignment: 'center', margin: [0, 2, 0, 15] },
       { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, strokeColor: '#e2e8f0' }] },
       { text: 'DATOS GENERALES DE LA ATENCIÓN', fontSize: 11, bold: true, color: '#1e293b', margin: [0, 15, 0, 10] },
@@ -749,7 +754,7 @@ const generarEstructuraPdfDef = async (item: MedicalRecord): Promise<TDocumentDe
         },
         layout: { hLineColor: () => '#e2e8f0', vLineColor: () => '#e2e8f0' }
       },
-      { text: 'Este documento constituye un extracto oficial firmado digitalmente por el sistema contable-clínico de MedCore.', fontSize: 8, color: '#94a3b8', alignment: 'center', margin: [0, 30, 0, 0] }
+      { text: 'Este documento constituye un extracto oficial firmado digitalmente por el sistema contable-clínico de MedGo+.', fontSize: 8, color: '#94a3b8', alignment: 'center', margin: [0, 30, 0, 0] }
     ],
     defaultStyle: { fontSize: 11, color: '#334155' }
   };
@@ -761,14 +766,14 @@ const descargarHistorialPdf = async (item: MedicalRecord): Promise<void> => {
   toast.info("Generando reporte oficial en formato PDF...");
   const docDef = await generarEstructuraPdfDef(item);
   const pdfDoc = pdfMake.createPdf(docDef) as unknown as PdfMakeCustomInstance;
-  pdfDoc.download(`Expediente_MedCore_#${item.CitaID}.pdf`);
+  pdfDoc.download(`Expediente_MedGoPlus_#${item.CitaID}.pdf`);
   toast.success("¡Documento descargado correctamente!");
 };
 
 const compartirHistorialWhatsApp = async (item: MedicalRecord): Promise<void> => {
   toast.info("Preparando canal de WhatsApp...");
   const textoMensaje = `
-*MEDCORE GLOBAL - EXPEDIENTE CLÍNICO*
+*MEDGO+ GLOBAL - EXPEDIENTE CLÍNICO*
 ---------------------------------------
 *Cita ID:* #${item.CitaID}
 *Médico:* Dr. ${item.Doctor}
@@ -855,7 +860,7 @@ const loadData = async (): Promise<void> => {
 
   } catch (error: unknown) {
     console.error("❌ Error en la llamada HTTP de historial clínico:", error);
-    toast.error("Error de sincronización con los servicios de MedCore Global.");
+    toast.error("Error de sincronización con los servicios de MedGo+ Global.");
   } finally {
     loading.value = false;
   }

@@ -575,20 +575,25 @@ const obtenerBorradorInicial = () => {
 
 const form = ref(obtenerBorradorInicial());
 
-watch(laboratorioDestinoId, (val) => {
-  if (typeof val !== 'number') {
-    laboratorioDestinoId.value = Number(val) || 1;
-  }
-});
+watch(
+  [examenesLaboratorioSeleccionados, laboratorioDestinoId, form],
+  () => {
+    // 1. Sanitización de tipo de dato para laboratorioDestinoId
+    const labIdNum = Number(laboratorioDestinoId.value) || 1;
+    if (typeof laboratorioDestinoId.value !== 'number') {
+      laboratorioDestinoId.value = labIdNum;
+    }
 
-watch(form, (nuevoEstado) => {
-  localStorage.setItem('draft_consulta_actual', JSON.stringify(nuevoEstado));
-}, { deep: true });
+    if (form.value.laboratorio_id !== labIdNum) {
+      form.value.laboratorio_id = labIdNum;
+    }
 
-watch([examenesLaboratorioSeleccionados, laboratorioDestinoId], () => {
-  form.value.examenes_laboratorio = examenesLaboratorioSeleccionados.value;
-  form.value.laboratorio_id = Number(laboratorioDestinoId.value) || 1;
-}, { deep: true });
+    form.value.examenes_laboratorio = [...examenesLaboratorioSeleccionados.value];
+
+    localStorage.setItem('draft_consulta_actual', JSON.stringify(form.value));
+  },
+  { deep: true }
+);
 
 const listaCamposSignos = [
   { label: 'Presión Arterial', key: 'presion' as keyof SignosVitales },

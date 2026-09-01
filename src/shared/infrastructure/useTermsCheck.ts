@@ -5,19 +5,19 @@ import { useAuthStore } from '@/stores/auth';
 export function useTermsCheck() {
   const authStore = useAuthStore();
   const showModalTerminos = ref(false);
-  const diasFrecuencia = ref(30); // Configurable a 15 o 30 días
+  const diasFrecuencia = ref(30);
 
-  // Entidades objetivo: Médicos (Rol 2), Clínicas, Laboratorios, Farmacias
+  // Clave de almacenamiento local exclusiva para MedGo+
+  const STORAGE_KEY_MEDGO = 'medgo_fecha_terminos';
+
   const esEntidadRequerida = computed(() => {
     if (!authStore.user) return false;
 
     const rolId = Number(authStore.user.rol_id || 0);
     const tipoEntidad = String(authStore.user.tipo_entidad || '').toLowerCase();
 
-    // 1. Médicos (Rol 2)
     if (rolId === 2) return true;
 
-    // 2. Clínicas, Laboratorios y Farmacias
     const tiposPermitidos = ['clinica', 'laboratorio', 'farmacia', 'medico'];
     return tiposPermitidos.includes(tipoEntidad);
   });
@@ -28,13 +28,12 @@ export function useTermsCheck() {
       return;
     }
 
-    // Leer la última fecha de aceptación guardada localmente
+    // Busca en el objeto de usuario o en el almacenamiento local de MedGo+
     const ultimaFechaRaw =
       (authStore.user as Record<string, unknown>).fecha_aceptacion_terminos ||
-      localStorage.getItem('medcore_fecha_terminos');
+      localStorage.getItem(STORAGE_KEY_MEDGO);
 
     if (!ultimaFechaRaw) {
-      // Nunca ha aceptado los términos en este navegador
       showModalTerminos.value = true;
       return;
     }
@@ -42,11 +41,9 @@ export function useTermsCheck() {
     const fechaUltimaAceptacion = new Date(String(ultimaFechaRaw));
     const fechaActual = new Date();
 
-    // Calcular diferencia en milisegundos y convertir a días
     const diffMs = fechaActual.getTime() - fechaUltimaAceptacion.getTime();
     const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    // Si pasaron 15 o 30 días o más, volver a mostrar el recordatorio
     if (diffDias >= diasFrecuencia.value) {
       showModalTerminos.value = true;
     } else {
@@ -54,25 +51,20 @@ export function useTermsCheck() {
     }
   };
 
-  /**
-   * Procesa la aceptación localmente sin realizar peticiones a la BD
-   */
   const registrarAceptacionAPI = async () => {
     try {
       const ahoraIso = new Date().toISOString();
 
-      // 1. Actualizar memoria de Pinia / AuthStore
       if (authStore.user) {
         (authStore.user as Record<string, unknown>).fecha_aceptacion_terminos = ahoraIso;
         localStorage.setItem('user', JSON.stringify(authStore.user));
       }
 
-      // 2. Guardar marca de fecha local
-      localStorage.setItem('medcore_fecha_terminos', ahoraIso);
+      // Guardado exclusivo bajo el identificador MedGo+
+      localStorage.setItem(STORAGE_KEY_MEDGO, ahoraIso);
 
-      // 3. Ocultar el modal de inmediato
       showModalTerminos.value = false;
-      console.log('✅ Aceptación de términos guardada en almacenamiento local.');
+      console.log('✅ Aceptación de términos guardada en almacenamiento local bajo MedGo+.');
     } catch (error) {
       console.error('Error al guardar la aceptación local de términos:', error);
       showModalTerminos.value = false;

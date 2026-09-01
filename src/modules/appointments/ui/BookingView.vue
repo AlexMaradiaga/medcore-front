@@ -251,7 +251,7 @@
                 <input
                   v-model="form.tipoSangre"
                   type="text"
-                  
+
                   placeholder="O+"
                   class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 text-xs font-black text-rose-600 outline-none cursor-not-allowed text-center uppercase"
                 />
@@ -1373,7 +1373,7 @@ const finalizarCierreConsulta = async (event?: Event): Promise<void> => {
     mostrarPasarelaModal.value = false;
     emit('cancel');
   } catch (error: unknown) {
-    console.error("[MedCore Contable] Fallo en la inserción del pago:", error);
+    console.error("[MedGo+ Contable] Fallo en la inserción del pago:", error);
     toast.error("Error al procesar el cierre contable en el servidor.");
   }
 };

@@ -11,7 +11,7 @@
         </h2>
         <p class="text-slate-500 text-xs font-bold flex items-center gap-2 mt-1">
           <v-icon name="bi-gear-fill" scale="0.75" class="text-slate-400 animate-spin-slow" />
-          Gestión de infraestructura, credenciales y planes SaaS de MedCore Global
+          Gestión de infraestructura, credenciales y planes SaaS de MedGo+ Global
         </p>
       </div>
 
@@ -644,7 +644,7 @@ const cargarMatrizAnalitica = async () => {
   try {
     analyticsData.value = await reportesInfraestructura.obtenerMatrizAnalitica();
   } catch {
-    toast.error("No se pudo sincronizar la matriz de gráficos de MedCore.");
+    toast.error("No se pudo sincronizar la matriz de gráficos de MedGo+.");
   } finally {
     loadingAnalytics.value = false;
   }

@@ -291,7 +291,7 @@ const handleSubmit = async () => {
       documento_identidad_url: selectedFile.value ? selectedFile.value.name : undefined
     });
 
-    toast.success("¡Expediente indexado de forma segura en MedCore Global!");
+    toast.success("¡Expediente indexado de forma segura en MedGo+ Global!");
 
     form.DNI = '';
     form.Telefono = '';

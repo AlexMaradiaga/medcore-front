@@ -85,9 +85,12 @@ export class LaboratoryRepository {
   /**
    * Transición 3: Carga el informe final en PDF, marca como 'Completada' y calcula la comisión.
    */
-  async subirResultadosPDF(ordenId: number, archivoPdf: File): Promise<{ comision_generada: number }> {
+  async subirResultadosPDF(ordenId: number, archivoPdf?: File | null): Promise<{ comision_generada: number }> {
     const formData = new FormData();
-    formData.append('archivo_pdf', archivoPdf);
+    if (archivoPdf) {
+      formData.append('archivo_pdf', archivoPdf);
+    }
+    
     const response = await api.post<{ comision_generada: number }>(
       `/laboratorio/ordenes/${ordenId}/subir-resultados`,
       formData,

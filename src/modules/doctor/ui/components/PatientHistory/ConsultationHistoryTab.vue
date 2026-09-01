@@ -315,7 +315,7 @@ const abrirExamenModal = async (consultaObj: ConsultaPrevia) => {
       detalle.value = res.datos;
     }
   } catch (error: unknown) {
-    console.error("[MedCore Error]", error);
+    console.error("[MedGo+ Error]", error);
     toast.error('No se pudo recuperar el expediente detallado de la consulta.');
   } finally {
     cargandoDetalle.value = false;

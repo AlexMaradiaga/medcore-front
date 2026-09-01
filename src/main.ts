@@ -1,55 +1,59 @@
-import './assets/main.css'
+import './assets/main.css';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-import router from './router'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import App from './App.vue';
+import router from './router';
 import { vLocked } from './directives/vLocked';
 
 import PrimeVue from 'primevue/config';
 import MiEdicionPreset from './theme/miEdicion';
 import 'primeicons/primeicons.css';
 
-import VueApexCharts from "vue3-apexcharts";
+import VueApexCharts from 'vue3-apexcharts';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
-import i18n from '../src/i18n';
+import i18n from '@/i18n';
 
-import { OhVueIcon as OhVueIconComponent, addIcons } from "oh-vue-icons";
-import * as BiIcons from "oh-vue-icons/icons/bi";
-
-import { RiBuildingFill, RiCapsuleFill, RiRocketFill, RiHospitalFill, RiStethoscopeLine } from "oh-vue-icons/icons/ri";
+import { OhVueIcon as OhVueIconComponent, addIcons } from 'oh-vue-icons';
+import * as BiIcons from 'oh-vue-icons/icons/bi';
+import {
+  RiBuildingFill,
+  RiCapsuleFill,
+  RiRocketFill,
+  RiHospitalFill,
+  RiStethoscopeLine
+} from 'oh-vue-icons/icons/ri';
 
 const Bi = Object.values({ ...BiIcons });
-
 addIcons(...Bi, RiBuildingFill, RiCapsuleFill, RiRocketFill, RiHospitalFill, RiStethoscopeLine);
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.component("v-icon", OhVueIconComponent);
+app.component('v-icon', OhVueIconComponent);
 app.directive('locked', vLocked);
 
 app.use(PrimeVue, {
-    theme: {
-        preset: MiEdicionPreset,
-        options: {
-            darkModeSelector: '.my-app-dark'
-        }
+  theme: {
+    preset: MiEdicionPreset,
+    options: {
+      darkModeSelector: '.my-app-dark'
     }
+  }
 });
 
-app.use(createPinia())
-app.use(router)
+app.use(createPinia());
+app.use(router);
 app.use(VueApexCharts);
 app.use(i18n);
 
 app.use(Toast, {
-    position: "top-right",
-    timeout: 4000,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    showCloseButtonOnHover: false
+  position: 'top-right',
+  timeout: 4000,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  showCloseButtonOnHover: false
 });
 
-app.mount('#app')
+app.mount('#app');

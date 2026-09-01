@@ -236,13 +236,21 @@ const cargarDatosIniciales = async (): Promise<void> => {
       repo.getCatalogo(),
       repo.getEntidadesPublicas()
     ]);
+
     catalogos.value = catData;
-    laboratorios.value = labData.filter(e => e.TipoEntidad === 'Laboratorio');
-    if (laboratorios.value.length > 0 && laboratorioSeleccionadoId.value === 0) {
-      laboratorioSeleccionadoId.value = laboratorios.value[0]?.EntidadID || 1;
+
+    laboratorios.value = labData.filter(
+      (e: EntidadLaboratorio) => e.TipoEntidad?.trim().toLowerCase() === 'laboratorio'
+    );
+
+    const primerLaboratorio = laboratorios.value[0];
+    if (primerLaboratorio && laboratorioSeleccionadoId.value === 0) {
+      laboratorioSeleccionadoId.value = primerLaboratorio.EntidadID;
+    } else if (laboratorios.value.length === 0) {
+      laboratorioSeleccionadoId.value = 0;
     }
   } catch (err) {
-    console.error("Error al cargar datos del laboratorio:", err);
+    console.error("Error al cargar laboratorios de la BD:", err);
   } finally {
     cargando.value = false;
   }

@@ -45,7 +45,7 @@ const i18n = createI18n({
       },
       settings: {
         languageTitle: 'Idioma del Sistema',
-        languageSubtitle: 'Seleccione su idioma de preferencia para toda la plataforma MedCore',
+        languageSubtitle: 'Seleccione su idioma de preferencia para toda la plataforma MedGo+',
         themeTitle: 'Personalización de Interfaz',
         themeSubtitle: 'Cambie el aspecto visual y el tema base de los componentes institucionales',
         selectLabel: 'Seleccionar Tema Base:',
@@ -93,7 +93,7 @@ const i18n = createI18n({
       },
       settings: {
         languageTitle: 'System Language',
-        languageSubtitle: 'Select your preferred language for the entire MedCore platform',
+        languageSubtitle: 'Select your preferred language for the entire MedGo+ platform',
         themeTitle: 'Interface Customization',
         themeSubtitle: 'Change the visual appearance and base theme of institutional components',
         selectLabel: 'Select Base Theme:',

@@ -14,8 +14,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: {
-        name: 'MedCore - Gestión Hospitalaria',
-        short_name: 'MedCore',
+        name: 'MedGo+ - Gestión Hospitalaria',
+        short_name: 'MedGo+',
         description: 'Sistema Médico PWA con Arquitectura DDD',
         theme_color: '#0055ff',
         icons: [

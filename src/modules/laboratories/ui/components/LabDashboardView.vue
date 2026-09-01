@@ -287,7 +287,7 @@
                 </button>
               </div>
             </div>
-            <button @click="cargarOrdenesOperativas" title="Recargar Lista" class="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl transition-all cursor-pointer">
+            <button @click="cargarOrdenesOperativas(false)" title="Recargar Lista" class="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl transition-all cursor-pointer">
               <v-icon name="bi-arrow-clockwise" scale="0.9" />
             </button>
           </div>
@@ -382,7 +382,7 @@
                           @click="abrirModalUploadPDF(orden)"
                           class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-[10px] uppercase tracking-wider cursor-pointer shadow-xs transition-all flex items-center gap-1.5 mx-auto"
                         >
-                          <v-icon name="bi-file-earmark-pdf-fill" /> Cargar PDF
+                          <v-icon name="bi-check-circle-fill" /> Completar Orden
                         </button>
                         <a
                           v-else-if="orden.Estado === 'Completada' && orden.ArchivoPdfPath"
@@ -566,12 +566,12 @@
       </div>
     </div>
 
-    <!-- ================= MODAL 2: CARGA DE PDF DE RESULTADOS ================= -->
+    <!-- ================= MODAL 2: CARGA DE PDF / COMPLETAR ORDEN ================= -->
     <div v-if="showUploadModal && ordenParaSubir" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
       <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-6 text-left">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
           <div>
-            <h3 class="text-base font-black text-slate-800 uppercase tracking-tight">Finalizar Orden y Cargar PDF</h3>
+            <h3 class="text-base font-black text-slate-800 uppercase tracking-tight">Finalizar y Completar Orden</h3>
             <p class="text-[10px] font-bold text-slate-400 font-mono">{{ ordenParaSubir.CodigoOrden || `ORD-2026-${ordenParaSubir.OrdenID}` }}</p>
           </div>
           <button @click="showUploadModal = false" class="text-slate-400 hover:text-slate-600 font-bold cursor-pointer">✕</button>
@@ -580,18 +580,18 @@
           <span class="text-[10px] font-black text-amber-800 uppercase tracking-wider block">Cálculo de Comisión SaaS</span>
           <div class="flex justify-between items-center text-xs font-black text-slate-800">
             <span>Monto Total Orden: ${{ Number(ordenParaSubir.MontoTotal || 0).toFixed(2) }}</span>
-            <span class="text-emerald-600">Comisión MedCore (5%): ${{ (Number(ordenParaSubir.MontoTotal || 0) * 0.05).toFixed(2) }}</span>
+            <span class="text-emerald-600">Comisión MedGo+  (5%): ${{ (Number(ordenParaSubir.MontoTotal || 0) * 0.05).toFixed(2) }}</span>
           </div>
         </div>
         <div class="space-y-2">
-          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Adjuntar Reporte Oficial (PDF)</label>
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Adjuntar Reporte Oficial PDF (Opcional)</label>
           <input @change="handleFileChange" type="file" accept=".pdf" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-slate-900 file:text-white cursor-pointer" />
         </div>
         <div class="flex justify-end gap-3 pt-4">
           <button @click="showUploadModal = false" class="px-5 py-3 text-xs font-bold text-slate-400 hover:text-slate-600 cursor-pointer">Cancelar</button>
           <button
             @click="ejecutarSubidaPDF"
-            :disabled="subiendoPDF || !archivoPDFSeleccionado"
+            :disabled="subiendoPDF"
             class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
           >
             {{ subiendoPDF ? 'Procesando...' : 'Completar Orden & Facturar' }}
@@ -612,7 +612,8 @@ import {
   BiGridFill, BiGraphUp, BiEyedropper, BiBoxSeam, BiReceipt,
   BiBell, BiGear, BiSearch, BiQrCodeScan, BiBoxArrowRight,
   BiListTask, BiExclamationTriangle, BiArrowClockwise, BiFileEarmarkPdfFill,
-  BiExclamationTriangleFill, BiClockHistory, BiEye, BiInfoCircleFill, BiXLg
+  BiExclamationTriangleFill, BiClockHistory, BiEye, BiInfoCircleFill, BiXLg,
+  BiCheckCircleFill
 } from 'oh-vue-icons/icons';
 import { SiFlask } from 'oh-vue-icons/icons';
 import QualityAuditModule from '@/shared/ui/components/QualityAuditModule.vue';
@@ -628,17 +629,21 @@ import type {
   EstadoOrdenLaboratorio
 } from '../../domain/LaboratoryModels';
 import type { LaboratoryDashboardData, ApiErrorResponse } from '../../domain/LaboratoryDashboard';
+
+// Polling optimizado a 15 segundos y refresco silencioso en segundo plano
 usePolling(async () => {
   if (labId.value && labId.value !== 0) {
     await loadDashboardData();
-    await cargarOrdenesOperativas();
+    await cargarOrdenesOperativas(true);
   }
-}, 5000);
+}, 15000);
+
 addIcons(
   BiGridFill, BiGraphUp, BiEyedropper, BiBoxSeam, BiReceipt,
   BiBell, BiGear, BiSearch, BiQrCodeScan, BiBoxArrowRight,
   BiListTask, BiExclamationTriangle, BiArrowClockwise, BiFileEarmarkPdfFill,
-  BiExclamationTriangleFill, SiFlask, BiClockHistory, BiEye, BiInfoCircleFill, BiXLg
+  BiExclamationTriangleFill, SiFlask, BiClockHistory, BiEye, BiInfoCircleFill, BiXLg,
+  BiCheckCircleFill
 );
 
 const labRepo = new LaboratoryRepository();
@@ -745,10 +750,15 @@ const actualizarPrecioExamen = async (item: CatalogoExamen): Promise<void> => {
 
 /**
  * Carga las órdenes e inmediatamente complementa los exámenes en tiempo real de forma reactiva
+ * @param esBackground Si es true, actualiza los datos sin mostrar la animación de carga
  */
-const cargarOrdenesOperativas = async (): Promise<void> => {
+const cargarOrdenesOperativas = async (esBackground = false): Promise<void> => {
   if (!labId.value || labId.value === 0) return;
-  cargandoOrdenes.value = true;
+
+  if (!esBackground) {
+    cargandoOrdenes.value = true;
+  }
+
   try {
     const ordenes = await labRepo.getOrdenes(labId.value, 'Todos');
 
@@ -769,9 +779,13 @@ const cargarOrdenesOperativas = async (): Promise<void> => {
 
     listaOrdenes.value = ordenesConDetalles;
   } catch {
-    toast.error("Error al obtener la lista de órdenes.");
+    if (!esBackground) {
+      toast.error("Error al obtener la lista de órdenes.");
+    }
   } finally {
-    cargandoOrdenes.value = false;
+    if (!esBackground) {
+      cargandoOrdenes.value = false;
+    }
   }
 };
 
@@ -796,7 +810,7 @@ const abrirModalDetalle = async (orden: LaboratoryOrderDTO): Promise<void> => {
  * Refresca la vista completa tras haber editado los exámenes en el modal
  */
 const handleOrdenActualizada = async (): Promise<void> => {
-  await cargarOrdenesOperativas();
+  await cargarOrdenesOperativas(false);
   await loadDashboardData();
 };
 
@@ -804,7 +818,7 @@ const procesarAceptarOrden = async (ordenId: number): Promise<void> => {
   try {
     await labRepo.aceptarOrden(ordenId);
     toast.success("Orden aceptada correctamente.");
-    await cargarOrdenesOperativas();
+    await cargarOrdenesOperativas(false);
     await loadDashboardData();
   } catch {
     toast.error("No se pudo aceptar la orden.");
@@ -822,7 +836,7 @@ const ejecutarValidacionQR = async (): Promise<void> => {
     await labRepo.validarCodigoQR(qrInputCodigo.value.trim(), labId.value);
     toast.success("Recepción de paciente confirmada.");
     showQRModal.value = false;
-    await cargarOrdenesOperativas();
+    await cargarOrdenesOperativas(false);
     await loadDashboardData();
   } catch (e: unknown) {
     const err = e as ApiErrorResponse;
@@ -850,16 +864,16 @@ const handleFileChange = (event: Event): void => {
 };
 
 const ejecutarSubidaPDF = async (): Promise<void> => {
-  if (!ordenParaSubir.value || !archivoPDFSeleccionado.value) return;
+  if (!ordenParaSubir.value) return;
   subiendoPDF.value = true;
   try {
     const res = await labRepo.subirResultadosPDF(ordenParaSubir.value.OrdenID, archivoPDFSeleccionado.value);
-    toast.success(`Resultados cargados. Comisión SaaS 5% registrada: $${res.comision_generada.toFixed(2)}`);
+    toast.success(`Orden completada exitosamente. Comisión SaaS 5% registrada: $${res.comision_generada.toFixed(2)}`);
     showUploadModal.value = false;
-    await cargarOrdenesOperativas();
+    await cargarOrdenesOperativas(false);
     await loadDashboardData();
   } catch {
-    toast.error("Error al adjuntar el PDF de resultados.");
+    toast.error("Error al finalizar la orden en el sistema.");
   } finally {
     subiendoPDF.value = false;
   }
@@ -911,7 +925,7 @@ watch(
     if (labId.value && labId.value !== 0) {
       void loadDashboardData();
       void loadCatalogoExamenes();
-      void cargarOrdenesOperativas();
+      void cargarOrdenesOperativas(false);
     }
   },
   { deep: true, immediate: true }

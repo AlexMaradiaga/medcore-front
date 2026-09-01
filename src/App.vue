@@ -10,8 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView, useRoute } from 'vue-router'
-import { computed, watch, onMounted } from 'vue';
+import { RouterView, useRoute } from 'vue-router';
+import { computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import ModalTerminos from '@/shared/ui/components/ModalTerminos.vue';
 import { useTermsCheck } from '@/shared/infrastructure/useTermsCheck';
@@ -27,12 +27,13 @@ const {
 } = useTermsCheck();
 
 const nombreEntidadUsuario = computed(() => {
-  return authStore.user?.nombre || 'Entidad MedCore';
+  return authStore.user?.nombre || 'Entidad MedGo+';
 });
 
 const tipoEntidadUsuario = computed(() => {
   return authStore.user?.tipo_entidad || 'Módulo Profesional';
 });
+
 
 watch(
   () => [route.path, authStore.token],
@@ -43,10 +44,4 @@ watch(
   },
   { immediate: true }
 );
-
-onMounted(() => {
-  if (authStore.token) {
-    verificarAceptacionTerminos();
-  }
-});
 </script>

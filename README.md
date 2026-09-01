@@ -1,48 +1,39 @@
-# medcore-front
+# medgo-front
 
-This template should help get you started developing with Vue 3 in Vite.
+Plataforma de Gestión Médica e Historial Clínico Unificado **MedGo+ Frontend**, desarrollada con **Vue 3**, **Vite**, **TypeScript** y **Tailwind CSS**.
 
-## Recommended IDE Setup
+## Configuración Recomendada de IDE
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (desactivar Vetur).
 
-## Recommended Browser Setup
+## Configuración Recomendada del Navegador
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
+- Navegadores basados en Chromium (Chrome, Edge, Brave, etc.):
   - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
+  - [Activar Custom Object Formatter en Chrome DevTools](http://bit.ly/object-formatters)
 - Firefox:
   - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+  - [Activar Custom Object Formatter en Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
 
-## Type Support for `.vue` Imports in TS
+## Soporte de Tipos para Archivos `.vue` en TypeScript
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+TypeScript no procesa información de tipos para archivos `.vue` de forma nativa, por lo que reemplazamos el CLI de `tsc` con `vue-tsc` para la verificación de tipos. En el editor se utiliza [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) para habilitar el servicio de lenguaje TypeScript en componentes `.vue`.
 
-## Customize configuration
+## Configuración de Vite
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Consulte la [Referencia de Configuración de Vite](https://vite.dev/config/).
 
-## Project Setup
+## Instalación y Ejecución
 
 ```sh
+# Instalación de dependencias
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Compilación y recarga en vivo para desarrollo
 npm run dev
-```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
+# Verificación de tipos, compilación y minificación para producción
 npm run build
-```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
+# Análisis de código con ESLint
 npm run lint
-```

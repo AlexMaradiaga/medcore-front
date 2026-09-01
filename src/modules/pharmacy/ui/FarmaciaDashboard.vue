@@ -206,11 +206,17 @@
                             <span class="text-[10px] font-bold text-[#00a8b5]">Consulta #{{ grupo.ConsultaID }}</span>
                             <span class="text-[10px] font-semibold text-slate-400">| DNI: {{ grupo.PacienteDNI }}</span>
                           </div>
-                          <!-- CÓDIGO DE CANJE EN LA TABLA -->
+                         <!-- CÓDIGO DE CANJE EN LA TABLA (SOLO CÓDIGO SELECCIONABLE) -->
                           <div v-if="grupo.CodigoCanje" class="mt-1">
-                            <span class="text-[9px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block max-w-42.5 truncate" :title="grupo.CodigoCanje">
-                              🔑 {{ grupo.CodigoCanje }}
-                            </span>
+                            <div
+                              class="inline-flex items-center gap-1 text-[9px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-200/60 transition-colors"
+                              :title="grupo.CodigoCanje"
+                            >
+                              <span class="select-none">🔑</span>
+                              <span class="font-bold tracking-tight break-all select-all text-slate-700">
+                                {{ grupo.CodigoCanje }}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -241,7 +247,7 @@
                     </td>
 
                     <td class="py-4 px-2 font-bold text-slate-600 align-top">{{ grupo.MedicoTratante || 'Mostrador' }}</td>
-                    <td class="py-4 px-2 font-bold text-slate-500 text-[11px] align-top">{{ grupo.FechaEmision }}</td>
+                    <td class="py-4 px-2 font-bold text-slate-500 text-[11px] align-top">{{ formatearFecha(grupo.FechaEmision) }}</td>
 
                     <td class="py-4 px-2 text-right align-top">
                       <button
@@ -308,14 +314,15 @@
             </div>
           </div>
 
-          <div class="lg:col-span-4 space-y-6">
-            <div class="bg-[#00685b] text-white rounded-3xl p-6 shadow-md text-center space-y-3 relative overflow-hidden">
-              <div class="w-12 h-12 rounded-2xl bg-white/10 mx-auto flex items-center justify-center text-2xl">📷</div>
-              <h3 class="text-base font-black uppercase tracking-tight">+ Nuevo Despacho / Escáner</h3>
-              <p class="text-xs text-white/80 font-medium leading-relaxed">Escanee código de barras o ingrese RUT / DNI del paciente.</p>
+          <!-- BLOQUE ESCÁNER MÁS PEQUEÑO Y COMPACTO -->
+          <div class="lg:col-span-4 space-y-4">
+            <div class="bg-[#00685b] text-white rounded-2xl p-4 shadow-sm text-center space-y-2 relative overflow-hidden">
+              <div class="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-base">📷</div>
+              <h3 class="text-xs font-black uppercase tracking-tight">+ Nuevo Despacho / Escáner</h3>
+              <p class="text-[10px] text-white/80 font-medium leading-tight">Escanee código de barras o DNI del paciente.</p>
               <button
                 @click="ejecutarEscanerLector"
-                class="w-full bg-white text-[#00685b] hover:bg-slate-50 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm mt-2"
+                class="w-full bg-white text-[#00685b] hover:bg-slate-50 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow-xs mt-1"
               >
                 Activar Escáner
               </button>
@@ -353,7 +360,7 @@
             <p v-if="consultaSeleccionada.CodigoCanje" class="text-[10px] font-mono font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200 inline-block my-0.5">
               🔑 {{ consultaSeleccionada.CodigoCanje }}
             </p>
-            <p class="text-[10px] font-bold text-slate-400">{{ consultaSeleccionada.FechaEmision }}</p>
+            <p class="text-[10px] font-bold text-slate-400">{{ formatearFecha(consultaSeleccionada.FechaEmision) }}</p>
             <p class="text-[10px] font-bold text-[#00a8b5]">{{ consultaSeleccionada.MedicoTratante || 'Médico General' }}</p>
           </div>
         </div>
@@ -535,7 +542,29 @@ const consultasAgrupadas = computed<ConsultaAgrupadaDTO[]>(() => {
 });
 
 const consultasFiltradas = computed<ConsultaAgrupadaDTO[]>(() => {
-  return consultasAgrupadas.value;
+  const q = criterioBusqueda.value.trim().toLowerCase().replace('#', '');
+  if (!q) return consultasAgrupadas.value;
+
+  return consultasAgrupadas.value.filter((item: ConsultaAgrupadaDTO) => {
+    const nombreCompleto = (item.Paciente || '').toLowerCase();
+    const dni = String(item.PacienteDNI || '').toLowerCase();
+    const consultaId = String(item.ConsultaID || '').toLowerCase();
+    const token = String(item.CodigoCanje || '').toLowerCase();
+
+    const tieneMedicamento = Array.isArray(item.Medicamentos)
+      ? item.Medicamentos.some((m: RecetaFarmaciaDTO) =>
+          (m.NombreMedicamento || '').toLowerCase().includes(q)
+        )
+      : false;
+
+    return (
+      nombreCompleto.includes(q) ||
+      dni.includes(q) ||
+      consultaId.includes(q) ||
+      token.includes(q) ||
+      tieneMedicamento
+    );
+  });
 });
 
 const showModal = ref<boolean>(false);
@@ -726,6 +755,11 @@ const getIniciales = (nombre: string): string => {
   if (!nombre) return 'PA';
   const partes = nombre.trim().split(' ').filter((p) => p.length > 0);
   return `${partes[0]?.charAt(0) || ''}${partes[1]?.charAt(0) || ''}`.toUpperCase() || 'PA';
+};
+
+const formatearFecha = (fechaStr?: string): string => {
+  if (!fechaStr) return 'N/D';
+  return fechaStr.split(' ')[0]?.split('T')[0] ?? 'N/D';
 };
 
 const enfocarBusqueda = (): void => {
