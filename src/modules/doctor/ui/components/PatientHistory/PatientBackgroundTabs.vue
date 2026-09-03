@@ -33,7 +33,7 @@
         :class="activeSubTab === 'medicamentos' ? 'bg-white text-slate-900 font-black shadow-3xs' : 'text-slate-500 font-bold hover:text-slate-800'"
         class="px-4 py-2 text-[11px] uppercase rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
       >
-        <v-icon name="bi-capsule" scale="0.8" class="text-purple-500" /> Medicación Actual
+        <v-icon name="fa-capsules" scale="0.8" class="text-purple-500" /> Medicación Actual
       </button>
     </div>
 

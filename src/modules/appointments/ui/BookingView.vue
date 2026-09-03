@@ -1,30 +1,28 @@
 <template>
-  <div class="space-y-8 animate-fade-in pb-20 text-left">
+  <div class="space-y-6 sm:space-y-8 animate-fade-in pb-20 text-left pt-12 md:pt-0">
 
     <!-- Header de navegación -->
-    <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+    <div class="flex flex-row justify-between items-center border-b border-slate-100 pb-4 gap-2">
       <div class="text-left">
-        <h2 class="text-3xl font-black text-slate-800 tracking-tight uppercase">Agendar Nueva Cita</h2>
+        <h2 class="text-xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase">Agendar Nueva Cita</h2>
         <p class="text-slate-400 font-bold text-xs mt-1">Paso {{ currentStep }} de 4: {{ totalSteps[currentStep - 1]?.shortTitle }}</p>
       </div>
       <button
         type="button"
         @click="$emit('cancel')"
-        class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+        class="px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shrink-0"
       >
         ← Volver
       </button>
     </div>
 
-    <!-- ========================================================================= -->
     <!-- SECTOR RESTAURADO: SELECTOR DE PACIENTE (TUTOR PRINCIPAL / DEPENDIENTES) -->
-    <!-- ========================================================================= -->
-    <div class="bg-white rounded-[2.5rem] p-6 shadow-3xs border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="bg-white rounded-2xl md:rounded-[2.5rem] p-4 sm:p-6 shadow-3xs border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div>
         <span class="text-[9px] font-black uppercase tracking-widest text-[#005596] bg-sky-50 px-3 py-1 rounded-full border border-sky-100/80">
           Atención Médica Dirigida
         </span>
-        <h3 class="text-lg font-black text-slate-800 tracking-tight mt-1">
+        <h3 class="text-base sm:text-lg font-black text-slate-800 tracking-tight mt-1">
           ¿Para quién es la consulta médica?
         </h3>
         <p class="text-xs font-bold text-slate-400">
@@ -37,12 +35,12 @@
         <button
           type="button"
           @click="dropdownDependientes = !dropdownDependientes"
-          class="w-full md:w-auto flex items-center justify-between gap-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 px-5 py-3 rounded-2xl transition-all cursor-pointer text-left shadow-2xs"
+          class="w-full md:w-auto flex items-center justify-between gap-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 px-4 sm:px-5 py-3 rounded-2xl transition-all cursor-pointer text-left shadow-2xs"
         >
           <div class="flex items-center gap-3">
             <div
               :class="pacienteSeleccionado.esDependiente ? 'bg-amber-500 text-white' : 'bg-[#005596] text-white'"
-              class="w-9 h-9 rounded-xl font-black flex items-center justify-center text-xs shadow-3xs"
+              class="w-9 h-9 rounded-xl font-black flex items-center justify-center text-xs shadow-3xs shrink-0"
             >
               {{ pacienteSeleccionado.iniciales }}
             </div>
@@ -83,7 +81,7 @@
               class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left cursor-pointer"
               :class="{ 'bg-sky-50/60': pacienteSeleccionado.id === tutorPrincipalPerfil.id }"
             >
-              <div class="w-8 h-8 rounded-xl bg-sky-100 text-[#005596] font-bold flex items-center justify-center text-xs">
+              <div class="w-8 h-8 rounded-xl bg-sky-100 text-[#005596] font-bold flex items-center justify-center text-xs shrink-0">
                 {{ tutorPrincipalPerfil.iniciales }}
               </div>
               <div class="flex flex-col">
@@ -106,7 +104,7 @@
                 class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left cursor-pointer"
                 :class="{ 'bg-sky-50/60': pacienteSeleccionado.id === dep.id }"
               >
-                <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xs">
+                <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xs shrink-0">
                   {{ dep.iniciales }}
                 </div>
                 <div class="flex flex-col">
@@ -124,14 +122,14 @@
     <transition name="fade">
       <div
         v-if="form.fecha && form.hora"
-        class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4.5 flex items-center gap-4 text-emerald-800 shadow-3xs"
+        class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 sm:p-4.5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 text-emerald-800 shadow-3xs"
       >
-        <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center text-xl animate-pulse">
+        <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center text-xl animate-pulse shrink-0">
           <v-icon name="bi-calendar-event" scale="1.1" />
         </div>
         <div class="text-left flex-1">
           <p class="text-[10px] font-black uppercase tracking-widest text-emerald-600 leading-none">Horario Reservado Localmente</p>
-          <p class="text-sm font-black mt-1">
+          <p class="text-xs sm:text-sm font-black mt-1">
             Su cita médica quedará agendada firmemente el día <span class="underline">{{ form.fecha }}</span> a las <span class="underline">{{ form.hora }} HS</span>.
           </p>
         </div>
@@ -139,37 +137,37 @@
     </transition>
 
     <!-- Ficha resumen del especialista -->
-    <div v-if="selectedDoctor" class="bg-white border border-slate-100 rounded-[2.5rem] p-6 text-slate-800 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-3xs">
-      <div class="flex items-center gap-5 w-full sm:w-auto">
-        <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner border border-slate-100 shrink-0">
-          <v-icon name="bi-people-fill" scale="2.0" class="text-slate-400" />
+    <div v-if="selectedDoctor" class="bg-white border border-slate-100 rounded-2xl md:rounded-[2.5rem] p-4 sm:p-6 text-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 shadow-3xs">
+      <div class="flex items-center gap-4 sm:gap-5 w-full sm:w-auto">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner border border-slate-100 shrink-0">
+          <v-icon name="bi-people-fill" scale="1.8" class="text-slate-400" />
         </div>
         <div class="text-left space-y-1">
           <div class="flex items-center gap-2">
             <span class="bg-sky-50 text-sky-600 border border-sky-200/50 font-black text-[9px] uppercase px-2 py-0.5 rounded-full">Especialista Verificado</span>
           </div>
-          <h3 class="text-xl font-black text-slate-800 tracking-tight">Dr. {{ selectedDoctor.Nombre }} {{ selectedDoctor.Apellido }}</h3>
+          <h3 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight">Dr. {{ selectedDoctor.Nombre }} {{ selectedDoctor.Apellido }}</h3>
           <p class="text-xs font-black text-slate-900 uppercase tracking-wider">{{ selectedDoctor.Especialidad }}</p>
         </div>
       </div>
-      <div class="text-right bg-slate-50/80 px-6 py-3.5 rounded-2xl border border-slate-100/60 w-full sm:w-auto shrink-0">
+      <div class="text-left sm:text-right bg-slate-50/80 px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl border border-slate-100/60 w-full sm:w-auto shrink-0 flex sm:block justify-between items-center">
         <p class="text-[9px] uppercase font-black text-slate-400 tracking-widest leading-none">Costo de Consulta</p>
-        <p class="text-2xl font-black text-emerald-600 mt-1">
-          ${{ (selectedDoctor as DoctorExtended).CostoConsulta || (selectedDoctor as DoctorExtended).Precio || 90 }}
+        <p class="text-xl sm:text-2xl font-black text-emerald-600 sm:mt-1">
+          ${{ tieneSeguroMedico ? '0.00' : ((selectedDoctor as DoctorExtended).CostoConsulta || (selectedDoctor as DoctorExtended).Precio || 90) }}
         </p>
       </div>
     </div>
 
     <!-- Contenedor del Wizard Formulario -->
-    <div class="bg-white rounded-[2.5rem] p-10 shadow-3xs border border-slate-100 min-h-130 flex flex-col justify-between">
+    <div class="bg-white rounded-2xl md:rounded-[2.5rem] p-4 sm:p-6 md:p-10 shadow-3xs border border-slate-100 min-h-112.5 md:min-h-130 flex flex-col justify-between">
 
       <!-- Stepper / Pasos -->
-      <div class="flex items-center justify-between border-b border-slate-50 pb-6 mb-4 select-none">
+      <div class="flex items-center justify-between border-b border-slate-50 pb-4 sm:pb-6 mb-4 select-none">
         <div v-for="(step, idx) in totalSteps" :key="step.id" class="flex items-center flex-1 last:flex-none">
-          <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-2">
             <div
               :class="currentStep === step.id ? 'bg-sky-500 text-white font-black scale-105 shadow-md shadow-sky-100' : currentStep > step.id ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-50 text-slate-400'"
-              class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all"
+              class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0"
             >
               <v-icon v-if="currentStep > step.id" name="bi-check" scale="0.9" />
               <span v-else>{{ step.id }}</span>
@@ -178,35 +176,35 @@
               {{ step.shortTitle }}
             </span>
           </div>
-          <div v-if="idx < totalSteps.length - 1" class="flex-1 h-0.5 mx-4 bg-slate-100 rounded">
+          <div v-if="idx < totalSteps.length - 1" class="flex-1 h-0.5 mx-2 sm:mx-4 bg-slate-100 rounded">
             <div class="h-full bg-sky-400 transition-all duration-300" :style="{ width: currentStep > step.id ? '100%' : '0%' }"></div>
           </div>
         </div>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="flex-1 flex flex-col justify-between space-y-8">
+      <form @submit.prevent="handleSubmit" class="flex-1 flex flex-col justify-between space-y-6 sm:space-y-8">
 
         <!-- PASO 01: FECHA Y HORA -->
         <div v-if="currentStep === 1" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-sky-400 pl-4">
-            <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">01. Planificación de Fecha y Hora</h4>
+            <h4 class="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest">01. Planificación de Fecha y Hora</h4>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div class="space-y-2">
               <label class="flex items-center gap-2 text-xs font-bold text-slate-700">
                 <v-icon name="bi-calendar-event" class="h-4 w-4 text-sky-500"/> Seleccione la Fecha *
               </label>
-              <input v-model="form.fecha" type="date" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
+              <input v-model="form.fecha" type="date" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
             </div>
             <div class="space-y-2 text-left">
               <label class="flex items-center gap-2 text-xs font-bold text-slate-700">
-                <v-icon name="bi-search" class="h-4 w-4 text-sky-500"/> Seleccione o ingrese la hora de atención *
+                <v-icon name="bi-search" class="h-4 w-4 text-sky-500"/> Seleccione o ingrese la hora *
               </label>
-              <input v-model="form.hora" type="time" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all bg-slate-50/50" />
+              <input v-model="form.hora" type="time" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all bg-slate-50/50" />
             </div>
             <div class="md:col-span-2 space-y-2">
               <label class="block text-xs font-bold text-slate-700">Motivo Principal de Consulta *</label>
-              <input v-model="form.motivo" type="text" placeholder="Ej: Control dermatológico anual..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
+              <input v-model="form.motivo" type="text" placeholder="Ej: Control dermatológico anual..." class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
             </div>
           </div>
         </div>
@@ -214,33 +212,34 @@
         <!-- PASO 02: INFORMACIÓN DEL PACIENTE Y EMERGENCIA -->
         <div v-if="currentStep === 2" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-sky-400 pl-4">
-            <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">02. Información del Paciente y Emergencia</h4>
+            <h4 class="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest">02. Información del Paciente y Emergencia</h4>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div class="space-y-2">
               <label class="flex items-center gap-2 text-xs font-bold text-slate-700">
                 <v-icon name="bi-people-fill" class="h-4 w-4 text-sky-500"/> Nombre Completo
               </label>
-              <input v-model="userData.nombre" type="text" readonly class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 text-xs font-bold text-slate-500 outline-none cursor-not-allowed" />
+              <input v-model="userData.nombre" type="text" readonly class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold text-slate-500 outline-none cursor-not-allowed" />
             </div>
             <div class="space-y-2">
               <label class="flex items-center gap-2 text-xs font-bold text-slate-700">
                 <v-icon name="bi-file-earmark-text-fill" class="h-4 w-4 text-sky-500"/> Correo Electrónico
               </label>
-              <input v-model="userData.email" type="email" readonly class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 text-xs font-bold text-slate-500 outline-none cursor-not-allowed" />
+              <input v-model="userData.email" type="email" readonly class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold text-slate-500 outline-none cursor-not-allowed" />
             </div>
             <div class="space-y-2">
               <label class="block text-xs font-bold text-slate-700">Teléfono de Contacto *</label>
-              <input v-model="form.telefono" type="text" placeholder="Ej: +504 9999-9999" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
+              <input v-model="form.telefono" type="text" placeholder="Ej: +504 9999-9999" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
             </div>
-            <div class="grid grid-cols-3 gap-3">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-700">Edad *</label>
-                <input v-model="form.edad" type="number" placeholder="Ej: 28" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
+                <input v-model="form.edad" type="number" placeholder="Ej: 28" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
               </div>
               <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-700">Género *</label>
-                <select v-model="form.genero" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none bg-white">
+                <select v-model="form.genero" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none bg-white">
                   <option value="">Seleccione</option>
                   <option value="M">Masculino</option>
                   <option value="F">Femenino</option>
@@ -251,23 +250,22 @@
                 <input
                   v-model="form.tipoSangre"
                   type="text"
-
                   placeholder="O+"
-                  class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 text-xs font-black text-rose-600 outline-none cursor-not-allowed text-center uppercase"
+                  class="w-full bg-slate-50/80 border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-black text-rose-600 outline-none cursor-not-allowed text-center uppercase"
                 />
               </div>
             </div>
           </div>
           <div class="pt-6 border-t border-slate-100 space-y-4">
             <h5 class="text-xs font-black text-slate-500 uppercase tracking-wider">Contacto de Emergencia Asociado</h5>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-700">Nombre del Responsable *</label>
-                <input v-model="form.contactoNombre" type="text" placeholder="Nombre completo del contacto" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none" />
+                <input v-model="form.contactoNombre" type="text" placeholder="Nombre completo del contacto" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none" />
               </div>
               <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-700">Teléfono de Emergencia *</label>
-                <input v-model="form.contactoTel" type="text" placeholder="Ej: +504 9999-0000" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs font-bold focus:border-sky-400 outline-none" />
+                <input v-model="form.contactoTel" type="text" placeholder="Ej: +504 9999-0000" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none" />
               </div>
             </div>
           </div>
@@ -276,23 +274,23 @@
         <!-- PASO 03: HISTORIAL MÉDICO -->
         <div v-if="currentStep === 3" class="space-y-5">
           <div class="flex items-center gap-2.5 border-l-4 border-sky-400 pl-4 mb-2">
-            <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">03. Historial e Información Médica</h4>
+            <h4 class="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest">03. Historial e Información Médica</h4>
           </div>
 
-          <div class="flex flex-wrap gap-2 border-b border-slate-100 pb-2">
+          <div class="flex flex-wrap gap-1.5 sm:gap-2 border-b border-slate-100 pb-2">
             <button
               type="button"
               v-for="subTab in subTabs" :key="subTab.id"
               @click="activeSubTab = subTab.id"
               :class="activeSubTab === subTab.id ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-black shadow-3xs' : 'text-slate-400 hover:bg-slate-50 font-bold'"
-              class="px-4 py-2 rounded-xl text-xs uppercase tracking-wide transition-all cursor-pointer"
+              class="px-3 sm:px-4 py-2 rounded-xl text-xs uppercase tracking-wide transition-all cursor-pointer"
             >
               {{ subTab.label }}
             </button>
           </div>
 
           <div v-if="activeSubTab === 'sintomas'" class="space-y-4 animate-fade-in text-left">
-            <div class="bg-white rounded-2xl border border-slate-100 p-5 space-y-3 shadow-3xs">
+            <div class="bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 space-y-3 shadow-3xs">
               <div class="flex items-center gap-2 text-rose-500">
                 <v-icon name="bi-people-fill" class="h-4 w-4" />
                 <p class="text-xs font-black uppercase text-slate-700 tracking-wider">Enfermedades Crónicas</p>
@@ -302,7 +300,7 @@
                 <label
                   v-for="cronica in listaCronicas" :key="cronica.EnfermedadID"
                   :class="form.cronicasSeleccionadasIds.includes(cronica.EnfermedadID) ? 'bg-sky-50/50 border-sky-300 text-sky-700 font-black' : 'bg-slate-50 border-slate-100 text-slate-600'"
-                  class="p-3.5 border rounded-xl flex items-center gap-3.5 cursor-pointer transition-all text-xs font-bold"
+                  class="p-3 sm:p-3.5 border rounded-xl flex items-center gap-3 cursor-pointer transition-all text-xs font-bold"
                 >
                   <input type="checkbox" :value="cronica.EnfermedadID" v-model="form.cronicasSeleccionadasIds" class="rounded border-slate-300 text-sky-500 focus:ring-sky-400 w-4 h-4" />
                   <span>{{ cronica.NombreEnfermedad }}</span>
@@ -316,14 +314,14 @@
           </div>
 
           <div v-if="activeSubTab === 'alergias'" class="space-y-4 animate-fade-in text-left">
-            <div class="bg-white rounded-2xl border border-slate-100 p-5 space-y-4 shadow-3xs">
+            <div class="bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 space-y-4 shadow-3xs">
               <div class="flex flex-wrap gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100 max-w-max">
                 <button
                   type="button"
                   v-for="catTab in subTabsAlergias" :key="catTab.id"
                   @click="activeCategoriaAlergia = catTab.id"
                   :class="activeCategoriaAlergia === catTab.id ? 'bg-white text-sky-600 border-slate-200/60 shadow-3xs font-black' : 'text-slate-400 border-transparent font-bold hover:text-slate-600'"
-                  class="px-3.5 py-1.5 border rounded-lg text-[11px] uppercase tracking-wider transition-all cursor-pointer"
+                  class="px-2.5 sm:px-3.5 py-1.5 border rounded-lg text-[10px] sm:text-[11px] uppercase tracking-wider transition-all cursor-pointer"
                 >
                   {{ catTab.label }}
                 </button>
@@ -352,7 +350,7 @@
                 <p class="text-xs font-black text-slate-800">¿Sufre de otra alergia no listada?</p>
                 <div class="flex gap-2">
                   <input v-model="customAlergiaName" type="text" placeholder="Escriba el nombre del alérgeno..." class="flex-1 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:border-sky-400" />
-                  <button type="button" @click="addCustomAlergia" class="px-5 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black uppercase transition-all">+ Añadir</button>
+                  <button type="button" @click="addCustomAlergia" class="px-4 sm:px-5 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black uppercase transition-all shrink-0">+ Añadir</button>
                 </div>
               </div>
               <button type="button" @click="clearAllAlergias" class="w-full py-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-slate-600 uppercase tracking-wider transition-all text-center">
@@ -367,7 +365,7 @@
           </div>
 
           <div v-if="activeSubTab === 'medicamentos'" class="space-y-4 animate-fade-in text-left">
-            <div class="bg-white rounded-2xl border border-slate-100 p-5 space-y-4 shadow-3xs">
+            <div class="bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 space-y-4 shadow-3xs">
               <div class="flex items-center gap-1.5 text-slate-800">
                 <v-icon name="bi-search" class="h-4 w-4 text-sky-500" />
                 <p class="text-xs font-black uppercase tracking-wider">Medicamentos que tomas actualmente</p>
@@ -391,7 +389,7 @@
                 <p class="text-xs font-black text-slate-800">¿No encuentras tu medicamento?</p>
                 <div class="flex gap-2">
                   <input v-model="customMedName" type="text" placeholder="Escribe el nombre del medicamento..." class="flex-1 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:border-sky-400" />
-                  <button type="button" @click="addCustomMedicamento" class="px-5 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black uppercase transition-all">+ Agregar</button>
+                  <button type="button" @click="addCustomMedicamento" class="px-4 sm:px-5 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-black uppercase transition-all shrink-0">+ Agregar</button>
                 </div>
               </div>
               <button type="button" @click="clearAllMedicamentos" class="w-full py-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-slate-600 uppercase tracking-wider transition-all text-center">
@@ -445,22 +443,37 @@
           </div>
         </div>
 
-        <!-- PASO 04: MÉTODO DE PAGO Y TÉRMINOS Y CONDICIONES -->
+        <!-- PASO 04: CONFIRMACIÓN Y MÉTODO DE PAGO -->
         <div v-if="currentStep === 4" class="space-y-6 animate-step-in">
           <div class="flex items-center gap-2.5 border-l-4 border-emerald-400 pl-4">
-            <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest">04. Método de Pago y Confirmación</h4>
+            <h4 class="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest">04. Confirmación y Cobertura</h4>
           </div>
 
-          <div class="space-y-3">
+          <!-- BANNER SI EL PACIENTE TIENE SEGURO MÉDICO -->
+          <div v-if="tieneSeguroMedico" class="bg-sky-50 border border-sky-200 p-4 sm:p-5 rounded-2xl space-y-2 text-left animate-fade-in">
+            <div class="flex items-center gap-2 text-[#005596] font-black text-xs uppercase tracking-wider">
+              <v-icon name="bi-check-circle-fill" scale="0.95" /> Cobertura por Seguro Médico Activa
+            </div>
+            <p class="text-xs text-slate-600 font-bold">
+              Aseguradora: <span class="text-slate-900 font-black uppercase">{{ form.aseguradora || 'Registrada' }}</span> 
+              <span v-if="form.poliza"> | Póliza: <span class="font-mono text-slate-900">{{ form.poliza }}</span></span>
+            </p>
+            <p class="text-xs text-emerald-600 font-black">
+              Monto Total a Cobrar: $0.00 (Exento por Seguro)
+            </p>
+          </div>
+
+          <!-- SELECCIÓN DE PAGO (SOLO SI NO TIENE SEGURO) -->
+          <div v-else class="space-y-3">
             <label class="block text-xs font-black text-slate-400 uppercase tracking-wider">
               Seleccione Modalidad de Pago de la Consulta
             </label>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div
                 @click="form.metodoPago = 'Efectivo'; ubicacionPago = 'clinic'"
                 :class="form.metodoPago === 'Efectivo' ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-3xs font-black' : 'bg-slate-50 text-slate-500 border-slate-100/70'"
-                class="p-4.5 rounded-2xl border text-xs font-black uppercase tracking-wider cursor-pointer transition-all flex items-center justify-between select-none"
+                class="p-4 sm:p-4.5 rounded-2xl border text-xs font-black uppercase tracking-wider cursor-pointer transition-all flex items-center justify-between select-none"
               >
                 <div class="flex items-center gap-3">💵 Ventanilla / Efectivo</div>
                 <div class="w-4 h-4 rounded-full border flex items-center justify-center bg-white" :class="form.metodoPago === 'Efectivo' ? 'border-emerald-500' : 'border-slate-300'">
@@ -471,9 +484,9 @@
               <div
                 @click="form.metodoPago = 'Tarjeta/Transferencia'; ubicacionPago = 'app'"
                 :class="form.metodoPago === 'Tarjeta/Transferencia' ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-3xs font-black' : 'bg-slate-50 text-slate-500 border-slate-100/70'"
-                class="p-4.5 rounded-2xl border text-xs font-black uppercase tracking-wider cursor-pointer transition-all flex items-center justify-between select-none"
+                class="p-4 sm:p-4.5 rounded-2xl border text-xs font-black uppercase tracking-wider cursor-pointer transition-all flex items-center justify-between select-none"
               >
-                <div class="flex items-center gap-3">💳 Tarjeta / Transferencia Digital</div>
+                <div class="flex items-center gap-3">💳 Tarjeta / Digital</div>
                 <div class="w-4 h-4 rounded-full border flex items-center justify-center bg-white" :class="form.metodoPago === 'Tarjeta/Transferencia' ? 'border-blue-500' : 'border-slate-300'">
                   <div v-if="form.metodoPago === 'Tarjeta/Transferencia'" class="w-2 h-2 bg-blue-500 rounded-full"></div>
                 </div>
@@ -482,12 +495,12 @@
           </div>
 
           <!-- SECCIÓN DE ACEPTACIÓN LEGAL DE TÉRMINOS Y CONDICIONES -->
-          <div class="bg-amber-50/60 border border-amber-200/80 p-5 rounded-2xl space-y-2 text-left">
+          <div class="bg-amber-50/60 border border-amber-200/80 p-4 sm:p-5 rounded-2xl space-y-2 text-left">
             <label class="flex items-start gap-3 cursor-pointer select-none">
               <input
                 type="checkbox"
                 v-model="aceptoTerminos"
-                class="mt-0.5 w-4 h-4 text-emerald-600 bg-white border-amber-300 rounded focus:ring-emerald-500 cursor-pointer"
+                class="mt-0.5 w-4 h-4 text-emerald-600 bg-white border-amber-300 rounded focus:ring-emerald-500 cursor-pointer shrink-0"
               />
               <span class="text-xs text-slate-700 font-semibold leading-relaxed">
                 Declaro que he leído, comprendo y acepto expresamente los
@@ -515,7 +528,7 @@
             :disabled="currentStep === 1"
             @click="currentStep--"
             :class="currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'"
-            class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+            class="px-5 sm:px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
           >
             Atrás
           </button>
@@ -524,7 +537,7 @@
             type="button"
             v-if="currentStep < 4"
             @click="handleNextStep"
-            class="px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white shadow-md shadow-sky-100 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.95] cursor-pointer"
+            class="px-6 sm:px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white shadow-md shadow-sky-100 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.95] cursor-pointer"
           >
             Siguiente
           </button>
@@ -536,9 +549,9 @@
             :class="aceptoTerminos
               ? 'bg-linear-to-r from-emerald-500 to-teal-600 hover:brightness-105 text-white shadow-md shadow-emerald-100 active:scale-[0.95] cursor-pointer'
               : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60 shadow-none'"
-            class="px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+            class="px-6 sm:px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
           >
-            {{ form.metodoPago === 'Efectivo' ? 'Confirmar y Guardar Cita' : 'Proceder al Pago en Línea' }}
+            {{ tieneSeguroMedico ? 'Confirmar Cita (Sin Costo)' : (form.metodoPago === 'Efectivo' ? 'Confirmar Cita' : 'Proceder al Pago') }}
           </button>
         </div>
 
@@ -546,18 +559,18 @@
     </div>
 
     <!-- MODAL / VISOR DE TÉRMINOS Y CONDICIONES -->
-    <div v-if="showModalTerminos" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in">
-      <div class="bg-white rounded-[2.5rem] w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] text-left">
+    <div v-if="showModalTerminos" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-4 backdrop-blur-xs animate-fade-in">
+      <div class="bg-white rounded-2xl md:rounded-[2.5rem] w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90dvh] text-left">
 
         <!-- ENCABEZADO DEL MODAL -->
-        <div class="p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
+        <div class="p-4 sm:p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-black text-xs">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-black text-xs shrink-0">
               MedGo+
             </div>
             <div>
-              <h3 class="text-base font-black text-white leading-tight">Términos y Condiciones de Uso</h3>
-              <p class="text-[10px] text-slate-400 font-medium">Inversiones Digitales SanRA S.A. — Versión 1.0 MVP</p>
+              <h3 class="text-sm sm:text-base font-black text-white leading-tight">Términos y Condiciones de Uso</h3>
+              <p class="text-[9px] sm:text-[10px] text-slate-400 font-medium">Inversiones Digitales SanRA S.A. — Versión 1.0 MVP</p>
             </div>
           </div>
           <button type="button" @click="showModalTerminos = false" class="text-slate-400 hover:text-white text-xl font-bold p-1 cursor-pointer">
@@ -566,7 +579,7 @@
         </div>
 
         <!-- CUERPO DEL MODAL -->
-        <div class="p-6 overflow-y-auto space-y-5 flex-1 text-slate-700 text-xs leading-relaxed">
+        <div class="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1 text-slate-700 text-xs leading-relaxed">
 
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
             <span class="text-[11px] font-black text-slate-600 uppercase tracking-wider">
@@ -582,12 +595,22 @@
             </a>
           </div>
 
-          <!-- VISOR PDF EMBEBIDO CON <object> -->
-          <div class="w-full h-80 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100">
+          <!-- VISOR PDF ADAPTATIVO (FALLBACK MÓVIL / OBJECT DESKTOP) -->
+          <div class="w-full h-64 md:h-80 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100">
+            <!-- Fallback para pantallas móviles -->
+            <div class="md:hidden p-6 text-center text-slate-600 bg-slate-50 flex flex-col items-center justify-center h-full gap-3">
+              <v-icon name="bi-file-earmark-pdf-fill" scale="2.0" class="text-rose-500" />
+              <span class="font-bold text-xs">Para ver el documento oficial en tu teléfono:</span>
+              <a :href="pdfTerminosUrl" target="_blank" class="px-5 py-2.5 bg-[#005596] text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md">
+                Abrir PDF Términos
+              </a>
+            </div>
+
+            <!-- Visor embebido para escritorio -->
             <object
               :data="`${pdfTerminosUrl}#toolbar=1`"
               type="application/pdf"
-              class="w-full h-full"
+              class="hidden md:block w-full h-full"
             >
               <div class="p-6 text-center text-slate-500 bg-slate-50 flex flex-col items-center justify-center h-full gap-2">
                 <span class="font-bold text-xs">Tu navegador no soporta la vista previa directa del PDF.</span>
@@ -599,7 +622,7 @@
           </div>
 
           <!-- RESUMEN LEGAL ESTRUCTURADO -->
-          <div class="space-y-2.5 bg-slate-50/80 p-4.5 rounded-2xl border border-slate-100">
+          <div class="space-y-2.5 bg-slate-50/80 p-4 sm:p-4.5 rounded-2xl border border-slate-100">
             <h4 class="font-black text-slate-900 text-xs uppercase tracking-wider">Resumen de Puntos Clave:</h4>
             <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600">
               <li><strong>Tratamiento de Datos:</strong> MedGo+ recopila datos identificativos y sensibles de salud únicamente para prestar los servicios contratados con medidas reforzadas de seguridad y cifrado.</li>
@@ -612,7 +635,7 @@
         </div>
 
         <!-- PIE DEL MODAL -->
-        <div class="p-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+        <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 shrink-0">
           <p class="text-[10px] text-slate-500 font-medium text-center sm:text-left">
             Al hacer clic en "Aceptar y Entendido", confirma que ha revisado la documentación legal correspondiente.
           </p>
@@ -638,15 +661,15 @@
     </div>
 
     <!-- MODAL PASARELA DE PAGO DIGITAL -->
-    <div v-if="mostrarPasarelaModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in overflow-y-auto">
-      <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full p-8 space-y-6 max-h-[90vh] overflow-y-auto text-left border border-slate-100 font-premium">
+    <div v-if="mostrarPasarelaModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-4 backdrop-blur-xs animate-fade-in overflow-y-auto">
+      <div class="bg-white rounded-2xl md:rounded-[2.5rem] shadow-2xl max-w-4xl w-full p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 max-h-[90dvh] overflow-y-auto text-left border border-slate-100 font-premium">
 
-        <div class="border-b border-slate-200 pb-4">
-          <h2 class="text-2xl font-black text-slate-800 tracking-tight">Pasarela de Cobro Digital</h2>
+        <div class="border-b border-slate-200 pb-3 sm:pb-4">
+          <h2 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Pasarela de Cobro Digital</h2>
           <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Gestión de pago y finalización de reserva</p>
         </div>
 
-        <div class="border border-slate-200/60 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-3xs bg-slate-50 relative overflow-hidden backdrop-blur-xs">
+        <div class="border border-slate-200/60 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 shadow-3xs bg-slate-50 relative overflow-hidden backdrop-blur-xs">
           <div class="space-y-0.5 relative z-10">
             <h3 class="text-base font-black text-[#005596] uppercase tracking-tight">
               {{ userData.nombre }}
@@ -655,9 +678,9 @@
               Cita médica reservada • {{ fechaActual }}
             </p>
           </div>
-          <div class="text-right relative z-10">
+          <div class="text-left sm:text-right relative z-10 w-full sm:w-auto flex sm:block justify-between items-center">
             <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest block">Monto Total</span>
-            <span class="text-2xl font-black text-blue-600 tracking-tight bg-white/60 px-3 py-0.5 rounded-xl border border-white/40 shadow-3xs">
+            <span class="text-xl sm:text-2xl font-black text-blue-600 tracking-tight bg-white/60 px-3 py-0.5 rounded-xl border border-white/40 shadow-3xs">
               $ {{ billingDataLocal.basePrice.toFixed(2) }}
             </span>
           </div>
@@ -670,12 +693,12 @@
           </h4>
           <p class="text-xs text-slate-400 font-medium -mt-1">Seleccione dónde se realizará el pago</p>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <button
               type="button"
               @click="cambiarUbicacionPago('app')"
               :class="[
-                'p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 relative group cursor-pointer w-full bg-white',
+                'p-4 sm:p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 relative group cursor-pointer w-full bg-white',
                 ubicacionPago === 'app'
                   ? 'bg-blue-100 border-blue-400 text-blue-950 shadow-3xs scale-[1.01]'
                   : 'bg-blue-50/40 border-blue-100/40 text-blue-700/70 hover:bg-blue-50/70'
@@ -696,7 +719,7 @@
               type="button"
               @click="cambiarUbicacionPago('clinic')"
               :class="[
-                'p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 relative group cursor-pointer w-full bg-white',
+                'p-4 sm:p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 relative group cursor-pointer w-full bg-white',
                 ubicacionPago === 'clinic'
                   ? 'bg-purple-100 border-purple-400 text-purple-950 shadow-3xs scale-[1.01]'
                   : 'bg-purple-50/40 border-purple-100/40 text-purple-700/70 hover:bg-purple-50/70'
@@ -715,7 +738,7 @@
           </div>
         </div>
 
-        <div v-if="ubicacionPago === 'clinic'" class="bg-amber-50 border border-amber-200/70 rounded-2xl p-5 space-y-2 text-left animate-fade-in">
+        <div v-if="ubicacionPago === 'clinic'" class="bg-amber-50 border border-amber-200/70 rounded-2xl p-4 sm:p-5 space-y-2 text-left animate-fade-in">
           <div class="flex items-center gap-2 text-amber-800 font-black text-xs uppercase tracking-wider">
             <v-icon name="bi-exclamation-circle-fill" scale="0.95" /> Gestión Pendiente en Recepción
           </div>
@@ -731,7 +754,7 @@
           </h4>
           <p class="text-xs text-slate-400 font-medium -mt-1">Seleccione el canal físico o digital a procesar</p>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <button
               type="button"
               @click="metodoPago = 'card'"
@@ -766,10 +789,10 @@
           </div>
         </div>
 
-        <div v-if="metodoPago !== ''" class="p-5 border border-slate-100 rounded-2xl bg-slate-50/50 space-y-4 animate-fade-in">
+        <div v-if="metodoPago !== ''" class="p-4 sm:p-5 border border-slate-100 rounded-2xl bg-slate-50/50 space-y-4 animate-fade-in">
           <div v-if="metodoPago === 'card' && ubicacionPago === 'app'" class="space-y-4 animate-fade-in">
             <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-center gap-2.5">
-              <v-icon name="bi-phone-vibrate" class="text-blue-600 animate-pulse" />
+              <v-icon name="bi-phone-vibrate" class="text-blue-600 animate-pulse shrink-0" />
               <p class="text-xs font-bold text-blue-800">
                 API de Cobro Cifrado: Generá el código QR dinámico de pago inmediato para esta consulta.
               </p>
@@ -782,7 +805,7 @@
           <div v-else-if="metodoPago === 'card' && ubicacionPago === 'clinic'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
             <div class="space-y-1.5 sm:col-span-2">
               <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl flex items-center gap-2.5">
-                <v-icon name="bi-building" class="text-purple-600" />
+                <v-icon name="bi-building" class="text-purple-600 shrink-0" />
                 <p class="text-xs font-bold text-purple-800">
                   Registro de Auditoría Interna: <span class="uppercase font-black text-purple-950">Datáfono / POS de Recepción</span>
                 </p>
@@ -806,7 +829,7 @@
           <div v-else-if="metodoPago === 'transfer'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
             <div class="space-y-1.5 sm:col-span-2">
               <div class="p-3 bg-sky-50 border border-sky-100 rounded-xl flex items-center gap-2.5">
-                <v-icon name="bi-bank" class="text-sky-600" />
+                <v-icon name="bi-bank" class="text-sky-600 shrink-0" />
                 <p class="text-xs font-bold text-sky-800">
                   Registro de Depósito Directo: <span class="uppercase font-black text-sky-950">Verificación de Banca Electrónica</span>
                 </p>
@@ -830,7 +853,7 @@
         </div>
 
         <!-- Resumen de Transacción -->
-        <div id="comprobante-visual" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-3xs space-y-4">
+        <div id="comprobante-visual" class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-3xs space-y-4">
           <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider border-b pb-2 border-slate-100">
             Resumen de Transacción
           </h4>
@@ -855,7 +878,7 @@
             </div>
             <div class="flex justify-between items-center pt-2 font-black text-sm">
               <span class="text-slate-800 uppercase tracking-wide">Total:</span>
-              <span class="text-xl font-black text-blue-600 bg-blue-50/50 px-3 py-1 rounded-lg border border-blue-100 shadow-3xs">
+              <span class="text-lg sm:text-xl font-black text-blue-600 bg-blue-50/50 px-3 py-1 rounded-lg border border-blue-100 shadow-3xs">
                 $ {{ billingDataLocal.basePrice.toFixed(2) }} USD
               </span>
             </div>
@@ -863,17 +886,17 @@
         </div>
 
         <!-- Acciones del Modal de Pasarela -->
-        <div class="flex justify-between items-center pt-4 border-t border-slate-200">
-          <div class="flex items-center gap-2.5">
-            <button type="button" @click="descargarReportePdf" title="Descargar Reporte PDF" class="h-9 w-11 bg-blue-50 hover:bg-blue-100 text-[#005596] border border-blue-200 rounded-xl transition-all cursor-pointer flex items-center justify-center border-b-4 border-b-blue-300 active:translate-y-0.5 active:border-b-0">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 pt-4 border-t border-slate-200">
+          <div class="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2.5">
+            <button type="button" @click="descargarReportePdf" title="Descargar Reporte PDF" class="h-9 w-1/2 sm:w-11 bg-blue-50 hover:bg-blue-100 text-[#005596] border border-blue-200 rounded-xl transition-all cursor-pointer flex items-center justify-center border-b-4 border-b-blue-300 active:translate-y-0.5 active:border-b-0">
               <v-icon name="bi-download" scale="0.9" />
             </button>
-            <button type="button" @click="compartirReporteCanal" title="Compartir Comprobante por WhatsApp" class="h-9 w-11 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl transition-all cursor-pointer flex items-center justify-center border-b-4 border-b-emerald-300 active:translate-y-0.5 active:border-b-0">
+            <button type="button" @click="compartirReporteCanal" title="Compartir Comprobante por WhatsApp" class="h-9 w-1/2 sm:w-11 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl transition-all cursor-pointer flex items-center justify-center border-b-4 border-b-emerald-300 active:translate-y-0.5 active:border-b-0">
               <v-icon name="bi-share-fill" scale="0.85" />
             </button>
           </div>
 
-          <div class="flex items-center gap-2.5">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center w-full sm:w-auto gap-2.5">
             <button type="button" @click="mostrarPasarelaModal = false; $emit('cancel')" class="h-9 px-4 bg-slate-50 hover:bg-slate-100 text-slate-500 border border-slate-200 rounded-xl font-black uppercase text-[10px] tracking-wider transition-all cursor-pointer flex items-center justify-center border-b-4 border-b-slate-300 active:translate-y-0.5 active:border-b-0">
               Omitir Pago por Ahora
             </button>
@@ -888,14 +911,14 @@
 
     <!-- MODAL CÓDIGO QR GENERADO -->
     <div v-if="mostrarQrModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs animate-fade-in">
-      <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-5 border border-slate-100 transform scale-100 transition-all">
+      <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-4 sm:space-y-5 border border-slate-100 transform scale-100 transition-all">
         <div class="space-y-1">
           <h3 class="font-black text-lg text-slate-800 tracking-tight">Código QR de Cobro</h3>
           <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">MedGo+ Cobros Digitales</p>
         </div>
 
         <div class="flex justify-center p-3 bg-slate-50 border border-slate-100 rounded-2xl shadow-3xs">
-          <img v-if="qrGenerado" :src="qrGenerado" alt="QR de Pago Clínico" class="w-60 h-60 object-contain" />
+          <img v-if="qrGenerado" :src="qrGenerado" alt="QR de Pago Clínico" class="w-52 h-52 sm:w-60 sm:h-60 object-contain" />
         </div>
 
         <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-3 text-left space-y-1">
@@ -1288,7 +1311,7 @@ const handleSubmit = async () => {
     alergias: alergiasTexto || 'Ninguna',
     genero: form.genero,
     aseguradora: form.aseguradora,
-    numero_poliza: form.poliza,
+    numeropoliza: form.poliza,
     nombre_contacto_emergencia: form.contactoNombre || undefined,
     telefono_contacto_emergencia: form.contactoTel || undefined,
     medicamentos_actuales: medicamentosTexto || 'Ninguno',
@@ -1299,7 +1322,7 @@ const handleSubmit = async () => {
     await appointmentRepo.create(payload as AppointmentRequest);
 
     const docExt = props.selectedDoctor as DoctorExtended;
-    const precioConsulta = docExt.CostoConsulta || docExt.Precio || 90;
+    const precioConsulta = tieneSeguroMedico.value ? 0 : (docExt.CostoConsulta || docExt.Precio || 90);
 
     const idDetectado = await obtenerUltimaCitaCreada(userData.value.id);
 
@@ -1327,7 +1350,19 @@ const handleSubmit = async () => {
       basePrice: Number(precioConsulta)
     };
 
-    if (form.metodoPago === 'Efectivo') {
+    if (tieneSeguroMedico.value) {
+      if (idDetectado > 0) {
+        await pgoRepository.procesarPago({
+          cita_id: idDetectado,
+          servicio_id: 1,
+          monto: 0,
+          metodo: 'insurance',
+          referencia: `Cobertura Seguro: ${form.aseguradora || 'Asegurado'} - Póliza: ${form.poliza || 'N/A'}`
+        });
+      }
+      toast.success("¡Cita agendada exitosamente con cobertura de seguro médico!");
+      emit('cancel');
+    } else if (form.metodoPago === 'Efectivo') {
       if (idDetectado > 0) {
         await pgoRepository.procesarPago({
           cita_id: idDetectado,

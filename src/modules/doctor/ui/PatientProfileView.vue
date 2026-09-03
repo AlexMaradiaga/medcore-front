@@ -76,7 +76,9 @@
             </div>
             <div class="space-y-3">
               <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Seguro Médico:</label>
-              <div class="bg-slate-50 text-slate-700 border border-slate-100 p-6 rounded-3xl font-bold min-h-17.5 flex items-center">{{ appointment?.SeguroMedico || 'No se cuenta con seguro' }}</div>
+              <div class="bg-slate-50 text-slate-700 border border-slate-100 p-6 rounded-3xl font-bold min-h-17.5 flex items-center">
+                {{ seguroMedicoDisplay }}
+              </div>
             </div>
             <div class="space-y-3">
               <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Contacto de Emergencia:</label>
@@ -116,6 +118,8 @@ interface ComponentAppointment extends Omit<DoctorAppointment, 'Paciente'> {
   Paciente: string;
   TipoSangre?: string;
   SeguroMedico?: string;
+  Aseguradora?: string;
+  NumeroPoliza?: string;
   NombreContactoEmergencia?: string;
   TelefonoContactoEmergencia?: string;
 }
@@ -124,6 +128,20 @@ const router = useRouter();
 const medicalStore = useMedicalStore();
 const appointment = ref<ComponentAppointment | null>(null);
 const exams = ref<Array<{id: number, nombre: string, fecha: string, url: string}>>([]);
+
+const seguroMedicoDisplay = computed(() => {
+  if (!appointment.value) return 'No se cuenta con seguro';
+  const raw = appointment.value as Record<string, unknown>;
+  const aseguradora = raw.Aseguradora || raw.aseguradora || raw.SeguroMedico;
+  const poliza = raw.NumeroPoliza || raw.numero_poliza || raw.poliza || raw.Numero_Poliza || raw.num_poliza;
+
+  if (aseguradora || poliza) {
+    const nombreAseguradora = aseguradora && aseguradora !== 'No se cuenta con seguro' ? aseguradora : 'Aseguradora registrada';
+    const textoPoliza = poliza ? ` - Póliza: ${poliza}` : '';
+    return `${nombreAseguradora}${textoPoliza}`;
+  }
+  return 'No se cuenta con seguro';
+});
 
 const contactoEmergenciaDisplay = computed(() => {
   if (!appointment.value) return 'No registrado';
@@ -146,7 +164,9 @@ const startConsultation = () => {
       genero: appointment.value.Genero,
       telefono: appointment.value.Telefono,
       email: appointment.value.EmailPaciente,
-      tipoSangre: appointment.value.TipoSangre || 'N/A'
+      tipoSangre: appointment.value.TipoSangre || 'N/A',
+      aseguradora: appointment.value.Aseguradora || appointment.value.SeguroMedico || '', 
+      numeroPoliza: appointment.value.NumeroPoliza || ''
     };
 
     localStorage.setItem('MedGo+_resumen_compartir', JSON.stringify(payloadActualizado));
@@ -161,9 +181,10 @@ onMounted(() => {
   if (saved) {
     try {
       const parsedData = JSON.parse(saved);
-
+      console.log('🚀 [onMounted] Objeto crudo en localStorage ("current_appointment"):', parsedData);
       appointment.value = parsedData as ComponentAppointment;
-    } catch {
+    } catch (e) {
+      console.error('❌ Error al parsear "current_appointment":', e);
       localStorage.removeItem('current_appointment');
     }
   } else {

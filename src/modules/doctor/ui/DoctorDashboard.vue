@@ -1,28 +1,28 @@
 <template>
   <DoctorLayout>
-    <main class="p-8 max-w-350 mx-auto space-y-12 animate-fade-in">
+    <main class="p-4 sm:p-8 max-w-350 mx-auto space-y-6 sm:space-y-12 animate-fade-in">
 
       <!-- CABECERA PRINCIPAL -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="text-left">
-          <h2 class="text-4xl font-black text-[#005596] tracking-tighter">Agenda del Día</h2>
-          <p class="text-slate-400 font-bold capitalize">{{ new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }}</p>
+          <h2 class="text-2xl sm:text-4xl font-black text-[#005596] tracking-tighter">Agenda del Día</h2>
+          <p class="text-slate-400 text-xs sm:text-sm font-bold capitalize">{{ new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }}</p>
         </div>
 
         <!-- ACCIONES Y BOTONES SUPERIORES -->
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <!-- BOTÓN PARA ABRIR MODAL DE TARIFAS (SÓLO SI EntidadID <= 1 O NULL) -->
           <button
             v-if="mostrarGestionTarifas"
             @click="showTarifasModal = true"
-            class="flex items-center gap-2 px-5 py-3 bg-blue-50 text-[#005596] hover:bg-blue-100 border border-blue-100 rounded-2xl text-xs font-black shadow-2xs transition-all cursor-pointer"
+            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-blue-50 text-[#005596] hover:bg-blue-100 border border-blue-100 rounded-xl sm:rounded-2xl text-xs font-black shadow-2xs transition-all cursor-pointer"
           >
             <v-icon name="bi-cash-stack" scale="0.9" /> Configurar Tarifas
           </button>
 
           <button
             @click="router.push('/medico/agenda')"
-            class="flex items-center gap-2.5 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black text-slate-600 shadow-sm hover:bg-slate-50 transition-all cursor-pointer"
+            class="flex-1 sm:flex-initial flex items-center justify-center gap-2.5 px-4 py-2.5 sm:px-6 sm:py-3 bg-white border border-slate-200 rounded-xl sm:rounded-2xl text-xs font-black text-slate-600 shadow-sm hover:bg-slate-50 transition-all cursor-pointer"
           >
             <v-icon name="bi-calendar-event" scale="0.9" /> Ver Calendario
           </button>
@@ -30,47 +30,49 @@
       </div>
 
       <!-- SECCIÓN: CONSULTAS URGENTES / PENDIENTES -->
-      <section class="bg-red-50/20 border border-red-100/50 rounded-[3rem] p-10 text-left">
-        <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-blue-400 rounded-2xl flex items-center justify-center text-white shadow-md">
+      <section class="bg-red-50/20 border border-red-100/50 rounded-3xl sm:rounded-[3rem] p-4 sm:p-10 text-left">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-400 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-md shrink-0">
             <v-icon name="bi-exclamation-octagon-fill" scale="1.1" />
           </div>
 
-          <div class="text-left">
-            <h3 class="text-xl font-black text-slate-800">Consulta Pendiente ({{ citasUrgentes.length }})</h3>
-            <p class="px-10 py-4 bg-blue-200 text-black border border-blue-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em]">Solicitudes de atención pendiente</p>
+          <div class="text-left space-y-1">
+            <h3 class="text-lg sm:text-xl font-black text-slate-800">Consulta Pendiente ({{ citasUrgentes.length }})</h3>
+            <p class="inline-block px-3 py-1 bg-blue-200 text-black border border-blue-100 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider">
+              Solicitudes de atención pendiente
+            </p>
           </div>
         </div>
 
-        <div v-if="citasUrgentes.length === 0" class="p-10 text-center border-2 border-dashed border-red-100 rounded-4xl text-slate-400 font-bold bg-white">
+        <div v-if="citasUrgentes.length === 0" class="p-6 sm:p-10 text-center border-2 border-dashed border-red-100 rounded-2xl sm:rounded-4xl text-slate-400 text-xs sm:text-sm font-bold bg-white">
           No hay consultas urgentes pendientes
         </div>
 
-        <div v-else class="space-y-6">
+        <div v-else class="space-y-4 sm:space-y-6">
           <div v-for="cita in citasUrgentes" :key="obtenerIdCita(cita)"
-               class="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100 flex justify-between items-center hover:shadow-xl transition-all group">
-            <div class="text-left space-y-3">
-              <div class="flex items-center gap-3">
-                <span class="bg-blue-200 text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em]">Prioridad</span>
-                <span class="px-2 py-1 bg-slate-100 border border-slate-200/60 text-slate-700 text-[10px] font-black uppercase rounded-lg flex items-center gap-1.5 shadow-sm">
+               class="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[3.5rem] shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 hover:shadow-xl transition-all group">
+            <div class="text-left space-y-2 sm:space-y-3 w-full sm:w-auto">
+              <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span class="bg-blue-200 text-black text-[9px] sm:text-[10px] font-black px-3 py-1 sm:px-4 sm:py-1.5 rounded-full uppercase tracking-wider">Prioridad</span>
+                <span class="px-2 py-1 bg-slate-100 border border-slate-200/60 text-slate-700 text-[9px] sm:text-[10px] font-black uppercase rounded-lg flex items-center gap-1.5 shadow-sm">
                   <v-icon name="bi-clock-history" scale="0.75" class="text-slate-500" />
                   {{ formatHora(cita) }}
                 </span>
               </div>
-              <h4 class="text-2xl font-black text-slate-800">{{ obtenerNombrePaciente(cita) }}</h4>
-              <p class="text-sm font-bold text-slate-500">{{ obtenerMotivo(cita) }}</p>
+              <h4 class="text-xl sm:text-2xl font-black text-slate-800">{{ obtenerNombrePaciente(cita) }}</h4>
+              <p class="text-xs sm:text-sm font-bold text-slate-500">{{ obtenerMotivo(cita) }}</p>
             </div>
-            <div class="flex gap-4">
+            <div class="flex gap-2 sm:gap-4 w-full sm:w-auto">
               <button
                 @click="handleApprove(obtenerIdCita(cita))"
-                class="px-10 py-4 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                class="flex-1 sm:flex-initial px-5 py-3 sm:px-10 sm:py-4 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase shadow-md sm:shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer text-center"
               >
                 Aprobar
               </button>
 
               <button
                 @click="handleReject(obtenerIdCita(cita))"
-                class="px-10 py-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                class="flex-1 sm:flex-initial px-5 py-3 sm:px-10 sm:py-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase shadow-md sm:shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer text-center"
               >
                 Rechazar
               </button>
@@ -80,34 +82,34 @@
       </section>
 
       <!-- SECCIÓN: CITAS CONFIRMADAS DEL DÍA -->
-      <section class="bg-blue-50/30 border border-blue-100 rounded-[3rem] p-10 text-left">
-        <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-blue-400 rounded-2xl flex items-center justify-center text-white shadow-md">
+      <section class="bg-blue-50/30 border border-blue-100 rounded-3xl sm:rounded-[3rem] p-4 sm:p-10 text-left">
+        <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-400 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-md shrink-0">
             <v-icon name="bi-clock-history" scale="1.1" />
           </div>
-          <h3 class="text-xl font-black text-blue-600">Citas Confirmadas del Día ({{ citasConfirmadas.length }})</h3>
+          <h3 class="text-lg sm:text-xl font-black text-blue-600">Citas Confirmadas del Día ({{ citasConfirmadas.length }})</h3>
         </div>
 
-        <div v-if="citasConfirmadas.length === 0" class="p-10 text-center border-2 border-dashed border-blue-100 rounded-4xl text-slate-400 font-bold bg-white">
+        <div v-if="citasConfirmadas.length === 0" class="p-6 sm:p-10 text-center border-2 border-dashed border-blue-100 rounded-2xl sm:rounded-4xl text-slate-400 text-xs sm:text-sm font-bold bg-white">
           No hay citas confirmadas para hoy
         </div>
 
-        <div v-else class="space-y-6">
+        <div v-else class="space-y-4 sm:space-y-6">
           <div v-for="cita in citasConfirmadas" :key="obtenerIdCita(cita)"
-               class="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex justify-between items-center shadow-sm hover:shadow-md transition-all">
-            <div class="flex items-center gap-6">
-              <div class="bg-blue-400 text-black p-4 rounded-2xl text-center min-w-22.5 shadow-lg flex flex-col items-center justify-center">
-                <p class="text-lg font-black">{{ formatHora(cita) }}</p>
+               class="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
+              <div class="bg-blue-400 text-black px-4 py-2 sm:p-4 rounded-xl sm:rounded-2xl text-center min-w-full sm:min-w-22.5 shadow-md flex sm:flex-col items-center justify-between sm:justify-center">
+                <p class="text-base sm:text-lg font-black">{{ formatHora(cita) }}</p>
                 <p class="text-[9px] font-bold uppercase opacity-80 tracking-widest">Confirmada</p>
               </div>
               <div class="text-left">
-                <p class="text-xl font-black text-slate-800">{{ obtenerNombrePaciente(cita) }}</p>
+                <p class="text-lg sm:text-xl font-black text-slate-800">{{ obtenerNombrePaciente(cita) }}</p>
                 <p class="text-xs font-bold text-slate-600">{{ obtenerMotivo(cita) }}</p>
               </div>
             </div>
             <button
               @click="startConsultation(cita)"
-              class="px-10 py-4 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl text-[10px] font-black uppercase shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              class="w-full sm:w-auto px-6 py-3 sm:px-10 sm:py-4 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase shadow-md sm:shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer text-center"
             >
               Atender Ahora
             </button>
@@ -116,15 +118,15 @@
       </section>
 
       <!-- TARJETAS DE ESTADÍSTICAS -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-10">
         <div v-for="(stat, index) in statsCards" :key="index"
-             class="bg-white p-12 rounded-[4rem] shadow-sm border border-slate-50 flex flex-col items-center justify-center gap-6 hover:-translate-y-1.25 transition-all">
-          <div :class="stat.color" class="w-16 h-16 rounded-3xl flex items-center justify-center text-2xl border border-current/10">
+             class="bg-white p-6 sm:p-12 rounded-3xl sm:rounded-[4rem] shadow-sm border border-slate-50 flex flex-col items-center justify-center gap-4 sm:gap-6 hover:-translate-y-1.25 transition-all">
+          <div :class="stat.color" class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl flex items-center justify-center text-xl sm:text-2xl border border-current/10">
             <v-icon :name="stat.icon" scale="1.3" />
           </div>
           <div class="text-center space-y-1">
-            <p class="text-6xl font-black text-slate-800 tracking-tighter">{{ stat.value }}</p>
-            <p class="text-slate-400 font-black uppercase text-[11px] tracking-[0.2em]">{{ stat.label }}</p>
+            <p class="text-4xl sm:text-6xl font-black text-slate-800 tracking-tighter">{{ stat.value }}</p>
+            <p class="text-slate-400 font-black uppercase text-[10px] sm:text-[11px] tracking-[0.2em]">{{ stat.label }}</p>
           </div>
         </div>
       </div>

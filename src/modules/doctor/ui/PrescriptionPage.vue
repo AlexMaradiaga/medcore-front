@@ -713,21 +713,84 @@ const compartirDocumentoFisico = async () => {
   }
 };
 
+// En PrescriptionPage.vue -> tieneSeguroMedico y finalizarYIrAlPago
+
+const tieneSeguroMedico = computed(() => {
+  const esValido = (val: string) => Boolean(val && val.trim() !== '' && val !== 'No se cuenta con seguro');
+
+  const extraerSeguro = (data: Record<string, unknown>) => ({
+    aseguradora: String(data.Aseguradora || data.SeguroMedico || data.aseguradora || ''),
+    poliza: String(data.NumeroPoliza || data.numero_poliza || data.poliza || data.Numero_Poliza || data.num_poliza || '')
+  });
+
+  // 1. Cita activa almacenada
+  const savedApp = localStorage.getItem('current_appointment');
+  if (savedApp) {
+    try {
+      const appObj = JSON.parse(savedApp) as Record<string, unknown>;
+      const { aseguradora, poliza } = extraerSeguro(appObj);
+
+      console.log('🔎 [PrescriptionPage] Verificando seguro en "current_appointment":', { aseguradora, poliza });
+
+      if (esValido(aseguradora) && esValido(poliza)) {
+        return true;
+      }
+    } catch (e) {
+      console.error('Error parseando current_appointment:', e);
+    }
+  }
+
+  // 2. Resumen compartido de sesión
+  const resGuardado =
+    localStorage.getItem('medgo_resumen_compartir') ||
+    localStorage.getItem('MedGo+_resumen_compartir');
+
+  if (resGuardado) {
+    try {
+      const d = JSON.parse(resGuardado) as Record<string, unknown>;
+      const { aseguradora, poliza } = extraerSeguro(d);
+
+      console.log('🔎 [PrescriptionPage] Verificando seguro en "resumen_compartir":', { aseguradora, poliza });
+
+      if (esValido(aseguradora) && esValido(poliza)) {
+        return true;
+      }
+    } catch (e) {
+      console.error('Error parseando resumen guardado:', e);
+    }
+  }
+
+  console.warn('⚠️ [PrescriptionPage] El paciente no cuenta con seguro ni póliza registrados.');
+  return false;
+});
+
 const finalizarYIrAlPago = () => {
   const idConsultaActual = route.params.id ? String(route.params.id) : '';
-
   if (!idConsultaActual) {
     toast.error("No se pudo recuperar el identificador de la consulta activa.");
     return;
   }
 
-  // Guardado estandarizado bajo MedGo+ exclusivo
+  // ÚNICA CLAVE ESTÁNDAR
   window.localStorage.setItem('medgo_current_consulta_id', idConsultaActual);
-  window.localStorage.setItem('MedGo+_current_consulta_id', idConsultaActual);
 
-  toast.success("Prescripción guardada. Procediendo al cierre de consulta.");
+  console.log('🚀 [PrescriptionPage] Decisión de navegación -> Tiene Seguro:', tieneSeguroMedico.value);
 
-  router.push(`/medico/consulta/cierre/${idConsultaActual}`);
+  if (tieneSeguroMedico.value) {
+    toast.success("Consulta cubierta por seguro médico. Consulta finalizada con éxito.");
+
+    // Finalización de estado y limpieza de la sesión clínica activa
+    localStorage.removeItem('draft_consulta_actual');
+    localStorage.removeItem('current_appointment');
+    medicalStore.setConsultationActive(false);
+    medicalStore.clearPatient();
+
+    // Redirección directa al Home / Dashboard del médico
+    router.push('/medico/dashboard');
+  } else {
+    toast.success("Prescripción guardada. Procediendo al cierre de consulta.");
+    router.push(`/medico/consulta/cierre/${idConsultaActual}`);
+  }
 };
 </script>
 

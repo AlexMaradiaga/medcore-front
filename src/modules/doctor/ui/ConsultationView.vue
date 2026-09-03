@@ -389,16 +389,16 @@ import type { DirectiveBinding } from 'vue';
 import PatientBackgroundTabs from '../ui/components/PatientHistory/PatientBackgroundTabs.vue';
 
 import DoctorLabSelector from '@/modules/laboratories/ui/components/DoctorLabSelector.vue';
-import { LaboratoryRepository } from '@/modules/laboratories/infrastructure/LaboratoryRepository';
-import type { CatalogoExamen, CrearSolicitudPayload } from '@/modules/laboratories/domain/LaboratoryModels';
+//import { LaboratoryRepository } from '@/modules/laboratories/infrastructure/LaboratoryRepository';
+import type { CatalogoExamen} from '@/modules/laboratories/domain/LaboratoryModels'; //, CrearSolicitudPayload 
 
 import { GiLungs, GiStomach } from "oh-vue-icons/icons/gi";
-import { FaBrain, FaFemale, FaBone } from "oh-vue-icons/icons/fa";
+import { FaBrain, FaFemale, FaBone, FaCapsules } from "oh-vue-icons/icons/fa"; 
 import { BiArrowRepeat } from "oh-vue-icons/icons/bi";
 import { SiFlask } from "oh-vue-icons/icons/si";
 import { addIcons } from "oh-vue-icons";
 
-addIcons(GiLungs, GiStomach, FaBrain, FaFemale, FaBone, BiArrowRepeat, SiFlask);
+addIcons(FaCapsules, GiLungs, GiStomach, FaBrain, FaFemale, FaBone, BiArrowRepeat, SiFlask);
 
 const OdontologyModule = defineAsyncComponent(() =>
   import('../../consultations/ui/components/odontology/OdontologyModule.vue')
@@ -426,7 +426,7 @@ const toast = useToast();
 const authStore = useAuthStore();
 const medicalStore = useMedicalStore();
 const repo = new DoctorRepository();
-const labRepo = new LaboratoryRepository();
+//const labRepo = new LaboratoryRepository();
 
 const appointment = ref<DoctorAppointment | null>(null);
 const loading = ref(false);
@@ -576,9 +576,8 @@ const obtenerBorradorInicial = () => {
 const form = ref(obtenerBorradorInicial());
 
 watch(
-  [examenesLaboratorioSeleccionados, laboratorioDestinoId, form],
+  [examenesLaboratorioSeleccionados, laboratorioDestinoId],
   () => {
-    // 1. Sanitización de tipo de dato para laboratorioDestinoId
     const labIdNum = Number(laboratorioDestinoId.value) || 1;
     if (typeof laboratorioDestinoId.value !== 'number') {
       laboratorioDestinoId.value = labIdNum;
@@ -589,8 +588,14 @@ watch(
     }
 
     form.value.examenes_laboratorio = [...examenesLaboratorioSeleccionados.value];
+  },
+  { deep: true }
+);
 
-    localStorage.setItem('draft_consulta_actual', JSON.stringify(form.value));
+watch(
+  form,
+  (newForm) => {
+    localStorage.setItem('draft_consulta_actual', JSON.stringify(newForm));
   },
   { deep: true }
 );
@@ -681,6 +686,7 @@ onMounted(async () => {
     return;
   }
   appointment.value = JSON.parse(saved);
+  console.log('🔍 [ConsultationView] Cita cargada en localStorage:', appointment.value);
   if (appointment.value) {
     form.value.cita_id = appointment.value.CitaID;
     if (form.value.notas_medicas) {
@@ -726,6 +732,182 @@ const handleSaveDraft = () => {
   toast.success('Borrador clínico respaldado de forma segura.');
 };
 
+// const handleSubmit = async () => {
+//   if (form.value.diagnostico.length === 0 && !form.value.diagnostico_extenso.trim()) {
+//     toast.error('Por favor registre un diagnóstico antes de finalizar.');
+//     return;
+//   }
+//   if (form.value.detalle_medicamentos.length === 0) {
+//     toast.error('Por favor agregue al menos un medicamento en la pestaña de Plan.');
+//     return;
+//   }
+//   if (requiereSeguimiento.value && (!seguimientoData.value.fecha || !seguimientoData.value.hora)) {
+//     toast.error('Por favor especifique la fecha y la hora para la cita de seguimiento.');
+//     return;
+//   }
+
+//   loading.value = true;
+//   try {
+//     // 1. PROCESAMIENTO CLÍNICO PRINCIPAL (GUARDA LA CONSULTA PRIMERO)
+//     const payload = JSON.parse(JSON.stringify(form.value));
+//     payload.cita_id = Number(payload.cita_id);
+
+//     const notaMedicaFinal = form.value.notas_medicas
+//       || editableSubjetivo.value
+//       || tempSubjetivo?.value
+//       || (appointment.value ? `${appointment.value.Motivo} - ${appointment.value.Sintomas || 'Sin síntomas registrados'}` : 'Sin síntomas registrados');
+//     payload.notas_medicas = notaMedicaFinal;
+
+//     const sv = form.value.signos_vitales || {};
+//     payload.signos_vitales = {
+//       PresionArterial: sv.presion || null,
+//       FrecuenciaCardiaca: sv.pulso ? parseInt(String(sv.pulso), 10) : null,
+//       FrecuenciaRespiratoria: sv.respiracion ? parseInt(String(sv.respiracion), 10) : null,
+//       Temperatura: sv.temp ? parseFloat(String(sv.temp)) : null
+//     };
+
+//     let diagnosticoFinal = form.value.diagnostico.join(', ');
+//     if (form.value.diagnostico_extenso.trim()) {
+//       diagnosticoFinal = diagnosticoFinal
+//         ? `${diagnosticoFinal} | Nota de Criterio Clínico: ${form.value.diagnostico_extenso.trim()}`
+//         : `Nota de Criterio Clínico: ${form.value.diagnostico_extenso.trim()}`;
+//     }
+//     payload.diagnostico = diagnosticoFinal;
+
+//     if (obtenerEspecialidadLogueada.value === 8 && datosOdontologiaExtra.value) {
+//       payload.presupuesto_total = datosOdontologiaExtra.value.totalPresupuesto;
+//       payload.odontograma_json = datosOdontologiaExtra.value.odontograma;
+//       payload.examenes_odontologicos_json = datosOdontologiaExtra.value.examenesBase || [];
+//     }
+
+//     // FECHA Y HORA DE SEGUIMIENTO
+//     let fechaHoraSeguimiento: string | null = null;
+//     if (requiereSeguimiento.value && seguimientoData.value.fecha && seguimientoData.value.hora) {
+//       const horaLimpia = seguimientoData.value.hora.trim();
+//       const horaFormateada = horaLimpia.length === 5 ? `${horaLimpia}:00` : horaLimpia;
+//       fechaHoraSeguimiento = `${seguimientoData.value.fecha.trim()} ${horaFormateada}`;
+//     }
+
+//     payload.crear_seguimiento = Boolean(requiereSeguimiento.value && fechaHoraSeguimiento);
+//     payload.seguimiento_fecha_hora = fechaHoraSeguimiento;
+
+//     // SE GUARDA LA CONSULTA Y SE OBTIENE EL CONSULTAID REAL
+//     const resConsulta = await repo.completeConsultation(payload);
+//     const consultaIdReal = Number(resConsulta?.consulta_id || 0);
+//     console.log('🔍 Respuesta backend consulta:', resConsulta);
+//     console.log('📌 ConsultaID capturado:', consultaIdReal);
+//     // 2. GENERACIÓN FORMAL DE SOLICITUD DE LABORATORIO (CON EL CONSULTAID REAL)
+//     if (examenesLaboratorioSeleccionados.value.length > 0) {
+//       // Extracción limpia de IDs con fallback seguro
+//       const pacienteIdNum = Number(appointment.value?.PacienteID ?? medicalStore.selectedPatient?.PacienteID ?? 0);
+//       const doctorIdNum = Number(medicalStore.doctor?.DoctorID ?? 0);
+
+//       const notasParaLab = form.value.diagnostico_extenso
+//         ? `Diagnóstico: ${form.value.diagnostico.join(', ')} | Criterio: ${form.value.diagnostico_extenso}`
+//         : (appointment.value?.Motivo || 'Indicación médica desde consulta');
+
+//       const payloadLab: CrearSolicitudPayload = {
+//         laboratorio_id: Number(laboratorioDestinoId.value) || 1,
+//         paciente_id: pacienteIdNum > 0 ? pacienteIdNum : undefined,
+//         doctor_id: doctorIdNum > 0 ? doctorIdNum : undefined,
+//         consulta_id: consultaIdReal > 0 ? consultaIdReal : undefined,
+//         notas_clinicas: notasParaLab,
+//         nombre_paciente: appointment.value?.Paciente || 'Paciente',
+//         codigo_expediente: `PAC-${pacienteIdNum}`,
+//         examenes: examenesLaboratorioSeleccionados.value.map(e => e.ExamID),
+//         monto_total: examenesLaboratorioSeleccionados.value.reduce((acc, item) => acc + Number(item.Precio || 0), 0)
+//       };
+
+//       await labRepo.crearSolicitudDigital(payloadLab);
+//     }
+
+//     toast.success('¡Consulta finalizada e indicación de laboratorio procesada!');
+
+//     const hallazgosExamenFisico: Array<{
+//       sistema: string;
+//       isNormal: boolean;
+//       opciones: string[];
+//       notas: string;
+//     }> = [];
+
+//     if (sistemasFisicos.value && sistemasFisicos.value.length > 0) {
+//       sistemasFisicos.value.forEach((sistema) => {
+//         const id = sistema.id;
+//         const notes = form.value.examen_fisico_notes?.[id]?.trim() || '';
+//         const opcionesSeleccionadas: string[] = [];
+//         const opciones = form.value.examen_fisico_opciones?.[id];
+//         if (opciones) {
+//           Object.keys(opciones).forEach((opc) => {
+//             if (opciones[opc]) {
+//               opcionesSeleccionadas.push(opc);
+//             }
+//           });
+//         }
+//         hallazgosExamenFisico.push({
+//           sistema: sistema.nombre,
+//           isNormal: !!sistema.isNormal,
+//           opciones: opcionesSeleccionadas,
+//           notas: notes
+//         });
+//       });
+//     }
+
+//     // En ConsultationView.vue -> handleSubmit()
+//     const rawApp = (appointment.value || {}) as Record<string, unknown>;
+
+//     // Extracción tolerante a variantes de capitalización de backend
+//     const aseguradoraCapturada = rawApp.Aseguradora || rawApp.SeguroMedico || rawApp.aseguradora || '';
+//     const polizaCapturada = rawApp.NumeroPoliza || rawApp.numero_poliza || rawApp.poliza || rawApp.Numero_Poliza || rawApp.num_poliza || '';
+
+//     console.log('📦 [ConsultationView] Capturando seguro para resumen:', {
+//       Aseguradora: aseguradoraCapturada,
+//       NumeroPoliza: polizaCapturada
+//     });
+
+//     const objetoResumen = {
+//       paciente: appointment.value?.Paciente || 'Paciente',
+//       edad: appointment.value?.Edad || 'No registrada',
+//       genero: appointment.value?.Genero || 'No especificado',
+//       telefono: appointment.value?.Telefono || 'No disponible',
+//       email: appointment.value?.EmailPaciente || 'No disponible',
+//       tipoSangre: appointment.value?.TipoSangre || 'N/A',
+//       Aseguradora: aseguradoraCapturada,
+//       NumeroPoliza: polizaCapturada,
+//       diagnostico: payload.diagnostico,
+//       detalle_medicamentos: form.value.detalle_medicamentos || [],
+//       examenes_laboratorio: examenesLaboratorioSeleccionados.value,
+//       signos_vitales: {
+//         presion: sv.presion || '',
+//         pulso: sv.pulso || '',
+//         temp: sv.temp || '',
+//         respiracion: sv.respiracion || ''
+//       },
+//       fechaSeguimiento: fechaHoraSeguimiento,
+//       antecedentes: {
+//         cronicas: obtenerEnfermedadesCronicas.value || 'No registra',
+//         alergias: appointment.value?.Alergias || 'Ninguna conocida',
+//         medicamentos: appointment.value?.MedicamentosActuales || 'Ninguno'
+//       },
+//       sintomas: {
+//         motivo: appointment.value?.Motivo || 'Consulta de seguimiento',
+//         dolor: appointment.value?.Sintomas || payload.notas_medicas || 'Sin síntomas reportados'
+//       },
+//       hallazgos_examen_fisico: hallazgosExamenFisico
+//     };
+
+//     localStorage.setItem('MedGo+_resumen_compartir', JSON.stringify(objetoResumen));
+//     localStorage.removeItem('draft_consulta_actual');
+//     medicalStore.setConsultationActive(false);
+//     medicalStore.clearPatient();
+//     localStorage.removeItem('current_appointment');
+//     router.push(`/medico/consulta/${payload.cita_id}/resumen`);
+//   } catch (error) {
+//     console.error('Error al completar consulta:', error);
+//     toast.error('Error crítico al intentar finalizar la consulta.');
+//   } finally {
+//     loading.value = false;
+//   }
+// };
 const handleSubmit = async () => {
   if (form.value.diagnostico.length === 0 && !form.value.diagnostico_extenso.trim()) {
     toast.error('Por favor registre un diagnóstico antes de finalizar.');
@@ -742,30 +924,7 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    // 1. GENERACIÓN FORMAL DE SOLICITUD DE LABORATORIO (SI APLICA)
-    if (examenesLaboratorioSeleccionados.value.length > 0) {
-      const pacienteIdNum = Number(appointment.value?.PacienteID || 0);
-      const doctorIdNum = Number(medicalStore.doctor?.DoctorID || authStore.user?.id || 0);
-
-      const notasParaLab = form.value.diagnostico_extenso
-        ? `Diagnóstico: ${form.value.diagnostico.join(', ')} | Criterio: ${form.value.diagnostico_extenso}`
-        : (appointment.value?.Motivo || 'Indicación médica desde consulta');
-
-      const payloadLab: CrearSolicitudPayload = {
-        laboratorio_id: Number(laboratorioDestinoId.value) || 1,
-        paciente_id: pacienteIdNum,
-        doctor_id: doctorIdNum,
-        consulta_id: Number(appointment.value?.CitaID || form.value.cita_id || 0),
-        notas_clinicas: notasParaLab,
-        nombre_paciente: appointment.value?.Paciente || 'Paciente',
-        codigo_expediente: `PAC-${pacienteIdNum}`,
-        examenes: examenesLaboratorioSeleccionados.value.map(e => e.ExamID),
-        monto_total: examenesLaboratorioSeleccionados.value.reduce((acc, item) => acc + Number(item.Precio || 0), 0)
-      };
-      await labRepo.crearSolicitudDigital(payloadLab);
-    }
-
-    // 2. PROCESAMIENTO CLÍNICO PRINCIPAL
+    // 1. PROCESAMIENTO CLÍNICO PRINCIPAL
     const payload = JSON.parse(JSON.stringify(form.value));
     payload.cita_id = Number(payload.cita_id);
 
@@ -808,7 +967,25 @@ const handleSubmit = async () => {
     payload.crear_seguimiento = Boolean(requiereSeguimiento.value && fechaHoraSeguimiento);
     payload.seguimiento_fecha_hora = fechaHoraSeguimiento;
 
-    await repo.completeConsultation(payload);
+    // 2. INYECCIÓN DE DATOS DE LABORATORIO AL PAYLOAD PRINCIPAL
+    if (examenesLaboratorioSeleccionados.value.length > 0) {
+      const notasParaLab = form.value.diagnostico_extenso
+        ? `Diagnóstico: ${form.value.diagnostico.join(', ')} | Criterio: ${form.value.diagnostico_extenso}`
+        : (appointment.value?.Motivo || 'Indicación médica desde consulta');
+
+      payload.laboratorio_id = Number(laboratorioDestinoId.value) || 1;
+      payload.monto_total_laboratorio = examenesLaboratorioSeleccionados.value.reduce(
+        (acc, item) => acc + Number(item.Precio || 0), 
+        0
+      );
+      payload.examenes_laboratorio = examenesLaboratorioSeleccionados.value.map(e => e.ExamID);
+      payload.notas_laboratorio = notasParaLab;
+    }
+
+    // 3. ÚNICO LLAMADO HTTP (Guarda consulta y crea la orden de laboratorio en una sola transacción)
+    const resConsulta = await repo.completeConsultation(payload);
+    console.log('🔍 Respuesta backend consulta unificada:', resConsulta);
+
     toast.success('¡Consulta finalizada e indicación de laboratorio procesada!');
 
     const hallazgosExamenFisico: Array<{
@@ -840,6 +1017,10 @@ const handleSubmit = async () => {
       });
     }
 
+    const rawApp = (appointment.value || {}) as Record<string, unknown>;
+    const aseguradoraCapturada = rawApp.Aseguradora || rawApp.SeguroMedico || rawApp.aseguradora || '';
+    const polizaCapturada = rawApp.NumeroPoliza || rawApp.numero_poliza || rawApp.poliza || rawApp.Numero_Poliza || rawApp.num_poliza || '';
+
     const objetoResumen = {
       paciente: appointment.value?.Paciente || 'Paciente',
       edad: appointment.value?.Edad || 'No registrada',
@@ -847,6 +1028,8 @@ const handleSubmit = async () => {
       telefono: appointment.value?.Telefono || 'No disponible',
       email: appointment.value?.EmailPaciente || 'No disponible',
       tipoSangre: appointment.value?.TipoSangre || 'N/A',
+      Aseguradora: aseguradoraCapturada,
+      NumeroPoliza: polizaCapturada,
       diagnostico: payload.diagnostico,
       detalle_medicamentos: form.value.detalle_medicamentos || [],
       examenes_laboratorio: examenesLaboratorioSeleccionados.value,

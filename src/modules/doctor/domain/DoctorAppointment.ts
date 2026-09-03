@@ -29,6 +29,8 @@ export interface DoctorAppointment {
   TipoSangre?: string;
   MedicamentosActuales?: string;
   EspecialidadID?: number;
+  Aseguradora?: string;  
+  NumeroPoliza?: string;
 }
 
 export interface DoctorStats {

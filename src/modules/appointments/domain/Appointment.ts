@@ -21,7 +21,7 @@ export interface AppointmentRequest {
   genero: string;
   TipoSangre?: string;
   aseguradora?: string;
-  numero_poliza?: string;
+  numeropoliza?: string;
   nombre_contacto_emergencia?: string | null;
   telefono_contacto_emergencia?: string | null;
   medicamentos_actuales?: string;
@@ -80,7 +80,7 @@ export interface Prescription {
   Doctor?: string;
 }
 
-export interface DashboardAppointment {
+export interface DashboardAppointment{
     id: number;
     nombrePaciente: string;
     fecha: string;
@@ -89,6 +89,8 @@ export interface DashboardAppointment {
     estado: string;
     genero: string;
     edad: number;
+    aseguradora?: string;
+    numeroPoliza?: string; //este es el que ocupamos
 }
 
 export interface EnfermedadCronica {

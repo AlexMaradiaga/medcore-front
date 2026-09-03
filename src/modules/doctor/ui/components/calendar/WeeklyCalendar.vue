@@ -120,7 +120,10 @@ const goToPatient = (app: DashboardAppointment) => {
     EstadoCita: app.estado,
     Sintomas: 'Evaluación programada por agenda semanal.',
     Alergias: 'No reportadas',
-    MedicamentosActuales: 'Ninguno'
+    MedicamentosActuales: 'Ninguno',
+    Aseguradora: app.aseguradora,
+    NumeroPoliza: app.numeroPoliza
+
   };
 
   localStorage.setItem('current_appointment', JSON.stringify(appointmentPascal));

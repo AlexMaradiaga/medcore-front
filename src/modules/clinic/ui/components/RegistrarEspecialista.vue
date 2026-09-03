@@ -2,21 +2,21 @@
 <template>
   <div class="max-w-5xl mx-auto space-y-6 text-left select-none font-sans animate-fade-in">
     <!-- Card Formulario -->
-    <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs relative overflow-hidden space-y-8">
+    <div class="bg-white rounded-3xl p-4 sm:p-8 border border-slate-200/80 shadow-xs relative overflow-hidden space-y-6 sm:space-y-8">
       <div class="h-1.5 bg-[#00a884] absolute top-0 left-0 right-0"></div>
 
       <!-- Header y Fotografía Profesional -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">REGISTRAR ESPECIALISTA</h1>
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">REGISTRAR ESPECIALISTA</h1>
           <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
             SE VINCULARÁ AUTOMÁTICAMENTE A SU ENTIDAD
           </p>
         </div>
 
         <!-- Box Fotografía Profesional -->
-        <div class="bg-slate-50 border border-slate-100 p-3.5 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-slate-200/80 text-slate-500 flex items-center justify-center font-black text-[10px] text-center leading-tight overflow-hidden">
+        <div class="bg-slate-50 border border-slate-100 p-3 sm:p-3.5 rounded-2xl flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+          <div class="w-12 h-12 rounded-xl bg-slate-200/80 text-slate-500 flex items-center justify-center font-black text-[10px] text-center leading-tight overflow-hidden shrink-0">
             <img v-if="fotoPreview" :src="fotoPreview" class="w-full h-full object-cover" />
             <span v-else>SIN<br>FOTO</span>
           </div>
@@ -32,17 +32,15 @@
 
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <!-- Grid Campos -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           <div>
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">NOMBRE</label>
             <input v-model="form.nombre" type="text" required class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-800 outline-none focus:bg-white focus:border-[#00a884]" />
           </div>
-
           <div>
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">APELLIDO</label>
             <input v-model="form.apellido" type="text" required class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-800 outline-none focus:bg-white focus:border-[#00a884]" />
           </div>
-
           <div>
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">ESPECIALIDAD</label>
             <select v-model="form.especialidad_id" required class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-[#00a884] cursor-pointer">
@@ -52,17 +50,14 @@
               </option>
             </select>
           </div>
-
           <div>
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">N° COLEGIACIÓN</label>
             <input v-model="form.numero_colegiado" type="text" placeholder="EJ. CMH-12345" required class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-mono font-bold text-slate-800 outline-none focus:bg-white focus:border-[#00a884]" />
           </div>
-
           <div>
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">CORREO ELECTRÓNICO</label>
             <input v-model="form.email" type="email" required class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 outline-none focus:bg-white focus:border-[#00a884]" />
           </div>
-
           <div>
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">CONTRASEÑA</label>
             <input v-model="form.password" type="password" required class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 outline-none focus:bg-white focus:border-[#00a884]" />
@@ -70,55 +65,54 @@
         </div>
 
         <!-- Documentación Legal Requerida -->
-        <div class="bg-slate-50/60 rounded-2xl border border-slate-200/80 p-6 space-y-4">
+        <div class="bg-slate-50/60 rounded-2xl border border-slate-200/80 p-4 sm:p-6 space-y-4">
           <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider">
             DOCUMENTACIÓN LEGAL REQUERIDA (ARCHIVOS INDEPENDIENTES)
           </h3>
-
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- 1. Título General -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-              <div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0">
+              <div class="min-w-0 flex-1">
                 <span class="block text-[10px] font-black text-slate-800 uppercase">1. TÍTULO DE MÉDICO GENERAL</span>
-                <span class="text-[11px] text-slate-400 font-medium truncate block max-w-xs">{{ docFiles.titulo_medico ? docFiles.titulo_medico.name : 'No se ha seleccionado ningún archivo' }}</span>
+                <span class="text-[11px] text-slate-400 font-medium truncate block">{{ docFiles.titulo_medico ? docFiles.titulo_medico.name : 'No se ha seleccionado ningún archivo' }}</span>
               </div>
-              <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0">
+              <label class="w-full sm:w-auto text-center px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0 transition-colors">
                 Elegir archivo
                 <input type="file" accept=".pdf,image/*" class="hidden" @change="(e) => handleFileChange(e, 'titulo_medico')" />
               </label>
             </div>
 
             <!-- 2. Título Especialidad -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-              <div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0">
+              <div class="min-w-0 flex-1">
                 <span class="block text-[10px] font-black text-slate-800 uppercase">2. TÍTULO DE ESPECIALIDAD</span>
-                <span class="text-[11px] text-slate-400 font-medium truncate block max-w-xs">{{ docFiles.titulo_especialista ? docFiles.titulo_especialista.name : 'No se ha seleccionado ningún archivo' }}</span>
+                <span class="text-[11px] text-slate-400 font-medium truncate block">{{ docFiles.titulo_especialista ? docFiles.titulo_especialista.name : 'No se ha seleccionado ningún archivo' }}</span>
               </div>
-              <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0">
+              <label class="w-full sm:w-auto text-center px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0 transition-colors">
                 Elegir archivo
                 <input type="file" accept=".pdf,image/*" class="hidden" @change="(e) => handleFileChange(e, 'titulo_especialista')" />
               </label>
             </div>
 
             <!-- 3. Constancia del Colegio -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-              <div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0">
+              <div class="min-w-0 flex-1">
                 <span class="block text-[10px] font-black text-slate-800 uppercase">3. CONSTANCIA DEL COLEGIO MÉDICO</span>
-                <span class="text-[11px] text-slate-400 font-medium truncate block max-w-xs">{{ docFiles.constancia_colegio ? docFiles.constancia_colegio.name : 'No se ha seleccionado ningún archivo' }}</span>
+                <span class="text-[11px] text-slate-400 font-medium truncate block">{{ docFiles.constancia_colegio ? docFiles.constancia_colegio.name : 'No se ha seleccionado ningún archivo' }}</span>
               </div>
-              <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0">
+              <label class="w-full sm:w-auto text-center px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0 transition-colors">
                 Elegir archivo
                 <input type="file" accept=".pdf,image/*" class="hidden" @change="(e) => handleFileChange(e, 'constancia_colegio')" />
               </label>
             </div>
 
             <!-- 4. DNI -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
-              <div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0">
+              <div class="min-w-0 flex-1">
                 <span class="block text-[10px] font-black text-slate-800 uppercase">4. DOCUMENTO DE IDENTIDAD / DNI</span>
-                <span class="text-[11px] text-slate-400 font-medium truncate block max-w-xs">{{ docFiles.dni ? docFiles.dni.name : 'No se ha seleccionado ningún archivo' }}</span>
+                <span class="text-[11px] text-slate-400 font-medium truncate block">{{ docFiles.dni ? docFiles.dni.name : 'No se ha seleccionado ningún archivo' }}</span>
               </div>
-              <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0">
+              <label class="w-full sm:w-auto text-center px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg cursor-pointer shrink-0 transition-colors">
                 Elegir archivo
                 <input type="file" accept=".pdf,image/*" class="hidden" @change="(e) => handleFileChange(e, 'dni')" />
               </label>
@@ -232,12 +226,10 @@ const handleSubmit = async () => {
     toast.error('Por favor seleccione una especialidad.');
     return;
   }
-
   if (!docFiles.value.fotografia) {
     toast.error('Por favor seleccione la fotografía profesional.');
     return;
   }
-
   if (
     !docFiles.value.titulo_medico ||
     !docFiles.value.titulo_especialista ||
@@ -249,7 +241,6 @@ const handleSubmit = async () => {
   }
 
   loading.value = true;
-
   try {
     const formData = new FormData();
     formData.append('email', form.value.email);
@@ -259,7 +250,6 @@ const handleSubmit = async () => {
     formData.append('especialidad_id', String(form.value.especialidad_id));
     formData.append('numero_colegiado', form.value.numero_colegiado);
     formData.append('entidad_id', String(clinicId.value));
-
     formData.append('fotografia', docFiles.value.fotografia);
     formData.append('titulo_medico', docFiles.value.titulo_medico);
     formData.append('titulo_especialista', docFiles.value.titulo_especialista);
@@ -267,7 +257,6 @@ const handleSubmit = async () => {
     formData.append('dni', docFiles.value.dni);
 
     await repo.registerDoctor(formData);
-
     toast.success('¡Especialista registrado y verificado exitosamente!');
     emit('guardar', { ...form.value });
   } catch (error: unknown) {
@@ -286,10 +275,15 @@ onMounted(async () => {
   } else {
     try {
       especialidadesList.value = await repo.getSpecialties();
-    } catch{
+    } catch {
       toast.error('No se pudieron cargar las especialidades desde el servidor.');
       especialidadesList.value = [];
     }
   }
 });
 </script>
+
+<style scoped>
+.animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>

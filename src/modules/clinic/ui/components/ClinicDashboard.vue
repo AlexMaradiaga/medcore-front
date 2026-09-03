@@ -8,18 +8,16 @@
     </div>
 
     <!-- TARJETAS DE KPIS PRINCIPALES -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       <!-- Total Citas -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
         <div class="space-y-1">
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">TOTAL CITAS</span>
-          <div class="text-3xl font-black text-slate-900 tracking-tight">
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {{ dashboardData.kpis?.TotalCitas ?? 0 }}
           </div>
-
-          <!-- Variación Dinámica (Se elimina el 12% estático) -->
           <p v-if="variacionCitasText" :class="isVariacionCitasPositiva ? 'text-emerald-600' : 'text-rose-600'" class="text-[10px] font-bold flex items-center gap-1 pt-1">
-            <span>{{ isVariacionCitasPositiva ? '↗' : '↘' }} {{ variacionCitasText }}</span>
+            <span>{{ isVariacionCitasPositiva ? '▲' : '▼' }} {{ variacionCitasText }}</span>
           </p>
           <p v-else class="text-[10px] font-bold text-slate-400 pt-1">
             Total histórico registrado
@@ -30,11 +28,11 @@
         </div>
       </div>
 
-      <!-- Citas Pendientes (Esfera fija + Agujas giratorias) -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <!-- Citas Pendientes -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
         <div class="space-y-1">
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">CITAS PENDIENTES</span>
-          <div class="text-3xl font-black text-slate-900 tracking-tight">
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {{ dashboardData.kpis?.CitasPendientes ?? 0 }}
           </div>
           <p class="text-[10px] font-bold text-slate-400 pt-1">Para el día de hoy</p>
@@ -51,10 +49,10 @@
       </div>
 
       <!-- Cuerpo Médico -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
         <div class="space-y-1">
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">CUERPO MÉDICO</span>
-          <div class="text-3xl font-black text-slate-900 tracking-tight">
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {{ dashboardData.kpis?.TotalDoctoresActivos ?? 0 }}
           </div>
           <p class="text-[10px] font-bold text-teal-600 pt-1">Especialistas activos</p>
@@ -65,16 +63,14 @@
       </div>
 
       <!-- Ingreso Total -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
         <div class="space-y-1">
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">INGRESO TOTAL</span>
-          <div class="text-3xl font-black text-slate-900 tracking-tight">
+          <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             L. {{ dashboardData.kpis?.IngresosTotales ?? '0.00' }}
           </div>
-
-          <!-- Variación Dinámica (Se elimina el 5.4% estático) -->
           <p v-if="variacionIngresosText" :class="isVariacionIngresosPositiva ? 'text-emerald-600' : 'text-rose-600'" class="text-[10px] font-bold flex items-center gap-1 pt-1">
-            <span>{{ isVariacionIngresosPositiva ? '↗' : '↘' }} {{ variacionIngresosText }}</span>
+            <span>{{ isVariacionIngresosPositiva ? '▲' : '▼' }} {{ variacionIngresosText }}</span>
           </p>
           <p v-else class="text-[10px] font-bold text-slate-400 pt-1">
             Monto acumulado general
@@ -86,33 +82,64 @@
       </div>
     </div>
 
-    <!-- TABLA AGENDA Y CITAS RECIENTES -->
+    <!-- SECCIÓN AGENDA Y CITAS RECIENTES RESPONSIVA -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-      <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+      <div class="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
         <div>
           <h2 class="text-base font-black text-slate-900">Agenda y Citas Recientes</h2>
           <p class="text-xs font-bold text-slate-400 mt-0.5">Control de flujo de pacientes y asignación de consultorios</p>
         </div>
       </div>
 
-      <div class="overflow-x-auto">
+      <!-- VISTA 1: TARJETAS EN MÓVIL (< 768px) -->
+      <div class="block md:hidden divide-y divide-slate-100">
+        <div v-for="cita in citasFiltradas" :key="cita.CitaID" class="p-4 space-y-3 bg-white">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Paciente</span>
+              <p class="text-xs font-black text-slate-900 uppercase leading-tight mt-0.5">{{ cita.Paciente }}</p>
+            </div>
+            <span :class="getEstadoClass(cita.EstadoCita)" class="px-2.5 py-0.5 text-[9px] font-black uppercase rounded-full border shrink-0">
+              {{ cita.EstadoCita }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block">Médico</span>
+              <span class="font-bold text-slate-700 truncate block">Dr. {{ cita.Doctor }}</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block">Fecha y Hora</span>
+              <span class="font-mono text-[11px] text-slate-600 block">{{ formatDate(cita.FechaHora) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="citasFiltradas.length === 0" class="p-8 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">
+          No se encontraron citas o pacientes que coincidan.
+        </div>
+      </div>
+
+      <!-- VISTA 2: TABLA EN ESCRITORIO (>= 768px) -->
+      <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 border-b border-slate-100">
             <tr>
-              <th class="py-3.5 px-6">PACIENTE</th>
-              <th class="py-3.5 px-6">MÉDICO</th>
-              <th class="py-3.5 px-6">FECHA Y HORA</th>
-              <th class="py-3.5 px-6">ESTADO</th>
+              <th class="py-3.5 px-6 whitespace-nowrap">PACIENTE</th>
+              <th class="py-3.5 px-6 whitespace-nowrap">MÉDICO</th>
+              <th class="py-3.5 px-6 whitespace-nowrap">FECHA Y HORA</th>
+              <th class="py-3.5 px-6 whitespace-nowrap">ESTADO</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-slate-700">
             <tr v-for="cita in citasFiltradas" :key="cita.CitaID" class="hover:bg-slate-50/80 transition-colors">
-              <td class="py-4 px-6 font-bold text-slate-900 text-xs uppercase">{{ cita.Paciente }}</td>
-              <td class="py-4 px-6 font-bold text-slate-700 text-xs">Dr. {{ cita.Doctor }}</td>
-              <td class="py-4 px-6 text-xs font-mono text-slate-500">{{ formatDate(cita.FechaHora) }}</td>
-              <td class="py-4 px-6">
-                <span :class="getEstadoClass(cita.EstadoCita)" class="px-3 py-1 text-[10px] font-black uppercase rounded-full border">
-                  • {{ cita.EstadoCita }}
+              <td class="py-4 px-6 font-bold text-slate-900 text-xs uppercase whitespace-nowrap">{{ cita.Paciente }}</td>
+              <td class="py-4 px-6 font-bold text-slate-700 text-xs whitespace-nowrap">Dr. {{ cita.Doctor }}</td>
+              <td class="py-4 px-6 text-xs font-mono text-slate-500 whitespace-nowrap">{{ formatDate(cita.FechaHora) }}</td>
+              <td class="py-4 px-6 whitespace-nowrap">
+                <span :class="getEstadoClass(cita.EstadoCita)" class="px-3 py-1 text-[10px] font-black uppercase rounded-full border inline-block">
+                  {{ cita.EstadoCita }}
                 </span>
               </td>
             </tr>
@@ -143,7 +170,6 @@ addIcons(BiCalendarEvent, BiCashStack, GiStethoscope);
 interface Props {
   searchQuery?: string;
 }
-
 const props = withDefaults(defineProps<Props>(), {
   searchQuery: ''
 });
@@ -167,45 +193,36 @@ const clinicId = computed<number>(() => {
 
 const dashboardData = ref<ClinicDashboardData>({ kpis: null, citas_recientes: [] });
 
-// Helper para extraer campos dinámicos sin usas 'any'
 const getKpiExtra = (key: string): unknown => {
   if (!dashboardData.value.kpis) return undefined;
   return (dashboardData.value.kpis as Record<string, unknown>)[key];
 };
 
-// Evaluación dinámica de variación de Citas
 const variacionCitas = computed<number | null>(() => {
   const val = getKpiExtra('VariacionCitas') ?? getKpiExtra('PorcentajeCitas');
   return typeof val === 'number' ? val : null;
 });
-
 const isVariacionCitasPositiva = computed(() => (variacionCitas.value ?? 0) >= 0);
-
 const variacionCitasText = computed(() => {
   if (variacionCitas.value === null) return null;
   const sign = variacionCitas.value > 0 ? '+' : '';
   return `${sign}${variacionCitas.value}% vs mes anterior`;
 });
 
-// Evaluación dinámica de variación de Ingresos
 const variacionIngresos = computed<number | null>(() => {
   const val = getKpiExtra('VariacionIngresos') ?? getKpiExtra('PorcentajeIngresos');
   return typeof val === 'number' ? val : null;
 });
-
 const isVariacionIngresosPositiva = computed(() => (variacionIngresos.value ?? 0) >= 0);
-
 const variacionIngresosText = computed(() => {
   if (variacionIngresos.value === null) return null;
   const sign = variacionIngresos.value > 0 ? '+' : '';
   return `${sign}${variacionIngresos.value}% vs mes anterior`;
 });
 
-// Filtro reactivo para la barra de búsqueda superior
 const citasFiltradas = computed(() => {
   const query = props.searchQuery.toLowerCase().trim();
   if (!query) return dashboardData.value.citas_recientes;
-
   return dashboardData.value.citas_recientes.filter((cita) => {
     const paciente = cita.Paciente.toLowerCase();
     const doctor = cita.Doctor.toLowerCase();
@@ -262,13 +279,8 @@ onMounted(() => {
   transform-origin: 12px 12px;
   animation: girarAgujas 6s linear infinite;
 }
-
 @keyframes girarAgujas {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 </style>

@@ -39,7 +39,7 @@
         >
           <option :value="0" disabled>Seleccionar Laboratorio Habilitado</option>
           <option v-for="lab in laboratorios" :key="lab.EntidadID" :value="lab.EntidadID">
-            {{ lab.NombreEntidad }} ({{ lab.Direccion || 'Sede Principal' }})
+            {{ lab.NombreEntidad || 'Laboratorio Clínico' }}{{ lab.Direccion ? ' — ' + lab.Direccion : '' }}
           </option>
         </select>
       </div>

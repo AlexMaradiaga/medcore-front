@@ -11,6 +11,7 @@ import type { DashboardAppointment } from '@/modules/appointments/domain/Appoint
 
 interface DashboardAppointmentDTO {
   CitaID: string;
+  PacienteID?: number | null;
   FechaHora: string;
   Motivo: string;
   Sintomas: string | null;
@@ -23,6 +24,8 @@ interface DashboardAppointmentDTO {
   MedicamentosActuales: string | null;
   EmailDoctor: string;
   EstadoCita: string;
+  Aseguradora?: string | null;
+  NumeroPoliza?: string | null;
 }
 
 export interface PacienteCatalogoDTO {
@@ -63,8 +66,9 @@ export class DoctorRepository {
     return response.data;
   }
 
-  async completeConsultation(data: ConsultationPayload): Promise<void> {
-    await api.post('/doctor/consulta/finalizar', data);
+  async completeConsultation(data: ConsultationPayload): Promise<{ consulta_id: number; status?: string }> {
+    const response = await api.post<{ consulta_id: number; status?: string }>('/doctor/consulta/finalizar', data);
+    return response.data;
   }
 
   async approveAppointment(citaId: number): Promise<void> {
@@ -96,7 +100,9 @@ export class DoctorRepository {
           motivo: item.Motivo || '',
           estado: item.EstadoCita || '',
           genero: item.Genero || 'N/A',
-          edad: Number(item.Edad || 0)
+          edad: Number(item.Edad || 0),
+          aseguradora: item.Aseguradora || '',
+          numeroPoliza: item.NumeroPoliza || ''
         };
       });
     } catch {

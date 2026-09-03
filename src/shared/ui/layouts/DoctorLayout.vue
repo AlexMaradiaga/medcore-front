@@ -1,8 +1,9 @@
 <template>
   <div class="min-h-screen bg-slate-100 text-left font-sans relative pb-16">
 
-    <header class="bg-linear-to-r from-[#005596] to-[#00345c] text-white px-8 py-3 flex justify-between items-center shadow-lg border-b border-white/5">
-      <div class="flex items-center gap-4">
+    <!-- HEADER RESPONSIVO -->
+    <header class="bg-linear-to-r from-[#005596] to-[#00345c] text-white px-3 sm:px-8 py-2.5 sm:py-3 flex justify-between items-center shadow-lg border-b border-white/5">
+      <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
         <div class="contenedor-header-logo-3d relative shrink-0">
           <div class="header-logo-cuerpo-3d">
             <img
@@ -13,39 +14,42 @@
           </div>
         </div>
 
-        <div class="text-left">
-          <h1 class="text-lg font-bold leading-tight tracking-tight bg-linear-to-r from-white via-slate-100 to-blue-100 bg-clip-text text-transparent">
-            {{ obtenerRolUsuario === 3 ? 'Portal Paciente' : 'Panel Médico' }} - MedGo+
+        <div class="text-left min-w-0">
+          <h1 class="text-sm sm:text-lg font-bold leading-tight tracking-tight bg-linear-to-r from-white via-slate-100 to-blue-100 bg-clip-text text-transparent truncate">
+            {{ obtenerRolUsuario === 3 ? 'Portal Paciente' : 'Panel Médico' }} <span class="hidden sm:inline">- MedGo+</span>
           </h1>
-          <p class="text-cyan-200 text-[10px] font-black uppercase tracking-widest">
+          <p class="text-cyan-200 text-[9px] sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest truncate">
             {{ obtenerRolUsuario === 3 ? (authStore.user?.nombre || 'Paciente') : ('Dr. ' + (medicalStore.doctorFullName || authStore.user?.nombre || 'Especialista')) }}
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <div class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-500/30 flex items-center gap-2 tracking-wider uppercase shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-          <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span> Verificado
+      <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+        <div class="bg-emerald-500/10 text-emerald-400 px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black border border-emerald-500/30 flex items-center gap-1.5 sm:gap-2 tracking-wider uppercase shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+          <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-400 rounded-full animate-ping"></span>
+          <span class="hidden sm:inline">Verificado</span>
         </div>
-        <!-- Modificado @click para llamar a preLogout -->
-        <button @click="preLogout" class="px-4 py-2 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 rounded-xl text-xs font-bold transition-all duration-300 border border-white/10 flex items-center gap-2 cursor-pointer active:scale-95">
-          <VIcon name="bi-box-arrow-right" scale="0.95" /> Salir
+        
+        <button @click="preLogout" class="px-2.5 py-1.5 sm:px-4 sm:py-2 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition-all duration-300 border border-white/10 flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95">
+          <VIcon name="bi-box-arrow-right" scale="0.9" />
+          <span>Salir</span>
         </button>
       </div>
     </header>
 
-    <nav class="bg-white border-b border-slate-200/80 px-8 py-2.5 sticky top-0 z-20 shadow-sm backdrop-blur-md">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 w-full relative">
+    <!-- BARRA DE NAVEGACIÓN DESPLAZABLE Y RESPONSIVA -->
+    <nav class="bg-white border-b border-slate-200/80 px-3 sm:px-8 py-1.5 sm:py-2.5 sticky top-0 z-20 shadow-sm backdrop-blur-md">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 w-full relative">
 
-        <div class="flex gap-2 overflow-x-auto scrollbar-none py-2 relative items-center justify-between w-full">
-          <div class="flex gap-2">
+        <div class="flex gap-2 overflow-x-auto scrollbar-none py-1 sm:py-2 relative items-center justify-between w-full touch-pan-x">
+          <div class="flex gap-1.5 sm:gap-2 shrink-0">
             <button
               v-for="item in menuFiltrado"
               :key="item.path"
               @click="handleNavigation(item.path)"
               :disabled="isItemDisabled(item.path)"
               :class="[
-                'px-5 py-3 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center gap-2.5 whitespace-nowrap relative overflow-hidden group',
+                'px-3 py-2 sm:px-5 sm:py-3 text-[10px] sm:text-[11px] font-black uppercase tracking-wider rounded-lg sm:rounded-xl transition-all duration-300 flex items-center gap-1.5 sm:gap-2.5 whitespace-nowrap relative overflow-hidden group shrink-0',
                 currentPath === item.path ? 'bg-slate-50 border border-slate-100 shadow-2xs font-black scale-[1.01]' : 'border border-transparent',
                 currentPath !== item.path && !isItemDisabled(item.path) ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50 cursor-pointer' : '',
                 isItemDisabled(item.path) ? 'text-slate-300/40 bg-slate-50/10 cursor-not-allowed pointer-events-none' : ''
@@ -53,25 +57,25 @@
             >
               <VIcon
                 :name="item.icon"
-                scale="1.1"
+                scale="0.95"
                 :class="[
-                  'transition-all duration-300 transform group-hover:scale-120 z-10',
+                  'transition-all duration-300 transform group-hover:scale-110 z-10',
                   currentPath === item.path ? item.colorClass : 'text-slate-400 ' + item.hoverColorClass
                 ]"
               />
               <span :class="['relative z-10 transition-colors duration-300', currentPath === item.path ? item.colorClass : 'group-hover:text-slate-800']">
                 {{ item.name }}
               </span>
-              <span v-if="currentPath === item.path" :class="['absolute bottom-0 left-3 right-3 h-0.75 rounded-t-full shadow-xs', item.bgIndicatorClass]"></span>
+              <span v-if="currentPath === item.path" :class="['absolute bottom-0 left-2 right-2 sm:left-3 sm:right-3 h-0.75 rounded-t-full shadow-xs', item.bgIndicatorClass]"></span>
             </button>
           </div>
 
-          <div v-if="obtenerRolUsuario !== 3" class="flex gap-2 shrink-0">
+          <div v-if="obtenerRolUsuario !== 3" class="flex gap-2 shrink-0 ml-2">
             <button
               @click="showPlans = true"
-              class="px-5 py-2.5 bg-linear-to-r from-[#b616e6] to-[#f30077] hover:brightness-110 text-white text-[11px] font-black uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              class="px-3 py-2 sm:px-5 sm:py-2.5 bg-linear-to-r from-[#b616e6] to-[#f30077] hover:brightness-110 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider rounded-lg sm:rounded-xl shadow-md transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95 whitespace-nowrap"
             >
-              <VIcon name="fa-crown" scale="0.95" class="text-amber-300" />
+              <VIcon name="fa-crown" scale="0.85" class="text-amber-300" />
               <span>Mi Plan</span>
             </button>
           </div>
@@ -92,16 +96,16 @@
       <button
         @click="showPlans = true"
         title="Ver Mi Plan y Analytics"
-        class="w-14 h-14 rounded-full bg-linear-to-tr from-[#8b5cf6] via-[#d946ef] to-[#ec4899] text-white shadow-[0_4px_20px_rgba(217,70,239,0.4)] flex items-center justify-center hover:scale-110 hover:rotate-6 active:scale-95 transition-all duration-300 pointer-events-auto cursor-pointer border-2 border-white/30 relative group"
+        class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-linear-to-tr from-[#8b5cf6] via-[#d946ef] to-[#ec4899] text-white shadow-[0_4px_20px_rgba(217,70,239,0.4)] flex items-center justify-center hover:scale-110 hover:rotate-6 active:scale-95 transition-all duration-300 pointer-events-auto cursor-pointer border-2 border-white/30 relative group"
       >
-        <VIcon name="bi-bar-chart-fill" scale="1.2" class="group-hover:animate-pulse text-yellow-200" />
+        <VIcon name="bi-bar-chart-fill" scale="1.1" class="group-hover:animate-pulse text-yellow-200" />
         <span class="absolute inset-0 rounded-full bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300 pointer-events-none"></span>
       </button>
     </div>
 
     <PlanesView v-if="showPlans" @close="showPlans = false" />
 
-    <!-- MODAL DE CONFIRMACIÓN DE CIERRE DE SESIÓN PREMIUM -->
+    <!-- MODAL DE CONFIRMACIÓN DE CIERRE DE SESIÓN -->
     <Transition
       enter-active-class="transition duration-300 ease-out"
       enter-from-class="opacity-0 scale-95"
@@ -111,18 +115,14 @@
       leave-to-class="opacity-0 scale-95"
     >
       <div v-if="showLogoutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <!-- Fondo oscuro difuminado -->
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="showLogoutModal = false"></div>
 
-        <!-- Tarjeta del Modal -->
         <div class="bg-white rounded-3xl p-7 max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-100 relative z-10 text-center space-y-5 transform transition-all">
 
-          <!-- Icono de Advertencia Estilizado -->
           <div class="mx-auto w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-xs border border-rose-100">
             <VIcon name="bi-box-arrow-right" scale="1.8" class="animate-pulse" />
           </div>
 
-          <!-- Texto Informativo -->
           <div class="space-y-2">
             <h3 class="text-xl font-black text-slate-800 tracking-tight uppercase">
               ¿Cerrar Sesión Activa?
@@ -132,7 +132,6 @@
             </p>
           </div>
 
-          <!-- Botones de Acción de Alta Gama -->
           <div class="grid grid-cols-2 gap-3 pt-2">
             <button
               @click="showLogoutModal = false"
@@ -184,7 +183,6 @@ const currentPath = computed(() => route.path);
 const { isConsultationActive } = storeToRefs(medicalStore);
 
 const showPlans = ref(false);
-
 const showLogoutModal = ref(false);
 
 const obtenerRolUsuario = computed<number>(() => {
@@ -255,16 +253,7 @@ const menuItems = [
     hoverColorClass: 'group-hover:text-indigo-500',
     bgIndicatorClass: 'bg-indigo-600',
     soloMedico: true
-  },
-  // {
-  //   name: 'Laboratorio',
-  //   path: '/medico/laboratorio',
-  //   icon: 'bi-droplet-half',
-  //   colorClass: 'text-blue-500',
-  //   hoverColorClass: 'group-hover:text-blue-400',
-  //   bgIndicatorClass: 'bg-blue-500',
-  //   soloMedico: true
-  // }
+  }
 ];
 
 const menuFiltrado = computed(() => {
@@ -325,10 +314,17 @@ const confirmarLogout = () => {
 }
 
 .contenedor-header-logo-3d {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   perspective: 600px;
   animation: headerFlotarImagen 4s ease-in-out infinite;
+}
+
+@media (min-width: 640px) {
+  .contenedor-header-logo-3d {
+    width: 42px;
+    height: 42px;
+  }
 }
 
 .header-logo-cuerpo-3d {
@@ -338,7 +334,6 @@ const confirmarLogout = () => {
   padding: 1.5px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.15) 100%);
 
-  /* Sombras y profundidad adaptadas al header */
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.35),
     0 2px 4px rgba(0, 0, 0, 0.1),

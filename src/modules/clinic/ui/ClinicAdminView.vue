@@ -1,67 +1,84 @@
 <!-- ui/ClinicAdminView.vue -->
 <template>
-  <div class="min-h-screen bg-[#f4f7f9] flex text-left font-sans select-none">
+  <div class="min-h-screen bg-[#f4f7f9] flex text-left font-sans select-none relative overflow-x-hidden">
 
-    <!-- SIDEBAR IZQUIERDO -->
-    <aside class="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 p-6">
+    <!-- OVERLAY / TELÓN PARA MÓVIL -->
+    <Transition name="fade">
+      <div
+        v-if="menuMobileAbierto"
+        @click="menuMobileAbierto = false"
+        class="lg:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40"
+      ></div>
+    </Transition>
+
+    <!-- SIDEBAR IZQUIERDO RESPONSIVO -->
+    <aside
+      :class="menuMobileAbierto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+      class="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between p-6 fixed lg:sticky top-0 h-screen z-50 lg:z-30 shrink-0 transition-transform duration-300 ease-in-out"
+    >
       <div class="space-y-8">
-        <!-- Logo MedGo+ -->
-        <div class="flex items-center gap-4 px-2 cursor-pointer group/logo" @click="activeTab = 'dashboard'">
-          <div class="contenedor-mini-logo-3d relative shrink-0">
-            <div class="mini-logo-cuerpo-3d">
-              <img
-                src="/logo-medgo.jpg"
-                alt="MedGo+ Logo"
-                class="w-full h-full object-cover rounded-[11px] shadow-xs"
-              />
+        <!-- Logo MedGo+ y Cierre en móvil -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4 px-2 cursor-pointer group/logo" @click="activeTab = 'dashboard'; menuMobileAbierto = false">
+            <div class="contenedor-mini-logo-3d relative shrink-0">
+              <div class="mini-logo-cuerpo-3d">
+                <img
+                  src="/logo-medgo.jpg"
+                  alt="MedGo+ Logo"
+                  class="w-full h-full object-cover rounded-[11px] shadow-xs"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xl font-black tracking-tighter leading-none bg-linear-to-r from-sky-600 to-emerald-600 bg-clip-text text-transparent group-hover/logo:opacity-90 transition-opacity">MedGo+</span>
+              <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestión Médica Digital</span>
             </div>
           </div>
-          <div class="flex flex-col">
-            <span class="text-xl font-black tracking-tighter leading-none bg-linear-to-r from-sky-600 to-emerald-600 bg-clip-text text-transparent group-hover/logo:opacity-90 transition-opacity">MedGo+</span>
-            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestión Médica Digital</span>
-          </div>
+
+          <button
+            @click="menuMobileAbierto = false"
+            class="lg:hidden text-slate-400 hover:text-slate-700 p-1 rounded-lg cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
 
         <!-- Opciones Sidebar -->
         <nav class="space-y-1.5">
           <button
-            @click="activeTab = 'dashboard'"
+            @click="activeTab = 'dashboard'; menuMobileAbierto = false"
             :class="activeTab === 'dashboard' ? 'bg-[#50e9a2] text-slate-900 font-bold' : 'text-slate-600 hover:bg-slate-50 font-medium'"
             class="w-full px-4 py-3 rounded-xl text-xs transition-all flex items-center gap-3 cursor-pointer"
           >
             <v-icon name="bi-grid-1x2-fill" scale="0.9" />
             <span>Dashboard</span>
           </button>
-
           <button
-            @click="activeTab = 'doctores'"
+            @click="activeTab = 'doctores'; menuMobileAbierto = false"
             :class="activeTab === 'doctores' ? 'bg-[#50e9a2] text-slate-900 font-bold' : 'text-slate-600 hover:bg-slate-50 font-medium'"
             class="w-full px-4 py-3 rounded-xl text-xs transition-all flex items-center gap-3 cursor-pointer"
           >
             <v-icon name="bi-people-fill" scale="0.9" />
             <span>Personal Médico</span>
           </button>
-
           <button
-            @click="activeTab = 'registrar-especialista'"
+            @click="activeTab = 'registrar-especialista'; menuMobileAbierto = false"
             :class="activeTab === 'registrar-especialista' ? 'bg-[#50e9a2] text-slate-900 font-bold' : 'text-slate-600 hover:bg-slate-50 font-medium'"
             class="w-full px-4 py-3 rounded-xl text-xs transition-all flex items-center gap-3 cursor-pointer"
           >
             <v-icon name="bi-person-plus-fill" scale="0.9" />
             <span>Registrar Especialista</span>
           </button>
-
           <button
-            @click="activeTab = 'crear-expediente'"
+            @click="activeTab = 'crear-expediente'; menuMobileAbierto = false"
             :class="activeTab === 'crear-expediente' ? 'bg-[#50e9a2] text-slate-900 font-bold' : 'text-slate-600 hover:bg-slate-50 font-medium'"
             class="w-full px-4 py-3 rounded-xl text-xs transition-all flex items-center gap-3 cursor-pointer"
           >
             <v-icon name="bi-file-earmark-medical-fill" scale="0.9" />
             <span>Crear Expediente</span>
           </button>
-
           <button
-            @click="activeTab = 'especialidades'"
+            @click="activeTab = 'especialidades'; menuMobileAbierto = false"
             :class="activeTab === 'especialidades' ? 'bg-[#50e9a2] text-slate-900 font-bold' : 'text-slate-600 hover:bg-slate-50 font-medium'"
             class="w-full px-4 py-3 rounded-xl text-xs transition-all flex items-center gap-3 cursor-pointer"
           >
@@ -77,7 +94,7 @@
           <v-icon name="bi-gear-fill" scale="0.9" />
           <span>Ajustes</span>
         </button>
-        <button @click="showLogoutModal = true" class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+        <button @click="showLogoutModal = true; menuMobileAbierto = false" class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
           <v-icon name="bi-box-arrow-right" scale="0.9" />
           <span>Cerrar Sesión</span>
         </button>
@@ -87,11 +104,20 @@
     <!-- ÁREA DE CONTENIDO -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Top Bar -->
-      <header class="bg-white border-b border-slate-200/80 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
-        <h2 class="text-lg font-bold text-[#0a52be]">Clínica Central</h2>
+      <header class="bg-white border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+          <!-- Botón Menú Hamburguesa en Móvil -->
+          <button
+            @click="menuMobileAbierto = !menuMobileAbierto"
+            class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+          >
+            <v-icon name="bi-list" scale="1.1" />
+          </button>
+          <h2 class="text-base sm:text-lg font-bold text-[#0a52be]">Clínica Central</h2>
+        </div>
 
-        <div class="flex items-center gap-6">
-          <div class="relative w-72">
+        <div class="flex items-center gap-3 sm:gap-6">
+          <div class="relative w-36 sm:w-72">
             <input
               v-model="searchQuery"
               type="text"
@@ -100,21 +126,19 @@
             />
             <v-icon name="bi-search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
-
-          <div class="flex items-center gap-4">
-            <button class="text-slate-400 hover:text-slate-600 cursor-pointer">
+          <div class="flex items-center gap-2 sm:gap-4">
+            <button class="text-slate-400 hover:text-slate-600 cursor-pointer hidden sm:block">
               <v-icon name="bi-bell" scale="1" />
             </button>
-            <button class="text-slate-400 hover:text-slate-600 cursor-pointer">
+            <button class="text-slate-400 hover:text-slate-600 cursor-pointer hidden sm:block">
               <v-icon name="bi-question-circle" scale="1" />
             </button>
-
             <!-- Usuario dinámico desde AuthStore/localStorage -->
             <div class="flex items-center gap-3 pl-2">
-              <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs uppercase shadow-xs">
+              <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs uppercase shadow-xs shrink-0">
                 {{ userInitials }}
               </div>
-              <div class="text-left">
+              <div class="text-left hidden md:block">
                 <p class="text-xs font-bold text-slate-800 leading-tight">{{ adminName }}</p>
                 <p class="text-[9px] font-bold text-slate-400 uppercase">{{ adminRole }}</p>
               </div>
@@ -124,7 +148,7 @@
       </header>
 
       <!-- Vistas Secundarias -->
-      <main class="p-8 flex-1 overflow-y-auto">
+      <main class="p-4 sm:p-8 flex-1 overflow-y-auto">
         <ClinicDashboard v-if="activeTab === 'dashboard'" :search-query="searchQuery" />
         <PersonalMedico v-else-if="activeTab === 'doctores'" @navegar="(r: string) => activeTab = r" />
         <RegistrarEspecialista
@@ -164,11 +188,41 @@ import RegistrarEspecialista from './components/RegistrarEspecialista.vue';
 import CrearExpediente from './components/CrearExpediente.vue';
 import ClinicSpecialties from './components/ClinicSpecialties.vue';
 
+import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
+import {
+  BiList, 
+  BiGrid1X2Fill, // <-- Cambiado de BiGrid1x2Fill a BiGrid1X2Fill
+  BiPeopleFill, 
+  BiPersonPlusFill,
+  BiFileEarmarkMedicalFill, 
+  BiIntersect, 
+  BiGearFill, 
+  BiBoxArrowRight,
+  BiSearch, 
+  BiBell, 
+  BiQuestionCircle
+} from 'oh-vue-icons/icons/bi';
+
+addIcons(
+  BiList, 
+  BiGrid1X2Fill, // <-- También aquí
+  BiPeopleFill, 
+  BiPersonPlusFill,
+  BiFileEarmarkMedicalFill, 
+  BiIntersect, 
+  BiGearFill, 
+  BiBoxArrowRight,
+  BiSearch, 
+  BiBell, 
+  BiQuestionCircle
+);
+
 const router = useRouter();
 const authStore = useAuthStore();
 const activeTab = ref('dashboard');
 const showLogoutModal = ref(false);
 const searchQuery = ref('');
+const menuMobileAbierto = ref(false);
 
 const currentUser = computed<Record<string, unknown> | null>(() => {
   if (authStore.user) {
@@ -218,6 +272,9 @@ const confirmarLogout = () => {
 <style scoped>
 .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 
 /* Mini Logo 3D */
 .contenedor-mini-logo-3d {

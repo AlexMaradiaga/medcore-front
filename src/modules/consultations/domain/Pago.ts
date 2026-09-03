@@ -2,7 +2,7 @@ export interface PagoPayload {
   cita_id: number;
   servicio_id: number;
   monto: number;
-  metodo: 'cash' | 'card' | 'transfer';
+  metodo: 'cash' | 'card' | 'transfer' | 'insurance';
   referencia: string;
 }
 

@@ -1,29 +1,50 @@
 <template>
-  <div class="min-h-screen bg-slate-100 flex font-sans selection:bg-sky-500/10 text-left">
+  <div class="min-h-screen bg-slate-100 flex font-sans selection:bg-sky-500/10 text-left relative overflow-x-hidden">
 
-    <!-- BARRA LATERAL (ASIDE) -->
-    <aside class="w-72 bg-white border-r border-slate-100 flex flex-col justify-between p-6 sticky top-0 h-screen z-30 shrink-0 shadow-xs">
+    <!-- OVERLAY / TELÓN PARA MÓVIL -->
+    <Transition name="fade">
+      <div
+        v-if="menuMobileAbierto"
+        @click="menuMobileAbierto = false"
+        class="lg:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40"
+      ></div>
+    </Transition>
+
+    <!-- BARRA LATERAL (ASIDE) RESPONSIVA -->
+    <aside
+      :class="menuMobileAbierto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+      class="w-72 bg-white border-r border-slate-100 flex flex-col justify-between p-6 fixed lg:sticky top-0 h-screen z-50 lg:z-30 shrink-0 shadow-xs transition-transform duration-300 ease-in-out"
+    >
       <div class="space-y-8">
-        <div class="flex items-center gap-4 px-2 cursor-pointer group/logo" @click="activeTab = 'home'; subViewInstituciones = 'clinicas'">
-
-          <div class="contenedor-mini-logo-3d relative shrink-0">
-            <div class="mini-logo-cuerpo-3d">
-              <img
-                src="/logo-medgo.jpg"
-                alt="MedGo+ Logo"
-                class="w-full h-full object-cover rounded-[11px] shadow-xs"
-              />
+        <!-- Logo y Cierre en móvil -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4 px-2 cursor-pointer group/logo" @click="activeTab = 'home'; subViewInstituciones = 'clinicas'; menuMobileAbierto = false">
+            <div class="contenedor-mini-logo-3d relative shrink-0">
+              <div class="mini-logo-cuerpo-3d">
+                <img
+                  src="/logo-medgo.jpg"
+                  alt="MedGo+ Logo"
+                  class="w-full h-full object-cover rounded-[11px] shadow-xs"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xl font-black tracking-tighter leading-none bg-linear-to-r from-sky-600 to-emerald-600 bg-clip-text text-transparent group-hover/logo:opacity-90 transition-opacity">MedGo+</span>
+              <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestión Médica Digital</span>
             </div>
           </div>
-          <div class="flex flex-col">
-            <span class="text-xl font-black tracking-tighter leading-none bg-linear-to-r from-sky-600 to-emerald-600 bg-clip-text text-transparent group-hover/logo:opacity-90 transition-opacity">MedGo+</span>
-            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestión Médica Digital</span>
-          </div>
+
+          <button
+            @click="menuMobileAbierto = false"
+            class="lg:hidden text-slate-400 hover:text-slate-700 p-1 rounded-lg"
+          >
+            ✕
+          </button>
         </div>
 
         <nav class="space-y-1.5">
           <button
-            @click="activeTab = 'home'; subViewInstituciones = 'clinicas'"
+            @click="activeTab = 'home'; subViewInstituciones = 'clinicas'; menuMobileAbierto = false"
             :class="activeTab === 'home' ? 'bg-sky-50 text-sky-600 font-black border-l-4 border-sky-400' : 'text-slate-500 font-bold hover:bg-slate-50 border-l-4 border-transparent'"
             class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-r-2xl text-xs uppercase tracking-wider transition-all cursor-pointer group"
           >
@@ -32,7 +53,7 @@
 
           <button
             v-for="tab in tabs" :key="tab.id"
-            @click="activeTab = tab.id; if(tab.id === 'instituciones') subViewInstituciones = 'clinicas'"
+            @click="activeTab = tab.id; if(tab.id === 'instituciones') subViewInstituciones = 'clinicas'; menuMobileAbierto = false"
             :class="activeTab === tab.id ? 'bg-sky-50 text-sky-600 font-black border-l-4 border-sky-400' : 'text-slate-500 font-bold hover:bg-slate-50 border-l-4 border-transparent'"
             class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-r-2xl text-xs uppercase tracking-wider transition-all cursor-pointer group"
           >
@@ -43,7 +64,7 @@
       </div>
 
       <button
-        @click="resetBooking(); activeTab = 'schedule'"
+        @click="resetBooking(); activeTab = 'schedule'; menuMobileAbierto = false"
         class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border border-emerald-200/60 shadow-xs transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
       >
         <v-icon name="bi-calendar-event" class="h-4 w-4 text-emerald-600" /> + Agendar Cita
@@ -51,20 +72,30 @@
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <div class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+    <div class="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
 
       <!-- ENCABEZADO -->
-      <header class="bg-white border-b border-slate-100 px-10 py-4 flex justify-end items-center sticky top-0 z-20 shadow-xs">
-        <div class="flex items-center gap-6">
+      <header class="bg-white border-b border-slate-100 px-4 sm:px-6 lg:px-10 py-4 flex justify-between items-center sticky top-0 z-20 shadow-xs">
+        
+        <!-- Botón menú hamburguesa (móvil/tablet) -->
+        <button
+          @click="menuMobileAbierto = !menuMobileAbierto"
+          class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+        >
+          <v-icon name="bi-list" class="h-6 w-6" />
+        </button>
+
+        <div class="flex items-center gap-3 sm:gap-6 ml-auto">
 
           <!-- SELECTOR DE PACIENTE/DEPENDIENTE AJUSTADO -->
-          <div v-if="esTutor || misDependientes.length > 0" class="flex items-center gap-3 bg-amber-50/60 px-3.5 py-1.5 rounded-2xl border border-amber-200/50 animate-fade-in shadow-2xs">
-            <div class="flex items-center gap-2">
+          <div v-if="esTutor || misDependientes.length > 0" class="flex items-center gap-2 sm:gap-3 bg-amber-50/60 px-2.5 sm:px-3.5 py-1.5 rounded-2xl border border-amber-200/50 animate-fade-in shadow-2xs">
+            <div class="flex items-center gap-1.5 sm:gap-2">
               <label class="text-[10px] font-black text-amber-800 uppercase tracking-wider flex items-center gap-1">
-                <v-icon name="bi-people-fill" class="h-3 w-3 text-amber-600" /> Paciente:
+                <v-icon name="bi-people-fill" class="h-3 w-3 text-amber-600" />
+                <span class="hidden sm:inline">Paciente:</span>
               </label>
               <select
-                class="bg-transparent text-xs font-black text-slate-800 outline-none cursor-pointer border-none p-0 pr-4 focus:ring-0"
+                class="bg-transparent text-xs font-black text-slate-800 outline-none cursor-pointer border-none p-0 pr-4 focus:ring-0 max-w-30 sm:max-w-none truncate"
                 @change="evaluarSeleccionPaciente($event)"
               >
                 <option v-for="(dep, idx) in misDependientes" :key="String(dep.PacienteID || idx)" :value="idx">
@@ -77,40 +108,42 @@
             <button
               v-if="pacienteActualSeleccionado?.es_dependiente === 1"
               @click="openEmancipateModal"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-xs"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-xs shrink-0"
             >
-              Independizar Hijo
+              Independizar
             </button>
           </div>
 
-          <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
-            <div class="w-8 h-8 bg-linear-to-tr from-sky-400/30 to-emerald-400/30 rounded-full flex items-center justify-center text-sky-700 font-black text-xs uppercase">
+          <div class="flex items-center gap-3 bg-slate-50 px-3 sm:px-4 py-2 rounded-2xl border border-slate-100">
+            <div class="w-8 h-8 bg-linear-to-tr from-sky-400/30 to-emerald-400/30 rounded-full flex items-center justify-center text-sky-700 font-black text-xs uppercase shrink-0">
               {{ userData.nombre.charAt(0) }}
             </div>
-            <div class="text-left">
+            <div class="text-left hidden sm:block">
               <p class="text-xs font-black text-slate-700 leading-none">{{ userData.nombre }}</p>
               <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ userSessionData.email }}</p>
             </div>
           </div>
-          <button @click="handleLogout" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors cursor-pointer">
-            <v-icon name="bi-box-arrow-right" class="h-4 w-4 text-rose-500" /> Salir
+          
+          <button @click="handleLogout" class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors cursor-pointer shrink-0">
+            <v-icon name="bi-box-arrow-right" class="h-4 w-4 text-rose-500" />
+            <span class="hidden sm:inline">Salir</span>
           </button>
         </div>
       </header>
 
       <!-- ÁREA DE VISTAS (MAIN) -->
-      <main class="p-10 flex-1 max-w-7xl w-full mx-auto space-y-12">
+      <main class="p-4 sm:p-6 lg:p-10 flex-1 max-w-7xl w-full mx-auto space-y-8 sm:space-y-12">
 
         <!-- INICIO -->
-        <section v-if="activeTab === 'home'" class="space-y-10 animate-fade-in">
+        <section v-if="activeTab === 'home'" class="space-y-8 sm:space-y-10 animate-fade-in">
           <div>
-            <h2 class="text-4xl font-black text-slate-800 tracking-tight">Hola, {{ userData.nombre.split(' ')[0] }}</h2>
-            <p class="text-slate-400 font-bold text-sm mt-1">Roatán • Islas de la Bahía</p>
+            <h2 class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight">Hola, {{ userData.nombre.split(' ')[0] }}</h2>
+            <p class="text-slate-400 font-bold text-xs mt-1">Roatán • Islas de la Bahía</p>
           </div>
 
-          <div class="bg-white rounded-[2.5rem] p-8 text-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xs border border-slate-100 relative overflow-hidden">
-            <div class="flex items-center gap-5 relative z-10">
-              <div class="w-16 h-16 bg-slate-50 text-slate-600 rounded-2xl border border-slate-100 flex items-center justify-center shadow-2xs">
+          <div class="bg-white rounded-3xl md:rounded-[2.5rem] p-5 sm:p-8 text-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xs border border-slate-100 relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 relative z-10">
+              <div class="w-16 h-16 bg-slate-50 text-slate-600 rounded-2xl border border-slate-100 flex items-center justify-center shadow-2xs shrink-0">
                 <v-icon name="ri-hospital-fill" scale="1.8" class="text-sky-600" />
               </div>
               <div>
@@ -120,46 +153,46 @@
                   </span>
                   <span class="bg-emerald-500/10 text-emerald-700 border border-emerald-200/40 font-black text-[9px] uppercase px-2 py-0.5 rounded-full">Premium</span>
                 </div>
-                <h3 class="text-2xl font-black tracking-tight mt-2 text-slate-800">Clínica Médica del Caribe</h3>
+                <h3 class="text-xl sm:text-2xl font-black tracking-tight mt-2 text-slate-800">Clínica Médica del Caribe</h3>
                 <p class="text-slate-500 text-xs font-semibold mt-1">Atención médica de excelencia • Equipamiento de última generación</p>
-                <div class="flex items-center gap-4 mt-3 text-[11px] font-black text-slate-500">
+                <div class="flex flex-wrap items-center gap-4 mt-3 text-[11px] font-black text-slate-500">
                   <span class="flex items-center gap-1.5"><v-icon name="bi-people-fill" class="text-sky-500" scale="0.75"/> 15+ Especialistas</span>
                   <span class="flex items-center gap-1.5"><v-icon name="bi-calendar-event" class="text-emerald-500" scale="0.75"/> Citas hoy disponibles</span>
                 </div>
               </div>
             </div>
-            <button @click="seleccionarClinicaDirectaDesdeHome(2)" class="bg-white hover:bg-sky-50 text-sky-600 border border-sky-100 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-2xs shrink-0 relative z-10 cursor-pointer">
+            <button @click="seleccionarClinicaDirectaDesdeHome(2)" class="w-full sm:w-auto bg-white hover:bg-sky-50 text-sky-600 border border-sky-100 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-2xs shrink-0 relative z-10 cursor-pointer">
               Ver más →
             </button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div @click="activeTab = 'directory'" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-sky-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-6 group">
-              <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+            <div @click="activeTab = 'directory'" class="bg-white p-5 sm:p-8 rounded-3xl md:rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-sky-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-4 sm:gap-6 group">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all shrink-0">
                 <v-icon name="bi-people-fill" class="h-6 w-6" />
               </div>
-              <div class="flex-1">
-                <h4 class="text-xl font-black text-slate-800 group-hover:text-sky-600 transition-colors">Mis Médicos</h4>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-lg sm:text-xl font-black text-slate-800 group-hover:text-sky-600 transition-colors truncate">Mis Médicos</h4>
                 <p class="text-slate-400 text-xs font-semibold mt-1">Directorio verificado de especialistas de la región.</p>
               </div>
-              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-sky-500 transition-colors" />
+              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-sky-500 transition-colors shrink-0" />
             </div>
 
-            <div @click="resetBooking(); activeTab = 'schedule'" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-emerald-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-6 group">
-              <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
+            <div @click="resetBooking(); activeTab = 'schedule'" class="bg-white p-5 sm:p-8 rounded-3xl md:rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-emerald-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-4 sm:gap-6 group">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all shrink-0">
                 <v-icon name="bi-calendar-event" class="h-6 w-6" />
               </div>
-              <div class="flex-1">
-                <h4 class="text-xl font-black text-slate-800 group-hover:text-emerald-600 transition-colors">Agendar Cita</h4>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-lg sm:text-xl font-black text-slate-800 group-hover:text-emerald-600 transition-colors truncate">Agendar Cita</h4>
                 <p class="text-slate-400 text-xs font-semibold mt-1">Reserva y asegura tu espacio médico en segundos.</p>
               </div>
-              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-emerald-500 transition-colors" />
+              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0" />
             </div>
           </div>
 
           <div class="bg-emerald-50/40 border border-emerald-100/70 rounded-3xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-4">
-              <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shadow-3xs">
+              <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shadow-3xs shrink-0">
                 <v-icon name="ri-capsule-fill" scale="1.2" />
               </div>
               <div>
@@ -170,58 +203,59 @@
             <button class="text-emerald-600 font-black text-xs uppercase tracking-widest hover:text-emerald-800 shrink-0 cursor-pointer">Ver ofertas →</button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div @click="activeTab = 'laboratory'" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-blue-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-6 group">
-              <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+            <div @click="activeTab = 'laboratory'" class="bg-white p-5 sm:p-8 rounded-3xl md:rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-blue-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-4 sm:gap-6 group">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0">
                 <v-icon name="bi-droplet-half" class="h-6 w-6" />
               </div>
-              <div class="flex-1">
-                <h4 class="text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">Mis Laboratorios</h4>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-lg sm:text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors truncate">Mis Laboratorios</h4>
                 <p class="text-slate-400 text-xs font-semibold mt-1">Monitorea tus órdenes clínicas y resultados analíticos.</p>
               </div>
-              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-blue-500 transition-colors" />
+              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
             </div>
 
-            <div @click="activeTab = 'instituciones'; subViewInstituciones = 'clinicas'; fetchClinicas()" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-purple-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-6 group">
-              <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-all">
+            <div @click="activeTab = 'instituciones'; subViewInstituciones = 'clinicas'; fetchClinicas()" class="bg-white p-5 sm:p-8 rounded-3xl md:rounded-[2.5rem] border border-slate-100 shadow-3xs hover:border-purple-100 hover:shadow-xs transition-all cursor-pointer flex items-center gap-4 sm:gap-6 group">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-all shrink-0">
                 <v-icon name="ri-building-fill" class="h-6 w-6" />
               </div>
-              <div class="flex-1">
-                <h4 class="text-xl font-black text-slate-800 group-hover:text-purple-600 transition-colors">Instituciones</h4>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-lg sm:text-xl font-black text-slate-800 group-hover:text-purple-600 transition-colors truncate">Instituciones</h4>
                 <p class="text-slate-400 text-xs font-semibold mt-1">Clínicas, laboratorios autorizados y farmacias integradas.</p>
               </div>
-              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-purple-500 transition-colors" />
+              <v-icon name="bi-chevron-right" class="text-slate-300 group-hover:text-purple-500 transition-colors shrink-0" />
             </div>
           </div>
 
+          <!-- SECCIÓN ACCESO RÁPIDO CON AUTO-AJUSTE PARA NO CORTAR TEXTO -->
           <div class="space-y-4 pt-4 border-t border-slate-100">
             <h5 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Acceso Rápido</h5>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
-              <div @click="historyViewMode = 'citas_gestion'; activeTab = 'history'" class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-sky-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3.5 group">
-                <v-icon name="bi-calendar-check-fill" class="text-sky-500 h-5 w-5" />
-                <span class="text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-sky-600">
+              <div @click="historyViewMode = 'citas_gestion'; activeTab = 'history'" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-sky-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3 group min-w-0">
+                <v-icon name="bi-calendar-check-fill" class="text-sky-500 h-5 w-5 shrink-0" />
+                <span class="text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-sky-600 truncate">
                   Mis Citas Activas
                 </span>
               </div>
 
-              <div @click="historyViewMode = 'recetas'; activeTab = 'history'" class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3.5 group">
-                <v-icon name="ri-capsule-fill" class="text-emerald-500 h-5 w-5" />
-                <span class="text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-emerald-600">
+              <div @click="historyViewMode = 'recetas'; activeTab = 'history'" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3 group min-w-0">
+                <v-icon name="ri-capsule-fill" class="text-emerald-500 h-5 w-5 shrink-0" />
+                <span class="text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-emerald-600 truncate">
                   {{ locale === 'en' ? 'My Prescriptions' : 'Mis Recetas' }}
                 </span>
               </div>
 
-              <div @click="activeTab = 'laboratory'" class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3.5 group">
-                <v-icon name="bi-droplet-half" class="text-blue-500 h-5 w-5" />
-                <span class="text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-blue-600">
+              <div @click="activeTab = 'laboratory'" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3 group min-w-0">
+                <v-icon name="bi-droplet-half" class="text-blue-500 h-5 w-5 shrink-0" />
+                <span class="text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-blue-600 truncate">
                   {{ locale === 'en' ? 'Labs' : 'Laboratorios' }}
                 </span>
               </div>
 
-              <div @click="activeTab = 'configuracion'" class="bg-white p-5 rounded-2xl border border-slate-100 hover:border-slate-300 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3.5 group">
-                <v-icon name="bi-gear-fill" class="text-slate-400 h-5 w-5" />
-                <span class="text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-slate-600">
+              <div @click="activeTab = 'configuracion'" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 hover:border-slate-300 hover:shadow-2xs transition-all cursor-pointer flex items-center gap-3 group min-w-0">
+                <v-icon name="bi-gear-fill" class="text-slate-400 h-5 w-5 shrink-0" />
+                <span class="text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wide group-hover:text-slate-600 truncate">
                   {{ locale === 'en' ? 'Settings' : 'Configuración' }}
                 </span>
               </div>
@@ -234,13 +268,12 @@
         <section v-if="activeTab === 'directory'" class="space-y-8 animate-fade-in">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Mis Médicos</h2>
+              <h2 class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight uppercase">Mis Médicos</h2>
               <p class="text-slate-400 font-bold text-xs mt-1">Directorio de médicos verificados en Roatán</p>
             </div>
 
-            <!-- TARJETA INTEGRADORA DE SELECCIÓN DE PACIENTE / DEPENDIENTE -->
             <div v-if="misDependientes.length > 0" class="bg-sky-50 border border-sky-100 p-4 rounded-2xl flex items-center gap-4">
-              <div class="w-10 h-10 bg-sky-500 text-white rounded-xl flex items-center justify-center font-black text-sm">
+              <div class="w-10 h-10 bg-sky-500 text-white rounded-xl flex items-center justify-center font-black text-sm shrink-0">
                 {{ perfilPacienteActivo.nombre.charAt(0) }}
               </div>
               <div class="text-left">
@@ -255,7 +288,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-[2.5rem] p-8 shadow-xs border border-slate-100 space-y-5">
+          <div class="bg-white rounded-3xl md:rounded-[2.5rem] p-5 sm:p-8 shadow-xs border border-slate-100 space-y-5">
             <div class="flex flex-col lg:flex-row gap-4 items-center">
               <div class="flex-1 w-full relative">
                 <input v-model="filters.search" type="text" placeholder="Buscar por nombre o especialidad..." class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4.5 px-6 pl-14 outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-400 focus:bg-white transition-all text-slate-700 font-bold placeholder:text-slate-300 text-sm" />
@@ -313,7 +346,6 @@
 
           <div v-if="doctors.length > 0" class="space-y-4">
             <div v-for="doctor in doctors" :key="doctor.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all hover:border-sky-200/60">
-
               <div class="flex items-center gap-6 w-full md:flex-1">
                 <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner relative border border-slate-100 shrink-0">
                   <v-icon name="ri-stethoscope-line" scale="2" class="text-slate-400" />
@@ -332,10 +364,9 @@
                 </div>
               </div>
 
-              <button @click="startBooking(doctor)" class="w-full md:w-auto bg-sky-50 hover:bg-sky-100 text-sky-700 px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer">
+              <button @click="startBooking(doctor)" class="w-full md:w-auto bg-sky-50 hover:bg-sky-100 text-sky-700 px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer shrink-0">
                 Agendar
               </button>
-
             </div>
           </div>
           <div v-else class="bg-white rounded-3xl p-12 text-center border border-slate-100">
@@ -347,12 +378,12 @@
         <section v-if="activeTab === 'instituciones'" class="space-y-8 animate-fade-in">
           <div v-if="subViewInstituciones === 'clinicas'" class="space-y-6">
             <div class="grid grid-cols-1 gap-6">
-              <div v-for="clinica in listaClinicasDB" :key="clinica.EntidadID" class="bg-white rounded-[2.5rem] p-8 text-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xs border border-slate-100 hover:border-purple-200 transition-all">
+              <div v-for="clinica in listaClinicasDB" :key="clinica.EntidadID" class="bg-white rounded-3xl md:rounded-[2.5rem] p-6 sm:p-8 text-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xs border border-slate-100 hover:border-purple-200 transition-all">
                 <div class="flex items-center gap-5">
-                  <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100 flex items-center justify-center shadow-2xs"><v-icon name="ri-building-fill" scale="1.4" /></div>
-                  <div class="text-left"><h3 class="text-2xl font-black tracking-tight text-slate-800">{{ clinica.NombreInstitucion }}</h3></div>
+                  <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100 flex items-center justify-center shadow-2xs shrink-0"><v-icon name="ri-building-fill" scale="1.4" /></div>
+                  <div class="text-left"><h3 class="text-xl sm:text-2xl font-black tracking-tight text-slate-800">{{ clinica.NombreInstitucion }}</h3></div>
                 </div>
-                <button @click="seleccionarClinica(clinica)" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer">Ver Especialistas →</button>
+                <button @click="seleccionarClinica(clinica)" class="w-full md:w-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0">Ver Especialistas →</button>
               </div>
             </div>
           </div>
@@ -362,7 +393,7 @@
                 <div class="flex items-center gap-6 w-full md:flex-1">
                   <div class="text-left"><h3 class="text-xl font-black text-slate-800">Dr. {{ doc.Nombre }} {{ doc.Apellido }}</h3></div>
                 </div>
-                <button @click="startBooking(doc)" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer shadow-sm">Agendar Cita</button>
+                <button @click="startBooking(doc)" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer shadow-sm shrink-0">Agendar Cita</button>
               </div>
             </div>
           </div>
@@ -372,11 +403,11 @@
         <section v-if="activeTab === 'schedule'" class="animate-fade-in space-y-6">
           <div v-if="!selectedDoctor" class="space-y-6 w-full text-left">
             <div>
-              <h2 class="text-4xl font-black text-slate-800 tracking-tight uppercase">Agendar Nueva Cita</h2>
+              <h2 class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight uppercase">Agendar Nueva Cita</h2>
               <p class="text-slate-400 font-bold text-xs mt-1">Seleccione médico, fecha y hora</p>
             </div>
 
-            <div class="bg-white rounded-[2.5rem] p-16 text-center border border-slate-100 shadow-xs flex flex-col items-center justify-center space-y-4 min-h-87.5">
+            <div class="bg-white rounded-3xl md:rounded-[2.5rem] p-8 sm:p-16 text-center border border-slate-100 shadow-xs flex flex-col items-center justify-center space-y-4 min-h-87.5">
               <div class="text-slate-300 flex items-center justify-center">
                 <v-icon name="bi-person" scale="3.5" class="text-slate-300" />
               </div>
@@ -406,19 +437,18 @@
 
         <!-- HISTORIAL Y CITAS -->
         <section v-if="activeTab === 'history'" class="animate-fade-in space-y-6 text-left">
-
           <div class="flex bg-slate-200/60 p-1.5 rounded-2xl border border-slate-200 shadow-inner w-fit gap-1 mb-2">
             <button
               @click="historyViewMode = historyViewMode === 'citas_gestion' ? 'completo' : historyViewMode"
               :class="historyViewMode !== 'citas_gestion' ? 'bg-white text-purple-600 font-black shadow-xs scale-102' : 'text-slate-500 font-bold hover:text-slate-800'"
-              class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2 border-none"
+              class="px-3 sm:px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2 border-none"
             >
               <v-icon name="bi-folder-fill" scale="0.85" /> Historial Clínico
             </button>
             <button
               @click="historyViewMode = 'citas_gestion'"
               :class="historyViewMode === 'citas_gestion' ? 'bg-white text-[#005596] font-black shadow-xs scale-102' : 'text-slate-500 font-bold hover:text-slate-800'"
-              class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2 border-none"
+              class="px-3 sm:px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2 border-none"
             >
               <v-icon name="bi-calendar-check-fill" scale="0.85" /> Control de Citas
             </button>
@@ -437,7 +467,7 @@
 
       </main>
 
-      <footer class="bg-slate-900 text-white/80 py-10 px-12 mt-auto border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold">
+      <footer class="bg-slate-900 text-white/80 py-8 sm:py-10 px-6 sm:px-12 mt-auto border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold">
         <div>MedGo+ © 2026 Todos los derechos reservados.</div>
       </footer>
 
@@ -446,7 +476,7 @@
 
   <!-- MODAL DE AUTO-REGISTRO -->
   <div v-if="showAutoRegistroModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl animate-fade-in">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-xl animate-fade-in">
       <h3 class="text-xl font-bold mb-4 text-slate-800">Crear mi Perfil Clínico</h3>
       <p class="text-slate-500 text-xs font-semibold mb-6">Completa tu información clínica base para poder agendar citas médicas a tu nombre como titular.</p>
 
@@ -466,7 +496,7 @@
 
   <!-- MODAL DE EMANCIPACIÓN -->
   <div v-if="showEmancipateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl animate-fade-in">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-xl animate-fade-in">
       <h3 class="text-xl font-bold mb-3 text-slate-800">Dar Acceso Propio a tu Hijo</h3>
       <p class="text-slate-500 text-xs font-semibold mb-6">
         Estás independizando el expediente de <span class="text-slate-800 font-black">{{ pacienteActualSeleccionado?.Nombre }}</span>. Podrá entrar a la app con sus propias credenciales y gestionar su historial.
@@ -510,8 +540,8 @@ import PatientLabView from '../../laboratories/ui/PatientLabView.vue';
 
 import PatientAppointmentsView from '@/modules/appointments/ui/PatientAppointmentsView.vue';
 import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
-import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch } from 'oh-vue-icons/icons/bi';
-addIcons(BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch);
+import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch, BiList } from 'oh-vue-icons/icons/bi';
+addIcons(BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch, BiList);
 
 interface Clinica { EntidadID: number; NombreInstitucion: string; Descripcion?: string; Direccion?: string; }
 interface EntidadBackend { EntidadID: number | string; NombreComercial?: string; Nombre?: string; Descripcion?: string; Direccion?: string; }
@@ -588,6 +618,9 @@ const formEmancipacion = ref({ email: '', password: '' });
 const activeTab = ref('home');
 const selectedDoctor = ref<Doctor | null>(null);
 
+// Estado reactivo para el menú lateral en pantallas táctiles/móviles
+const menuMobileAbierto = ref(false);
+
 const tabs = [
   { id: 'directory', label: 'tabs.directory', fallback: 'Directorio', icon: 'bi-people-fill', color: 'text-sky-500' },
   { id: 'instituciones', label: 'tabs.institutions', fallback: 'Instituciones', icon: 'ri-building-fill', color: 'text-purple-500' },
@@ -621,7 +654,7 @@ const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
       Telefono: userData.value.telefono,
       Genero: userData.value.genero,
       Edad: userData.value.fecha_nacimiento,
-      TipoSangre: '', // <-- Agregado
+      TipoSangre: '',
       Estado: '1',
       Aseguradora: userData.value.aseguradora || null,
       NumeroPoliza: userData.value.poliza || null,
@@ -645,7 +678,7 @@ const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
     Telefono: String(p.Telefono || p.telefono || userData.value.telefono || ''),
     Genero: String(p.Genero || p.genero || userData.value.genero || ''),
     Edad: (p.Edad || p.edad || userData.value.fecha_nacimiento || '') as string | number,
-    TipoSangre: String(p.TipoSangre || p.tipo_sangre || ''), // <-- Mapeo del tipo de sangre
+    TipoSangre: String(p.TipoSangre || p.tipo_sangre || ''),
     Estado: '1',
     Aseguradora: String(pRecord.Aseguradora || pRecord.aseguradora || userData.value.aseguradora || '') || null,
     NumeroPoliza: String(pRecord.NumeroPoliza || pRecord.poliza || userData.value.poliza || '') || null,
@@ -757,7 +790,6 @@ const cambiarPacienteSeleccionado = (index: number) => {
 
   const idClinico = paciente.PacienteID || paciente.id;
 
-  // Si es el tutor (índice 0) y no tiene PacienteID registrado todavía
   if (!idClinico && index === 0) {
     toast.info("Para agendar citas a tu nombre, primero debes completar tu perfil clínico de paciente.");
     const userJson = localStorage.getItem('user');
@@ -907,7 +939,6 @@ const loadUser = async () => {
 
         const dependientesCrudos: Dependiente[] = rootData.todos_los_dependientes || rootData.dependientes || [];
 
-        // TIPADO STRICTO: (d: Dependiente) en lugar de (d: any)
         const dependientesNormalizados: Dependiente[] = dependientesCrudos.map((d: Dependiente) => ({
           id: d.PacienteID ?? d.id,
           PacienteID: d.PacienteID ?? d.id,
@@ -970,7 +1001,10 @@ onMounted(async () => {
 .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Mini Logo con Efecto 3D y Flotación para el Sidebar */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* Mini Logo 3D */
 .contenedor-mini-logo-3d {
   width: 46px;
   height: 46px;
@@ -984,19 +1018,15 @@ onMounted(async () => {
   border-radius: 13px;
   padding: 1.5px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.15) 100%);
-
-  /* Sombras y bisel para efecto de volumen miniaturizado */
   box-shadow:
     0 8px 16px rgba(0, 120, 160, 0.22),
     0 2px 4px rgba(0, 0, 0, 0.08),
     inset 0 1.5px 3px rgba(255, 255, 255, 0.8);
-
   transform: rotateX(8deg) rotateY(-5deg);
   transform-style: preserve-3d;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Efecto al pasar el cursor sobre el área del logo */
 .group\/logo:hover .mini-logo-cuerpo-3d {
   transform: rotateX(0deg) rotateY(0deg) scale(1.06);
   box-shadow:

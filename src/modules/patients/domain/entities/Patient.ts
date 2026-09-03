@@ -40,7 +40,7 @@ export interface PatientExtendedProfile {
   NumeroPoliza: string | null;
 
   nombre_contacto_emergencia?: string | null;
-  NombreContactoEmergencia?: string | null;   // <--- Agregado en PascalCase
+  NombreContactoEmergencia?: string | null;   
   
   telefono_contacto_emergencia?: string | null;
   TelefonoContactoEmergencia?: string | null;
