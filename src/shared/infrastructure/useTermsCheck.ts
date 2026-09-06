@@ -64,7 +64,6 @@ export function useTermsCheck() {
       localStorage.setItem(STORAGE_KEY_MEDGO, ahoraIso);
 
       showModalTerminos.value = false;
-      console.log('✅ Aceptación de términos guardada en almacenamiento local bajo MedGo+.');
     } catch (error) {
       console.error('Error al guardar la aceptación local de términos:', error);
       showModalTerminos.value = false;

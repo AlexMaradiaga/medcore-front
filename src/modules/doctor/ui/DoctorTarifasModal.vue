@@ -176,24 +176,26 @@ const perfilDoctor = reactive({
 const cargarDatos = async () => {
   cargando.value = true;
   try {
-    // 1. Obtener catálogo dinámico desde sp_ObtenerPreciosDoctor
-    const resPrecios = await api.get<ServicioMedico[]>('/doctor/catalogo-precios', {
-      params: { doctor_id: props.doctorId }
-    });
-    if (resPrecios.data) {
-      servicios.value = resPrecios.data;
+    const [resPrecios, resDoctor] = await Promise.allSettled([
+      api.get<ServicioMedico[]>('/doctor/catalogo-precios', {
+        params: { doctor_id: props.doctorId }
+      }),
+      api.get('/doctor/perfil-ubicacion', {
+        params: { doctor_id: props.doctorId }
+      })
+    ]);
+
+    if (resPrecios.status === 'fulfilled' && resPrecios.value.data) {
+      servicios.value = resPrecios.value.data;
     }
 
-    // 2. Cargar perfil / ubicación del doctor si la API la expone
-    const resDoctor = await api.get('/doctor/perfil-ubicacion', {
-      params: { doctor_id: props.doctorId }
-    });
-    if (resDoctor.data) {
-      perfilDoctor.direccion_consultorio = resDoctor.data.DireccionConsultorio || '';
-      perfilDoctor.latitud = resDoctor.data.Latitud ? Number(resDoctor.data.Latitud) : null;
-      perfilDoctor.longitud = resDoctor.data.Longitud ? Number(resDoctor.data.Longitud) : null;
-      perfilDoctor.habla_ingles = Boolean(resDoctor.data.HablaIngles);
-      perfilDoctor.disponible_domicilio = Boolean(resDoctor.data.DisponibleDomicilio);
+    if (resDoctor.status === 'fulfilled' && resDoctor.value.data) {
+      const data = resDoctor.value.data;
+      perfilDoctor.direccion_consultorio = data.DireccionConsultorio || '';
+      perfilDoctor.latitud = data.Latitud ? Number(data.Latitud) : null;
+      perfilDoctor.longitud = data.Longitud ? Number(data.Longitud) : null;
+      perfilDoctor.habla_ingles = Boolean(data.HablaIngles);
+      perfilDoctor.disponible_domicilio = Boolean(data.DisponibleDomicilio);
     }
   } catch (err) {
     console.error("Error al cargar la información del doctor:", err);

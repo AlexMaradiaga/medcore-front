@@ -310,9 +310,6 @@ const calcularMetricasDinamicas = () => {
 
 const consultarCitasOperacionales = async () => {
   const usuarioId = authStore.user?.id;
-  console.group('🔍 [MedGo+ Log] Consultando Citas Operacionales');
-  console.log('👤 Usuario en AuthStore:', authStore.user);
-  console.log('🆔 ID del Usuario autenticado:', usuarioId);
 
   if (!usuarioId) {
     console.warn('⚠️ No se encontró usuarioId en authStore, abortando consulta de citas.');
@@ -321,9 +318,7 @@ const consultarCitasOperacionales = async () => {
   }
 
   try {
-    console.log(`📡 GET Endpoint Citas: doctor/citas/${usuarioId}`);
     const res = await api.get(`doctor/citas/${usuarioId}`);
-    console.log('📥 Respuesta Citas API:', res.data);
 
     if (Array.isArray(res.data)) {
       const citas: CitaContract[] = res.data;
@@ -344,9 +339,7 @@ const consultarCitasOperacionales = async () => {
       }
     }
 
-    console.log('📡 GET Endpoint Doctores: doctores');
     const resDoctores = await api.get('doctores');
-    console.log('📥 Respuesta Doctores API:', resDoctores.data);
 
     if (Array.isArray(resDoctores.data)) {
       medicosActivosContados.value = resDoctores.data.length;
@@ -388,7 +381,6 @@ const procesarPagoPlan = async (plan: string): Promise<void> => {
 };
 
 onMounted(() => {
-  console.log('🏁 Componente Planes/Métricas montado.');
   calcularMetricasDinamicas();
   consultarCitasOperacionales();
 });

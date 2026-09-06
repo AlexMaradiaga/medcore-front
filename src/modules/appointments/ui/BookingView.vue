@@ -153,7 +153,7 @@
       <div class="text-left sm:text-right bg-slate-50/80 px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl border border-slate-100/60 w-full sm:w-auto shrink-0 flex sm:block justify-between items-center">
         <p class="text-[9px] uppercase font-black text-slate-400 tracking-widest leading-none">Costo de Consulta</p>
         <p class="text-xl sm:text-2xl font-black text-emerald-600 sm:mt-1">
-          ${{ tieneSeguroMedico ? '0.00' : ((selectedDoctor as DoctorExtended).CostoConsulta || (selectedDoctor as DoctorExtended).Precio || 90) }}
+          ${{ tieneSeguroMedico ? '0.00' : precioConsultaDoctor.toFixed(2) }}
         </p>
       </div>
     </div>
@@ -231,7 +231,7 @@
               <label class="block text-xs font-bold text-slate-700">Teléfono de Contacto *</label>
               <input v-model="form.telefono" type="text" placeholder="Ej: +504 9999-9999" class="w-full border border-slate-200 rounded-xl p-3 sm:p-3.5 text-xs font-bold focus:border-sky-400 outline-none transition-all" />
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-700">Edad *</label>
@@ -455,7 +455,7 @@
               <v-icon name="bi-check-circle-fill" scale="0.95" /> Cobertura por Seguro Médico Activa
             </div>
             <p class="text-xs text-slate-600 font-bold">
-              Aseguradora: <span class="text-slate-900 font-black uppercase">{{ form.aseguradora || 'Registrada' }}</span> 
+              Aseguradora: <span class="text-slate-900 font-black uppercase">{{ form.aseguradora || 'Registrada' }}</span>
               <span v-if="form.poliza"> | Póliza: <span class="font-mono text-slate-900">{{ form.poliza }}</span></span>
             </p>
             <p class="text-xs text-emerald-600 font-black">
@@ -974,21 +974,35 @@ addIcons(
   BiFileEarmarkPdfFill, BiBoxArrowUpRight
 );
 
-interface GenericProfile {
-  paciente?: GenericProfile;
-  data?: GenericProfile;
-  id?: number | string; PacienteID?: number | string; UsuarioID?: number | string; usuario_id?: number | string;
-  nombre?: string; Nombre?: string; Apellido?: string;
-  email?: string; Email?: string;
-  telefono?: string; Telefono?: string; PacienteTelefono?: string;
-  genero?: string; Genero?: string;
-  tipo_sangre?: string; TipoSangre?: string; tipoSangre?: string;
-  aseguradora?: string; Aseguradora?: string;
-  poliza?: string; NumeroPoliza?: string; numero_poliza?: string;
-  edad?: string | number; Edad?: string | number; fecha_nacimiento?: string | number;
-  nombre_contacto_emergencia?: string; NombreContactoEmergencia?: string; contacto_emergencia_nombre?: string;
-  telefono_contacto_emergencia?: string; TelefonoContactoEmergencia?: string; contacto_emergencia?: string;
-  esDependiente?: boolean; parentesco?: string; iniciales?: string;
+// =========================================================================
+// INTERFACES TIPADAS DEL COMPONENTE
+// =========================================================================
+export interface GenericProfile {
+  // Identificadores
+  PacienteID?: number | string;
+  usuario_id?: number | string;
+  id?: number | string;
+
+  // Datos Personales
+  nombre?: string;
+  apellido?: string;
+  usuario_email?: string;
+  telefono?: string;
+  genero?: string;
+  tipo_sangre?: string;
+  fecha_nacimiento?: string | number;
+
+  // Cobertura y Contacto
+  aseguradora?: string;
+  poliza?: string;
+  nombre_contacto_emergencia?: string;
+  telefono_contacto_emergencia?: string;
+
+  // Relación / Tutor
+  parentesco?: string | null;
+  es_dependiente?: boolean | null;
+  tutor_id?: number | string | null;
+  dependientes?: GenericProfile[];
 }
 
 interface PdfMakeCustomInstance {
@@ -1014,8 +1028,35 @@ interface PerfilPaciente {
   iniciales: string;
 }
 
-const { t, locale } = useI18n();
+interface DoctorConIdOptional extends Doctor {
+  id?: number | string;
+}
+
+// interface ErrorConRespuestaServidor {
+//   response?: {
+//     data?: {
+//       message?: string;
+//     };
+//   };
+//   message?: string;
+// }
+
+// interface RespuestaCreacionCita {
+//   status?: string;
+//   message?: string;
+//   cita_id?: number;
+//   id?: number;
+// }
+
+interface ServicioMedico {
+  ServicioID: number;
+  NombreServicio: string;
+  Precio: number;
+}
+
 type DoctorExtended = Doctor & { CostoConsulta?: number; Precio?: number };
+
+const { t, locale } = useI18n();
 
 const vfsFonts = pdfFonts as unknown as { pdfMake?: { vfs: Record<string, string> }; vfs: Record<string, string> };
 const pdfMakeContext = pdfMake as unknown as { vfs: Record<string, string> };
@@ -1085,34 +1126,37 @@ const seleccionarPaciente = (perfil: PerfilPaciente) => {
 const cargarDependientesDesdeAPI = async (usuarioId: number) => {
   try {
     const res = await api.get(`/pacientes/usuario/${usuarioId}`);
-    const rootData = res.data;
-    const dependientesCrudos: GenericProfile[] = rootData.todos_los_dependientes || rootData.dependientes || [];
+
+    const datosUsuario = res.data.data;
+    const dependientesCrudos: GenericProfile[] = datosUsuario?.dependientes || [];
 
     if (Array.isArray(dependientesCrudos) && dependientesCrudos.length > 0) {
       listaDependientes.value = dependientesCrudos.map((dep: GenericProfile) => ({
-        id: Number(dep.UsuarioID || dep.id || 0),
-        pacienteId: Number(dep.PacienteID || dep.id || 0),
-        nombre: String(dep.Nombre || dep.nombre || 'Dependiente'),
-        email: String(dep.Email || dep.email || tutorPrincipalPerfil.value.email),
-        telefono: String(dep.Telefono || dep.telefono || tutorPrincipalPerfil.value.telefono),
-        genero: String(dep.Genero || dep.genero || ''),
-        tipoSangre: String(dep.TipoSangre || dep.tipo_sangre || 'A+'),
-        aseguradora: String(dep.Aseguradora || dep.aseguradora || ''),
-        poliza: String(dep.NumeroPoliza || dep.poliza || ''),
-        edad: String(dep.Edad || dep.edad || dep.fecha_nacimiento || '6'),
-        contactoNombre: String(dep.NombreContactoEmergencia || dep.nombre_contacto_emergencia || tutorPrincipalPerfil.value.contactoNombre),
-        contactoTel: String(dep.TelefonoContactoEmergencia || dep.telefono_contacto_emergencia || tutorPrincipalPerfil.value.contactoTel),
+        id: Number(dep.usuario_id || 0),
+        pacienteId: Number(dep.PacienteID || 0),
+        nombre: String(dep.nombre || ''),
+        email: String(dep.usuario_email || tutorPrincipalPerfil.value?.email || ''),
+        telefono: String(dep.telefono || tutorPrincipalPerfil.value?.telefono || ''),
+        genero: String(dep.genero || ''),
+        tipoSangre: String(dep.tipo_sangre || 'A+'),
+        aseguradora: String(dep.aseguradora || ''),
+        poliza: String(dep.poliza || ''),
+        edad: String(dep.fecha_nacimiento || '0'),
+        contactoNombre: String(dep.nombre_contacto_emergencia || tutorPrincipalPerfil.value?.contactoNombre || ''),
+        contactoTel: String(dep.telefono_contacto_emergencia || tutorPrincipalPerfil.value?.contactoTel || ''),
         esDependiente: true,
         parentesco: String(dep.parentesco || 'Hijo(a)'),
-        iniciales: String(dep.Nombre || dep.nombre || 'J').charAt(0).toUpperCase()
+        iniciales: String(dep.nombre || 'D').charAt(0).toUpperCase()
       }));
     }
   } catch (err) {
     console.warn("No se encontraron dependientes vinculados:", err);
   }
 };
-// =========================================================================
 
+// =========================================================================
+// ESTADO REACTIVO GENERAL
+// =========================================================================
 const userData = ref({ id: 0, nombre: '', email: '' });
 const currentStep = ref(1);
 
@@ -1129,6 +1173,8 @@ const confirmarAceptacionTerminos = (): void => {
   aceptoTerminos.value = true;
   showModalTerminos.value = false;
 };
+
+const servicioIdSeleccionado = ref<number>(1); // ✅ ID de servicio dinámico
 
 const billingDataLocal = ref({
   consultationId: '',
@@ -1284,6 +1330,9 @@ const dispararCobroAPI = async (): Promise<void> => {
   }
 };
 
+// =========================================================================
+// SUBMIT DE LA CITA Y PROCESAMIENTO DE PAGO
+// =========================================================================
 const handleSubmit = async () => {
   if (!props.selectedDoctor) {
     toast.error("No ha seleccionado un profesional médico.");
@@ -1295,44 +1344,72 @@ const handleSubmit = async () => {
     return;
   }
 
+  // Resolver ID del Paciente de forma segura evitando Uncaught TypeError
+  const idPacienteReal = Number(
+    pacienteSeleccionado.value?.pacienteId ||
+    pacienteSeleccionado.value?.id ||
+    userData.value?.id ||
+    localStorage.getItem('paciente_actual_id') ||
+    0
+  );
+
+  const docExt = props.selectedDoctor as DoctorConIdOptional;
+  const idDoctorReal = Number(props.selectedDoctor.DoctorID || docExt?.id || 0);
+
+  if (!idPacienteReal || !idDoctorReal) {
+    toast.error("No se pudo identificar al paciente o al médico seleccionado.");
+    return;
+  }
+
   const medicamentosTexto = form.medicamentosList.map(m => m.nombre).join(', ');
   const alergiasTexto = form.alergiasList.map(a => a.nombre).join(', ');
 
-  const payload: AppointmentRequest & { edad?: string | number; telefono?: string; paciente_id?: number } = {
-    UsuarioID: userData.value.id,
-    paciente_id: pacienteSeleccionado.value.pacienteId || undefined,
-    doctor_id: Number(props.selectedDoctor.DoctorID),
-    entidad_id: props.selectedDoctor.EntidadID || 1,
-    fecha_hora: `${form.fecha} ${form.hora}:00`,
-    motivo: form.motivo,
-    sintomas: form.sintomas,
-    edad: form.edad,
-    telefono: form.telefono,
+  const edadNumerica = form.edad !== '' && form.edad !== null && form.edad !== undefined
+    ? parseInt(String(form.edad), 10)
+    : 0;
+
+  const horaFormateada = form.hora.length === 5 ? `${form.hora}:00` : form.hora;
+
+  // Payload limpio tipado estrictamente según la interfaz AppointmentRequest
+  const payload: AppointmentRequest = {
+    UsuarioID: Number(userData.value?.id || 0),
+    paciente_id: idPacienteReal,
+    doctor_id: idDoctorReal,
+    entidad_id: Number(props.selectedDoctor.EntidadID || 1),
+    fecha_hora: `${form.fecha} ${horaFormateada}`,
+    motivo: form.motivo || '',
+    sintomas: form.sintomas || '',
+    edad: Number.isNaN(edadNumerica) ? 0 : edadNumerica,
     alergias: alergiasTexto || 'Ninguna',
-    genero: form.genero,
-    aseguradora: form.aseguradora,
-    numeropoliza: form.poliza,
-    nombre_contacto_emergencia: form.contactoNombre || undefined,
-    telefono_contacto_emergencia: form.contactoTel || undefined,
+    genero: form.genero || '',
+    TipoSangre: form.tipoSangre || '',
+    aseguradora: form.aseguradora || '',
+    NumeroPoliza: form.poliza || '',
+    nombre_contacto_emergencia: form.contactoNombre || null,
+    telefono_contacto_emergencia: form.contactoTel || null,
     medicamentos_actuales: medicamentosTexto || 'Ninguno',
-    cronicas_ids: form.cronicasSeleccionadasIds
+    cronicas_ids: form.cronicasSeleccionadasIds || []
   };
 
   try {
-    await appointmentRepo.create(payload as AppointmentRequest);
+    // 1. Envío limpio aprovechando la inferencia de tipos de TypeScript
+    const resCita = await appointmentRepo.create(payload);
 
-    const docExt = props.selectedDoctor as DoctorExtended;
-    const precioConsulta = tieneSeguroMedico.value ? 0 : (docExt.CostoConsulta || docExt.Precio || 90);
+    let idDetectado = Number(resCita?.CitaID || 0);
 
-    const idDetectado = await obtenerUltimaCitaCreada(userData.value.id);
+    if (idDetectado === 0) {
+      idDetectado = await obtenerUltimaCitaCreada(idPacienteReal);
+    }
+
+    const precioConsulta = tieneSeguroMedico.value ? 0 : precioConsultaDoctor.value;
 
     const datosResumenLocal = {
       citaId: idDetectado,
       paciente: {
-        nombre: userData.value.nombre,
-        email: userData.value.email,
+        nombre: userData.value?.nombre,
+        email: userData.value?.email,
         telefono: form.telefono,
-        edad: form.edad,
+        edad: Number.isNaN(edadNumerica) ? 0 : edadNumerica,
         genero: form.genero,
         TipoSangre: form.tipoSangre,
         tipoSangre: form.tipoSangre
@@ -1346,41 +1423,23 @@ const handleSubmit = async () => {
     billingDataLocal.value = {
       consultationId: String(idDetectado),
       citaId: idDetectado,
-      servicioId: 1,
+      servicioId: servicioIdSeleccionado.value,
       basePrice: Number(precioConsulta)
     };
 
+    // 2. Manejo de estado posterior según el método de pago elegido
     if (tieneSeguroMedico.value) {
-      if (idDetectado > 0) {
-        await pgoRepository.procesarPago({
-          cita_id: idDetectado,
-          servicio_id: 1,
-          monto: 0,
-          metodo: 'insurance',
-          referencia: `Cobertura Seguro: ${form.aseguradora || 'Asegurado'} - Póliza: ${form.poliza || 'N/A'}`
-        });
-      }
-      toast.success("¡Cita agendada exitosamente con cobertura de seguro médico!");
+      toast.success("¡Solicitud de cita enviada con cobertura de seguro médico!");
       emit('cancel');
     } else if (form.metodoPago === 'Efectivo') {
-      if (idDetectado > 0) {
-        await pgoRepository.procesarPago({
-          cita_id: idDetectado,
-          servicio_id: 1,
-          monto: Number(precioConsulta),
-          metodo: 'cash',
-          referencia: 'Ventanilla física - Pago en Recepción'
-        });
-      }
-      toast.success("¡Cita médica agendada en ventanilla correctamente!");
+      toast.success("¡Solicitud de cita médica enviada correctamente! Podrás pagar en ventanilla.");
       emit('cancel');
     } else {
       mostrarPasarelaModal.value = true;
-      toast.success("¡Cita reservada con éxito! Proceda con el pago digital.");
+      toast.success("¡Cita reservada con éxito! Proceda con el pago digital si lo desea.");
     }
-  } catch (error) {
-    console.error("Error crítico en creación de cita:", error);
-    toast.error("Error en el flujo transaccional de la cita.");
+  } catch  {
+    toast.error("Error al agendar la cita médica.");
   }
 };
 
@@ -1549,37 +1608,33 @@ const obtenerCorreoSesion = (): string => {
   return '';
 };
 
-const asignarCamposFormulario = (perfil: PatientExtendedProfile | GenericProfile | undefined) => {
+const asignarCamposFormulario = (perfil: GenericProfile | undefined) => {
   if (!perfil) return;
 
-  const wrapper = perfil as GenericProfile;
-  const p = (wrapper.paciente || wrapper.data || perfil) as GenericProfile;
+  const p = perfil;
 
-  const emailPerfil = String(p.email || p.Email || '').trim();
+  const emailPerfil = String(p.usuario_email || '').trim();
   const emailFinal = emailPerfil !== '' ? emailPerfil : obtenerCorreoSesion();
+  const nombreDet = String(p.nombre || 'Paciente');
 
-  const nombreDet = String(p.nombre || p.Nombre || (p.Nombre ? `${p.Nombre} ${p.Apellido || ''}` : '') || 'Paciente');
-
-  // Configurar Perfil Tutor Base
   tutorPrincipalPerfil.value = {
-    id: Number(p.id || p.UsuarioID || p.usuario_id || 0),
+    id: Number(p.usuario_id || p.id || 0),
     pacienteId: Number(p.PacienteID || p.id || 0),
     nombre: nombreDet,
     email: emailFinal,
-    telefono: String(p.telefono || p.Telefono || p.PacienteTelefono || ''),
-    genero: String(p.genero || p.Genero || ''),
-    tipoSangre: String(p.tipo_sangre || p.TipoSangre || p.tipoSangre || ''),
-    aseguradora: String(p.aseguradora || p.Aseguradora || ''),
-    poliza: String(p.poliza || p.NumeroPoliza || p.numero_poliza || ''),
-    edad: String(p.edad || p.Edad || p.fecha_nacimiento || ''),
-    contactoNombre: String(p.nombre_contacto_emergencia || p.NombreContactoEmergencia || p.contacto_emergencia_nombre || ''),
-    contactoTel: String(p.telefono_contacto_emergencia || p.TelefonoContactoEmergencia || p.contacto_emergencia || ''),
+    telefono: String(p.telefono || ''),
+    genero: String(p.genero || ''),
+    tipoSangre: String(p.tipo_sangre || ''),
+    aseguradora: String(p.aseguradora || ''),
+    poliza: String(p.poliza || ''),
+    edad: String(p.fecha_nacimiento || ''),
+    contactoNombre: String(p.nombre_contacto_emergencia || ''),
+    contactoTel: String(p.telefono_contacto_emergencia || ''),
     esDependiente: false,
     parentesco: 'Tutor',
     iniciales: nombreDet.charAt(0).toUpperCase()
   };
 
-  // Asignar tutor como activo por defecto
   pacienteSeleccionado.value = tutorPrincipalPerfil.value;
 
   userData.value = {
@@ -1655,6 +1710,46 @@ watch(() => props.idioma, (nuevoIdioma) => {
     locale.value = nuevoIdioma;
   }
 }, { immediate: true });
+
+const precioConsultaDoctor = ref<number>(0);
+
+const obtenerPrecioDoctor = async (): Promise<void> => {
+  if (!props.selectedDoctor?.DoctorID) return;
+
+  try {
+    const res = await api.get<ServicioMedico[]>('/doctor/catalogo-precios', {
+      params: { doctor_id: props.selectedDoctor.DoctorID }
+    });
+
+    if (res.data && res.data.length > 0) {
+      const primerServicio = res.data[0];
+      if (primerServicio) {
+        precioConsultaDoctor.value = Number(primerServicio.Precio) || 0;
+        servicioIdSeleccionado.value = Number(primerServicio.ServicioID) || 1; // ✅ Captura dinámica
+      }
+    } else {
+      const docExt = props.selectedDoctor as DoctorExtended;
+      precioConsultaDoctor.value = Number(docExt.CostoConsulta || docExt.Precio || 0);
+      servicioIdSeleccionado.value = 1;
+    }
+  } catch (err) {
+    console.error("Error al obtener precio del doctor:", err);
+    const docExt = props.selectedDoctor as DoctorExtended;
+    precioConsultaDoctor.value = Number(docExt.CostoConsulta || docExt.Precio || 0);
+    servicioIdSeleccionado.value = 1;
+  }
+};
+
+// Reactividad ante el cambio de médico
+watch(
+  () => props.selectedDoctor,
+  (nuevoDoc) => {
+    if (nuevoDoc) {
+      void obtenerPrecioDoctor();
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <style scoped>

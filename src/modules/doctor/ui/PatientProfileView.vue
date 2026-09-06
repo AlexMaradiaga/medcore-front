@@ -165,7 +165,7 @@ const startConsultation = () => {
       telefono: appointment.value.Telefono,
       email: appointment.value.EmailPaciente,
       tipoSangre: appointment.value.TipoSangre || 'N/A',
-      aseguradora: appointment.value.Aseguradora || appointment.value.SeguroMedico || '', 
+      aseguradora: appointment.value.Aseguradora || appointment.value.SeguroMedico || '',
       numeroPoliza: appointment.value.NumeroPoliza || ''
     };
 
@@ -181,7 +181,6 @@ onMounted(() => {
   if (saved) {
     try {
       const parsedData = JSON.parse(saved);
-      console.log('🚀 [onMounted] Objeto crudo en localStorage ("current_appointment"):', parsedData);
       appointment.value = parsedData as ComponentAppointment;
     } catch (e) {
       console.error('❌ Error al parsear "current_appointment":', e);

@@ -36,15 +36,40 @@
               No hay laboratorios registrados en la red.
             </div>
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div v-for="lab in laboratorios" :key="lab.EntidadID" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex items-start gap-4">
-                <span class="text-2xl">🏥</span>
-                <div>
-                  <h5 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                    {{ lab.NombreEntidad }}
-                  </h5>
-                  <p class="text-slate-400 text-[11px] font-bold mt-0.5">📍 {{ lab.Direccion || 'Sede Principal' }}</p>
-                  <div class="flex items-center gap-2 mt-2">
-                    <span class="bg-blue-50 text-[#005596] font-black text-[9px] px-2 py-0.5 rounded-md">📞 {{ lab.Telefono || 'Atención en Línea' }}</span>
+              <div v-for="lab in laboratorios" :key="lab.EntidadID" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex flex-col justify-between space-y-3">
+                <div class="flex items-start gap-4">
+                  <span class="text-2xl">🏥</span>
+                  <div class="overflow-hidden">
+                    <h5 class="text-sm font-black text-slate-800 truncate flex items-center gap-1.5">
+                      {{ lab.NombreEntidad }}
+                    </h5>
+                    <p class="text-slate-400 text-[11px] font-bold mt-0.5">📍 {{ lab.Direccion || 'Sede Principal' }}</p>
+                    <div class="flex items-center gap-2 mt-1.5">
+                      <span class="bg-blue-50 text-[#005596] font-black text-[9px] px-2 py-0.5 rounded-md">📞 {{ lab.Telefono || 'Atención en Línea' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- DESGLOSE DE HORARIOS DE ATENCIÓN DE LA ENTIDAD -->
+                <div class="border-t border-slate-100 pt-3 space-y-1">
+                  <p class="text-[9.5px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <v-icon name="bi-clock" scale="0.85" class="text-[#005596]" /> Horario de Atención:
+                  </p>
+                  <div v-if="lab.EntidadID && cargandoHorariosMap[lab.EntidadID]" class="text-[10px] font-bold text-slate-300 animate-pulse">
+                    Cargando horarios...
+                  </div>
+                  <div v-else-if="lab.EntidadID && horariosPorLab[lab.EntidadID]?.length" class="flex flex-wrap gap-1 mt-1">
+                    <span
+                      v-for="h in horariosPorLab[lab.EntidadID]"
+                      :key="h.dia_semana"
+                      :class="h.es_inactivo ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'"
+                      class="text-[9px] font-bold px-2 py-0.5 rounded-md border"
+                    >
+                      {{ getNombreDia(h.dia_semana) }}: {{ h.es_inactivo ? 'Cerrado' : `${h.hora_apertura} - ${h.hora_cierre}` }}
+                    </span>
+                  </div>
+                  <div v-else class="text-[10px] font-bold text-slate-400 italic">
+                    Sin horario registrado
                   </div>
                 </div>
               </div>
@@ -221,6 +246,8 @@ import * as QRCode from 'qrcode';
 
 // Capa de Dominio e Infraestructura DDD
 import { LaboratoryRepository } from '../infrastructure/LaboratoryRepository';
+import { EntityScheduleRepository } from '@/modules/entitySchedule/infrastructure/EntityScheduleRepository';
+import { DIAS_SEMANA, type ScheduleItem } from '@/modules/entitySchedule/domain/EntitySchedule';
 import type {
   CatalogoExamen,
   EntidadLaboratorio,
@@ -238,7 +265,22 @@ interface LocalStorageUser {
   UsuarioID?: number;
 }
 
+// Interfaz para definir el objeto que devuelve la API/BD de SQL Server
+interface RawScheduleResponse {
+  HorarioID?: number;
+  EntidadID?: number;
+  DiaSemana?: number | string;
+  dia_semana?: number | string;
+  HoraApertura?: string;
+  hora_apertura?: string;
+  HoraCierre?: string;
+  hora_cierre?: string;
+  EsInactivo?: number | boolean | string;
+  es_inactivo?: number | boolean | string;
+}
+
 const repo = new LaboratoryRepository();
+const scheduleRepo = new EntityScheduleRepository();
 const toast = useToast();
 
 const catalogos = ref<CatalogoExamen[]>([]);
@@ -247,6 +289,10 @@ const carrito = ref<CatalogoExamen[]>([]);
 const cargando = ref<boolean>(true);
 const cargandoLaboratorios = ref<boolean>(true);
 const guardandoSolicitud = ref<boolean>(false);
+
+// Mapa para gestionar los horarios de cada laboratorio
+const horariosPorLab = reactive<Record<number, ScheduleItem[]>>({});
+const cargandoHorariosMap = reactive<Record<number, boolean>>({});
 
 const busqueda = ref<string>('');
 const categoriaSeleccionada = ref<string>('Todos');
@@ -266,6 +312,11 @@ const formSolicitud = reactive({
   identificador: ''
 });
 
+const getNombreDia = (diaId: number): string => {
+  const dia = DIAS_SEMANA.find(d => d.id === Number(diaId));
+  return dia ? dia.nombre.substring(0, 3) : 'Día';
+};
+
 const categoriasCalculadas = computed<string[]>(() => {
   const cats = new Set(catalogos.value.map(item => item.Categoria));
   return Array.from(cats);
@@ -283,9 +334,6 @@ const totalEstimado = computed<number>(() => {
   return carrito.value.reduce((acc, item) => acc + Number(item.Precio || 0), 0);
 });
 
-/**
- * Recupera de forma tolerante el objeto de usuario de la sesión
- */
 const obtenerUsuarioSesion = (): LocalStorageUser | null => {
   const localUserRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
   if (!localUserRaw) return null;
@@ -297,11 +345,43 @@ const obtenerUsuarioSesion = (): LocalStorageUser | null => {
   }
 };
 
+const cargarHorariosLaboratorio = async (entidadId: number): Promise<void> => {
+  cargandoHorariosMap[entidadId] = true;
+  try {
+    const rawData = (await scheduleRepo.getSchedules(entidadId)) as RawScheduleResponse[];
+
+    // Mapeo seguro y sin 'any' resolviendo tipos numéricos/booleanos de SQL Server
+    horariosPorLab[entidadId] = rawData.map(item => {
+      const valInactivo = item.EsInactivo ?? item.es_inactivo;
+      const esInactivoBool = valInactivo === true || valInactivo === 1 || valInactivo === '1' || valInactivo === 'true';
+
+      return {
+        HorarioID: item.HorarioID,
+        EntidadID: item.EntidadID,
+        dia_semana: Number(item.DiaSemana ?? item.dia_semana),
+        hora_apertura: (item.HoraApertura ?? item.hora_apertura ?? '08:00').substring(0, 5),
+        hora_cierre: (item.HoraCierre ?? item.hora_cierre ?? '17:00').substring(0, 5),
+        es_inactivo: esInactivoBool
+      };
+    });
+  } catch (err) {
+    console.error(`Error obteniendo horarios para el lab ID ${entidadId}:`, err);
+  } finally {
+    cargandoHorariosMap[entidadId] = false;
+  }
+};
+
 const cargarLaboratoriosPublicos = async (): Promise<void> => {
   try {
     cargandoLaboratorios.value = true;
     const data = await repo.getEntidadesPublicas();
     laboratorios.value = data.filter(e => e.TipoEntidad === 'Laboratorio');
+
+    laboratorios.value.forEach(lab => {
+      if (lab.EntidadID) {
+        void cargarHorariosLaboratorio(lab.EntidadID);
+      }
+    });
   } catch (err) {
     console.error("Error al obtener laboratorios de la BD:", err);
   } finally {
@@ -321,18 +401,12 @@ const cargarCatalogoExamenes = async (): Promise<void> => {
   }
 };
 
-/**
- * Guarda la solicitud en la BD vía API y genera el comprobante con QR oficial
- */
 const procesarSolicitudDigital = async (): Promise<void> => {
   if (carrito.value.length === 0 || !formSolicitud.nombre) return;
 
   guardandoSolicitud.value = true;
   try {
-    // 1. Tomar ID del laboratorio seleccionado (o el primero activo)
     const labId = laboratorios.value[0]?.EntidadID || 1;
-
-    // 2. Resolver el paciente_id real dinámicamente desde el objeto de sesión activo
     const userSession = obtenerUsuarioSesion();
     let pacienteId: number | undefined = undefined;
 
@@ -340,7 +414,6 @@ const procesarSolicitudDigital = async (): Promise<void> => {
       pacienteId = userSession.pacienteId ?? userSession.PacienteID ?? userSession.id ?? userSession.usuarioId ?? userSession.UsuarioID;
     }
 
-    // 3. Formatear la carga útil manteniendo compatibilidad con la firma del Backend
     const payload: CrearSolicitudPayload = {
       laboratorio_id: labId,
       paciente_id: pacienteId,
@@ -350,7 +423,6 @@ const procesarSolicitudDigital = async (): Promise<void> => {
       monto_total: totalEstimado.value
     };
 
-    // 4. Invocar endpoint del repositorio
     const res = await repo.crearSolicitudDigital(payload);
 
     const ahora = new Date();
@@ -362,7 +434,6 @@ const procesarSolicitudDigital = async (): Promise<void> => {
       total: totalEstimado.value
     };
 
-    // 5. Generar el código QR de confirmación con la metadata de la orden
     const payloadQR = JSON.stringify({
       codigo_orden: res.codigo_orden,
       orden_id: res.orden_id,
@@ -387,7 +458,6 @@ const finalizarYVolver = (): void => {
 };
 
 onMounted(() => {
-  // Inicialización de los datos del formulario basándose en el usuario autenticado
   const userSession = obtenerUsuarioSesion();
   if (userSession) {
     const nombreUsuario = userSession.nombre || userSession.nombreCompleto;

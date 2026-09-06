@@ -570,7 +570,6 @@ onMounted(async () => {
 
     if (resGuardado) {
       const d = JSON.parse(resGuardado) as Record<string, unknown>;
-      console.log('[PrescriptionPage] Estructura recuperada (MedGo+):', d);
 
       // 1. Extraer y normalizar Medicamentos
       const rawMeds = (d.detalle_medicamentos || d.medicamentos || d.prescripcion || []) as Record<string, unknown>[];
@@ -730,8 +729,6 @@ const tieneSeguroMedico = computed(() => {
       const appObj = JSON.parse(savedApp) as Record<string, unknown>;
       const { aseguradora, poliza } = extraerSeguro(appObj);
 
-      console.log('🔎 [PrescriptionPage] Verificando seguro en "current_appointment":', { aseguradora, poliza });
-
       if (esValido(aseguradora) && esValido(poliza)) {
         return true;
       }
@@ -749,8 +746,6 @@ const tieneSeguroMedico = computed(() => {
     try {
       const d = JSON.parse(resGuardado) as Record<string, unknown>;
       const { aseguradora, poliza } = extraerSeguro(d);
-
-      console.log('🔎 [PrescriptionPage] Verificando seguro en "resumen_compartir":', { aseguradora, poliza });
 
       if (esValido(aseguradora) && esValido(poliza)) {
         return true;
@@ -773,8 +768,6 @@ const finalizarYIrAlPago = () => {
 
   // ÚNICA CLAVE ESTÁNDAR
   window.localStorage.setItem('medgo_current_consulta_id', idConsultaActual);
-
-  console.log('🚀 [PrescriptionPage] Decisión de navegación -> Tiene Seguro:', tieneSeguroMedico.value);
 
   if (tieneSeguroMedico.value) {
     toast.success("Consulta cubierta por seguro médico. Consulta finalizada con éxito.");

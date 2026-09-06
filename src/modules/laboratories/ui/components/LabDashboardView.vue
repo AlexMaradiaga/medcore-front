@@ -1,4 +1,3 @@
-<!-- src/modules/laboratories/ui/components/LabDashboardView.vue -->
 <template>
   <div class="min-h-screen bg-[#f8fafc] flex text-left font-premium select-none">
     <!-- ==================== SIDEBAR LATERAL ==================== -->
@@ -526,6 +525,11 @@
             </div>
           </div>
         </div>
+
+        <!-- ================= PESTAÑA: HORARIOS DE ATENCIÓN ================= -->
+        <div v-if="activeTab === 'horarios'" class="animate-fade-in">
+          <EntityScheduleConfigurator :entityId="labId" />
+        </div>
       </main>
     </div>
 
@@ -613,11 +617,12 @@ import {
   BiBell, BiGear, BiSearch, BiQrCodeScan, BiBoxArrowRight,
   BiListTask, BiExclamationTriangle, BiArrowClockwise, BiFileEarmarkPdfFill,
   BiExclamationTriangleFill, BiClockHistory, BiEye, BiInfoCircleFill, BiXLg,
-  BiCheckCircleFill
+  BiCheckCircleFill, BiClock
 } from 'oh-vue-icons/icons';
 import { SiFlask } from 'oh-vue-icons/icons';
 import QualityAuditModule from '@/shared/ui/components/QualityAuditModule.vue';
 import OrderDetailsModal from './OrderDetailsModal.vue';
+import EntityScheduleConfigurator from '@/modules/entitySchedule/ui/EntityScheduleConfigurator.vue';
 import type { SessionUser } from '@/shared/Domain/dashboard.interface';
 import { usePolling } from '@/shared/infrastructure/usePolling';
 // Importaciones desde Dominio e Infraestructura
@@ -643,7 +648,7 @@ addIcons(
   BiBell, BiGear, BiSearch, BiQrCodeScan, BiBoxArrowRight,
   BiListTask, BiExclamationTriangle, BiArrowClockwise, BiFileEarmarkPdfFill,
   BiExclamationTriangleFill, SiFlask, BiClockHistory, BiEye, BiInfoCircleFill, BiXLg,
-  BiCheckCircleFill
+  BiCheckCircleFill, BiClock
 );
 
 const labRepo = new LaboratoryRepository();
@@ -652,13 +657,14 @@ const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
 
-const activeTab = ref<'resumen' | 'ordenes' | 'tarifario' | 'calidad' | 'catalogo'>('resumen');
+const activeTab = ref<'resumen' | 'ordenes' | 'tarifario' | 'calidad' | 'catalogo' | 'horarios'>('resumen');
 const navTabs = [
   { id: 'resumen', label: 'Panel Principal', icon: 'bi-grid-fill' },
   { id: 'calidad', label: 'Auditoría y Calidad', icon: 'bi-graph-up' },
   { id: 'ordenes', label: 'Órdenes y Muestras', icon: 'bi-eyedropper' },
   { id: 'catalogo', label: 'Catálogo Pruebas', icon: 'bi-box-seam' },
-  { id: 'tarifario', label: 'Tarifario y Facturación', icon: 'bi-receipt' }
+  { id: 'tarifario', label: 'Tarifario y Facturación', icon: 'bi-receipt' },
+  { id: 'horarios', label: 'Horarios de Atención', icon: 'bi-clock' }
 ] as const;
 
 const busquedaExamen = ref<string>('');

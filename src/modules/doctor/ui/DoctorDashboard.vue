@@ -11,13 +11,21 @@
 
         <!-- ACCIONES Y BOTONES SUPERIORES -->
         <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <!-- BOTÓN PARA ABRIR MODAL DE TARIFAS (SÓLO SI EntidadID <= 1 O NULL) -->
+          <!-- BOTÓN PARA ABRIR MODAL DE TARIFAS -->
           <button
             v-if="mostrarGestionTarifas"
             @click="showTarifasModal = true"
             class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-blue-50 text-[#005596] hover:bg-blue-100 border border-blue-100 rounded-xl sm:rounded-2xl text-xs font-black shadow-2xs transition-all cursor-pointer"
           >
             <v-icon name="bi-cash-stack" scale="0.9" /> Configurar Tarifas
+          </button>
+
+          <!-- BOTÓN: CONFIGURAR HORARIOS -->
+          <button
+            @click="modalHorariosAbierto = true"
+            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 rounded-xl sm:rounded-2xl text-xs font-black shadow-2xs transition-all cursor-pointer"
+          >
+            <v-icon name="bi-clock-history" scale="0.9" /> Configurar Horarios
           </button>
 
           <button
@@ -136,6 +144,14 @@
     <!-- MODAL FLOTANTE DE CONFIGURACIÓN DE TARIFAS -->
     <DoctorTarifasModal :show="showTarifasModal" @close="showTarifasModal = false" />
 
+    <!-- MODAL FLOTANTE DE CONFIGURACIÓN DE HORARIOS Y DISPONIBILIDAD -->
+    <DoctorHorariosModal
+      :is-open="modalHorariosAbierto"
+      :doctor-id="doctorIdActual"
+      @close="modalHorariosAbierto = false"
+      @saved="handleHorariosActualizados"
+    />
+
     <!-- MODAL PERSONALIZADO PARA RECHAZO DE CITA -->
     <Transition
       enter-active-class="transition duration-300 ease-out"
@@ -149,7 +165,6 @@
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="cerrarModalRechazo"></div>
 
         <div class="bg-white rounded-3xl p-7 max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-100 relative z-10 text-center space-y-5 transform transition-all">
-
           <div class="mx-auto w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 shadow-xs border border-red-100">
             <v-icon name="bi-exclamation-octagon-fill" scale="1.6" class="animate-pulse" />
           </div>
@@ -199,6 +214,7 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import DoctorLayout from '@/shared/ui/layouts/DoctorLayout.vue';
 import DoctorTarifasModal from './DoctorTarifasModal.vue';
+import DoctorHorariosModal from './DoctorHorariosModal.vue';
 import { DoctorRepository } from '../infrastructure/DoctorRepository';
 import type { DoctorAppointment } from '../domain/DoctorAppointment';
 import { useMedicalStore } from '@/stores/medicalStore';
@@ -217,6 +233,8 @@ type RawAppointment = Record<string, unknown>;
 const appointments = ref<RawAppointment[]>([]);
 
 const showTarifasModal = ref<boolean>(false);
+const modalHorariosAbierto = ref<boolean>(false);
+const doctorIdActual = ref<number>(0);
 const showRejectModal = ref<boolean>(false);
 const motivoRechazo = ref<string>('');
 const selectedCitaId = ref<number | null>(null);
@@ -225,6 +243,13 @@ let pollInterval: ReturnType<typeof setInterval> | null = null;
 usePolling(async () => {
   await loadDoctorData();
 }, 5000);
+
+const handleHorariosActualizados = () => {
+  toast.success("Disponibilidad horaria actualizada correctamente.");
+  modalHorariosAbierto.value = false;
+  loadDoctorData();
+};
+
 const mostrarGestionTarifas = computed<boolean>(() => {
   const userRaw = localStorage.getItem('user');
   let entidadId: number | null = null;
@@ -241,7 +266,6 @@ const mostrarGestionTarifas = computed<boolean>(() => {
     }
   }
 
-  // Fallback si la información proviene de medicalStore
   if (entidadId === null && medicalStore.doctor?.EntidadID !== undefined) {
     entidadId = Number(medicalStore.doctor.EntidadID);
   }
@@ -249,9 +273,6 @@ const mostrarGestionTarifas = computed<boolean>(() => {
   return entidadId === null || isNaN(entidadId) || entidadId <= 1;
 });
 
-// ==========================================
-// HELPERS TIPADOS Y TOLERANTES A PROPIEDADES
-// ==========================================
 const obtenerEstado = (c: RawAppointment): string => {
   return String(c.EstadoCita || c.estado || c.Estado || '').toLowerCase().trim();
 };
@@ -303,9 +324,6 @@ const statsCards = computed(() => [
   { label: 'Pendientes', value: citasUrgentes.value.length, icon: 'bi-exclamation-circle-fill', color: 'bg-red-50 text-red-500' }
 ]);
 
-// ==========================================
-// FORMATEADOR DE HORA
-// ==========================================
 const formatHora = (cita: RawAppointment): string => {
   const fechaStr = obtenerFechaCruda(cita);
   if (!fechaStr || fechaStr === 'undefined') return '00:00';
@@ -361,8 +379,7 @@ const sincronizarPerfilDetalladoMedico = async (userId: number): Promise<void> =
       };
 
       medicalStore.setDoctor(doctorFormateado);
-    } else {
-      console.warn(`[Dashboard] No se halló ningún doctor con UsuarioID equivalente a ${userId} en la respuesta de la API.`);
+      doctorIdActual.value = doctorFormateado.DoctorID;
     }
   } catch (error) {
     console.error("[DoctorDashboard] Error de red al enlazar el perfil del médico:", error);
@@ -375,6 +392,11 @@ const loadDoctorData = async () => {
 
   if (userId) {
     await sincronizarPerfilDetalladoMedico(userId);
+
+    if (medicalStore.doctor?.DoctorID) {
+      doctorIdActual.value = Number(medicalStore.doctor.DoctorID);
+    }
+
     try {
       const data = await repo.getAppointments(userId);
       appointments.value = (data || []) as unknown as RawAppointment[];

@@ -53,7 +53,7 @@
 
           <button
             v-for="tab in tabs" :key="tab.id"
-            @click="activeTab = tab.id; if(tab.id === 'instituciones') subViewInstituciones = 'clinicas'; menuMobileAbierto = false"
+            @click="activeTab = tab.id; if(tab.id === 'instituciones') { subViewInstituciones = 'clinicas'; fetchClinicas(); } menuMobileAbierto = false"
             :class="activeTab === tab.id ? 'bg-sky-50 text-sky-600 font-black border-l-4 border-sky-400' : 'text-slate-500 font-bold hover:bg-slate-50 border-l-4 border-transparent'"
             class="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-r-2xl text-xs uppercase tracking-wider transition-all cursor-pointer group"
           >
@@ -76,7 +76,7 @@
 
       <!-- ENCABEZADO -->
       <header class="bg-white border-b border-slate-100 px-4 sm:px-6 lg:px-10 py-4 flex justify-between items-center sticky top-0 z-20 shadow-xs">
-        
+
         <!-- Botón menú hamburguesa (móvil/tablet) -->
         <button
           @click="menuMobileAbierto = !menuMobileAbierto"
@@ -87,7 +87,7 @@
 
         <div class="flex items-center gap-3 sm:gap-6 ml-auto">
 
-          <!-- SELECTOR DE PACIENTE/DEPENDIENTE AJUSTADO -->
+          <!-- SELECTOR DE PACIENTE/DEPENDIENTE -->
           <div v-if="esTutor || misDependientes.length > 0" class="flex items-center gap-2 sm:gap-3 bg-amber-50/60 px-2.5 sm:px-3.5 py-1.5 rounded-2xl border border-amber-200/50 animate-fade-in shadow-2xs">
             <div class="flex items-center gap-1.5 sm:gap-2">
               <label class="text-[10px] font-black text-amber-800 uppercase tracking-wider flex items-center gap-1">
@@ -123,7 +123,7 @@
               <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ userSessionData.email }}</p>
             </div>
           </div>
-          
+
           <button @click="handleLogout" class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors cursor-pointer shrink-0">
             <v-icon name="bi-box-arrow-right" class="h-4 w-4 text-rose-500" />
             <span class="hidden sm:inline">Salir</span>
@@ -227,7 +227,7 @@
             </div>
           </div>
 
-          <!-- SECCIÓN ACCESO RÁPIDO CON AUTO-AJUSTE PARA NO CORTAR TEXTO -->
+          <!-- SECCIÓN ACCESO RÁPIDO -->
           <div class="space-y-4 pt-4 border-t border-slate-100">
             <h5 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Acceso Rápido</h5>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -344,29 +344,61 @@
             </div>
           </div>
 
+          <!-- LISTADO DE MÉDICOS -->
           <div v-if="doctors.length > 0" class="space-y-4">
-            <div v-for="doctor in doctors" :key="doctor.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all hover:border-sky-200/60">
-              <div class="flex items-center gap-6 w-full md:flex-1">
-                <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner relative border border-slate-100 shrink-0">
-                  <v-icon name="ri-stethoscope-line" scale="2" class="text-slate-400" />
+            <div
+              v-for="doctor in doctors"
+              :key="doctor.DoctorID"
+              class="bg-white rounded-3xl p-5 border border-slate-100 shadow-2xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-sky-200 transition-all"
+            >
+              <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shrink-0 overflow-hidden">
+                  <img
+                    v-if="obtenerFotoDoctor(doctor)"
+                    :src="obtenerFotoDoctor(doctor)"
+                    alt="Foto Médico"
+                    class="w-full h-full object-cover"
+                  />
+                  <v-icon v-else name="ri-stethoscope-line" scale="1.8" class="text-slate-400" />
                 </div>
-                <div class="text-left space-y-1 flex-1">
-                  <h3 class="text-xl font-black text-slate-800 leading-tight group-hover:text-sky-600 transition-colors">Dr. {{ doctor.Nombre }} {{ doctor.Apellido }}</h3>
-                  <p class="text-xs font-black text-slate-900 uppercase tracking-wider">{{ doctor.Especialidad }}</p>
 
-                  <div class="pt-2">
-                    <DoctorLocationCard
-                      :doctor="doctor"
-                      :userLat="userLat"
-                      :userLon="userLon"
-                    />
+                <div class="space-y-1 text-left flex-1">
+                  <h3 class="text-lg font-black text-slate-800 leading-snug">
+                    Dr. {{ doctor.Nombre }} {{ doctor.Apellido }}
+                  </h3>
+                  <p class="text-xs font-black text-[#005596] uppercase tracking-wider">
+                    {{ doctor.Especialidad }}
+                  </p>
+
+                  <div class="pt-1">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-extrabold text-[10px] tracking-wide">
+                      <v-icon name="bi-clock" class="h-3 w-3 text-slate-500" />
+                      {{ (doctor as Record<string, any>).horario_resumen || 'Sin horario configurado hoy' }}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <button @click="startBooking(doctor)" class="w-full md:w-auto bg-sky-50 hover:bg-sky-100 text-sky-700 px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer shrink-0">
-                Agendar
-              </button>
+              <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                <DoctorLocationCard
+                  :doctor="doctor"
+                  :userLat="userLat"
+                  :userLon="userLon"
+                />
+
+                <button
+                  @click="startBooking(doctor)"
+                  :disabled="!doctorEstaDisponibleAhora(doctor)"
+                  :class="[
+                    'px-6 py-2.5 font-black text-xs rounded-2xl transition-all uppercase tracking-wider shrink-0',
+                    doctorEstaDisponibleAhora(doctor)
+                      ? 'bg-sky-50 hover:bg-[#005596] text-[#005596] hover:text-white cursor-pointer shadow-2xs'
+                      : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-70'
+                  ]"
+                >
+                  {{ doctorEstaDisponibleAhora(doctor) ? 'Agendar' : 'No disponible' }}
+                </button>
+              </div>
             </div>
           </div>
           <div v-else class="bg-white rounded-3xl p-12 text-center border border-slate-100">
@@ -376,25 +408,143 @@
 
         <!-- INSTITUCIONES -->
         <section v-if="activeTab === 'instituciones'" class="space-y-8 animate-fade-in">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase">Directorio de Instituciones</h2>
+              <p class="text-slate-400 font-bold text-xs mt-1">Red médica de clínicas, laboratorios y farmacias autorizadas</p>
+            </div>
+
+            <!-- Pestañas de filtrado de institución -->
+            <div class="flex items-center gap-1.5 bg-slate-200/60 p-1.5 rounded-2xl shrink-0 self-start sm:self-auto">
+              <button
+                @click="filtroTipoInstitucion = 'Todos'; subViewInstituciones = 'clinicas'"
+                :class="filtroTipoInstitucion === 'Todos' ? 'bg-white text-purple-700 font-black shadow-xs' : 'text-slate-500 font-bold hover:text-slate-800'"
+                class="px-3.5 py-2 text-xs uppercase rounded-xl transition-all cursor-pointer"
+              >
+                Todas
+              </button>
+              <button
+                @click="filtroTipoInstitucion = 'Clínica'; subViewInstituciones = 'clinicas'"
+                :class="filtroTipoInstitucion === 'Clínica' ? 'bg-white text-purple-700 font-black shadow-xs' : 'text-slate-500 font-bold hover:text-slate-800'"
+                class="px-3.5 py-2 text-xs uppercase rounded-xl transition-all cursor-pointer"
+              >
+                🏥 Clínicas
+              </button>
+              <button
+                @click="filtroTipoInstitucion = 'Laboratorio'; subViewInstituciones = 'clinicas'"
+                :class="filtroTipoInstitucion === 'Laboratorio' ? 'bg-white text-blue-700 font-black shadow-xs' : 'text-slate-500 font-bold hover:text-slate-800'"
+                class="px-3.5 py-2 text-xs uppercase rounded-xl transition-all cursor-pointer"
+              >
+                🧪 Laboratorios
+              </button>
+              <button
+                @click="filtroTipoInstitucion = 'Farmacia'; subViewInstituciones = 'clinicas'"
+                :class="filtroTipoInstitucion === 'Farmacia' ? 'bg-white text-emerald-700 font-black shadow-xs' : 'text-slate-500 font-bold hover:text-slate-800'"
+                class="px-3.5 py-2 text-xs uppercase rounded-xl transition-all cursor-pointer"
+              >
+                💊 Farmacias
+              </button>
+            </div>
+          </div>
+
           <div v-if="subViewInstituciones === 'clinicas'" class="space-y-6">
-            <div class="grid grid-cols-1 gap-6">
-              <div v-for="clinica in listaClinicasDB" :key="clinica.EntidadID" class="bg-white rounded-3xl md:rounded-[2.5rem] p-6 sm:p-8 text-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xs border border-slate-100 hover:border-purple-200 transition-all">
+            <div v-if="cargandoInstituciones" class="py-12 text-center text-xs font-black text-slate-400 animate-pulse uppercase tracking-widest">
+              Cargando instituciones asociadas...
+            </div>
+            <div v-else-if="institucionesFiltradas.length === 0" class="bg-white rounded-3xl p-12 text-center border border-slate-100">
+              <p class="text-slate-400 font-bold text-sm">No se encontraron instituciones registradas para esta categoría.</p>
+            </div>
+            <div v-else class="grid grid-cols-1 gap-6">
+              <div
+                v-for="inst in institucionesFiltradas"
+                :key="inst.EntidadID"
+                class="bg-white rounded-3xl md:rounded-[2.5rem] p-6 sm:p-8 text-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xs border border-slate-100 hover:border-purple-200 transition-all"
+              >
                 <div class="flex items-center gap-5">
-                  <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl border border-purple-100 flex items-center justify-center shadow-2xs shrink-0"><v-icon name="ri-building-fill" scale="1.4" /></div>
-                  <div class="text-left"><h3 class="text-xl sm:text-2xl font-black tracking-tight text-slate-800">{{ clinica.NombreInstitucion }}</h3></div>
+                  <div
+                    :class="[
+                      'w-16 h-16 rounded-2xl border flex items-center justify-center shadow-2xs shrink-0 text-2xl',
+                      normalizarTexto(inst.TipoEntidad).includes('laboratorio') ? 'bg-blue-50 border-blue-100 text-blue-600' :
+                      normalizarTexto(inst.TipoEntidad).includes('farmacia') ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                      'bg-purple-50 border-purple-100 text-purple-600'
+                    ]"
+                  >
+                    <span>{{ getIconoInstitucion(inst.TipoEntidad) }}</span>
+                  </div>
+                  <div class="text-left space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span
+                        :class="[
+                          'font-black text-[9px] uppercase px-2.5 py-0.5 rounded-md border',
+                          normalizarTexto(inst.TipoEntidad).includes('laboratorio') ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          normalizarTexto(inst.TipoEntidad).includes('farmacia') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                          'bg-purple-50 text-purple-700 border-purple-200'
+                        ]"
+                      >
+                        {{ inst.TipoEntidad || 'Clínica' }}
+                      </span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-black tracking-tight text-slate-800">{{ inst.NombreInstitucion }}</h3>
+                    <p class="text-xs text-slate-400 font-bold">📍 {{ inst.Direccion || 'Sede Principal' }} • 📞 {{ inst.Telefono || 'Atención Médica' }}</p>
+                  </div>
                 </div>
-                <button @click="seleccionarClinica(clinica)" class="w-full md:w-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0">Ver Especialistas →</button>
+
+                <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+                  <button
+                    v-if="normalizarTexto(inst.TipoEntidad).includes('clinica') || !inst.TipoEntidad"
+                    @click="seleccionarClinica(inst)"
+                    class="w-full md:w-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                  >
+                    Ver Especialistas →
+                  </button>
+                  <button
+                    v-else-if="normalizarTexto(inst.TipoEntidad).includes('laboratorio')"
+                    @click="activeTab = 'laboratory'"
+                    class="w-full md:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                  >
+                    Ir a Exámenes →
+                  </button>
+                  <button
+                    v-else
+                    @click="toast.info(`Contacta a ${inst.NombreInstitucion} al ${inst.Telefono || 'número oficial'}`)"
+                    class="w-full md:w-auto bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                  >
+                    Ver Catálogo →
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
           <div v-else-if="subViewInstituciones === 'personal_clinica'" class="space-y-6">
+            <div class="flex items-center justify-between">
+              <button @click="subViewInstituciones = 'clinicas'" class="text-xs font-black text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer">
+                ← Volver a Instituciones
+              </button>
+              <h3 v-if="clinicaActiva" class="text-base font-black text-purple-700 uppercase">{{ clinicaActiva.NombreInstitucion }}</h3>
+            </div>
+
             <div v-if="doctorsInClinic.length > 0" class="space-y-4">
               <div v-for="doc in doctorsInClinic" :key="doc.DoctorID" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-3xs flex flex-col md:flex-row justify-between items-center gap-6 relative group transition-all">
                 <div class="flex items-center gap-6 w-full md:flex-1">
                   <div class="text-left"><h3 class="text-xl font-black text-slate-800">Dr. {{ doc.Nombre }} {{ doc.Apellido }}</h3></div>
                 </div>
-                <button @click="startBooking(doc)" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all cursor-pointer shadow-sm shrink-0">Agendar Cita</button>
+                <button
+                  @click="startBooking(doc)"
+                  :disabled="!doctorEstaDisponibleAhora(doc)"
+                  :class="[
+                    'w-full md:w-auto px-6 py-2.5 rounded-xl font-black uppercase text-xs transition-all shrink-0 shadow-sm',
+                    doctorEstaDisponibleAhora(doc)
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                      : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-70'
+                  ]"
+                >
+                  {{ doctorEstaDisponibleAhora(doc) ? 'Agendar Cita' : 'No disponible' }}
+                </button>
               </div>
+            </div>
+            <div v-else class="bg-white rounded-3xl p-12 text-center border border-slate-100">
+              <p class="text-slate-400 font-bold text-sm">Esta institución no posee médicos registrados actualmente.</p>
             </div>
           </div>
         </section>
@@ -537,14 +687,36 @@ import BookingView from '@/modules/appointments/ui/BookingView.vue';
 import type { PatientExtendedProfile } from '../../patients/domain/entities/Patient';
 import MedicalHistoryView from '@/modules/appointments/ui/MedicalHistoryView.vue';
 import PatientLabView from '../../laboratories/ui/PatientLabView.vue';
+import { EntityRepository } from '@/modules/entities/infrastructure/EntityRepository';
+
+const entityRepo = new EntityRepository();
 
 import PatientAppointmentsView from '@/modules/appointments/ui/PatientAppointmentsView.vue';
 import { OhVueIcon as VIcon, addIcons } from 'oh-vue-icons';
 import { BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch, BiList } from 'oh-vue-icons/icons/bi';
 addIcons(BiCalendarCheckFill, BiCalendarRangeFill, BiGearFill, BiPeopleFill, BiClock, BiTranslate, BiHouseFill, BiSearch, BiList);
 
-interface Clinica { EntidadID: number; NombreInstitucion: string; Descripcion?: string; Direccion?: string; }
-interface EntidadBackend { EntidadID: number | string; NombreComercial?: string; Nombre?: string; Descripcion?: string; Direccion?: string; }
+interface Clinica {
+  EntidadID: number;
+  NombreInstitucion: string;
+  TipoEntidad?: string;
+  Descripcion?: string;
+  Direccion?: string;
+  Telefono?: string;
+}
+
+interface EntidadBackend {
+  EntidadID: number | string;
+  NombreComercial?: string;
+  Nombre?: string;
+  NombreEntidad?: string;
+  TipoEntidad?: string;
+  tipo_entidad?: string;
+  Descripcion?: string;
+  Direccion?: string;
+  Telefono?: string;
+}
+
 type DoctorExtended = Doctor & { CostoConsulta?: number; Precio?: number; costo?: number };
 
 interface Specialty { EspecialidadID: number; NombreEspecialidad: string; }
@@ -593,6 +765,9 @@ const { t, te, locale } = useI18n();
 const doctors = ref<Doctor[]>([]);
 const specialties = ref<Specialty[]>([]);
 const listaClinicasDB = ref<Clinica[]>([]);
+const cargandoInstituciones = ref<boolean>(false);
+const filtroTipoInstitucion = ref<string>('Todos');
+
 const doctorsInClinic = ref<Doctor[]>([]);
 const subViewInstituciones = ref<'clinicas' | 'personal_clinica'>('clinicas');
 const clinicaActiva = ref<Clinica | null>(null);
@@ -617,8 +792,6 @@ const formEmancipacion = ref({ email: '', password: '' });
 
 const activeTab = ref('home');
 const selectedDoctor = ref<Doctor | null>(null);
-
-// Estado reactivo para el menú lateral en pantallas táctiles/móviles
 const menuMobileAbierto = ref(false);
 
 const tabs = [
@@ -638,6 +811,98 @@ const filters = reactive<DoctorFilters & { domicilio?: boolean }>({
   domicilio: false,
   ordenar: 'cercania'
 });
+
+// Normalizador de cadenas tolerante a undefined/null, tildes y mayúsculas
+const normalizarTexto = (texto?: string | null): string => {
+  return (texto || '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+};
+
+const institucionesFiltradas = computed<Clinica[]>(() => {
+  if (filtroTipoInstitucion.value === 'Todos') {
+    return listaClinicasDB.value;
+  }
+
+  const filtroNorm = normalizarTexto(filtroTipoInstitucion.value);
+  return listaClinicasDB.value.filter(inst => {
+    const tipoNorm = normalizarTexto(inst.TipoEntidad || 'Clinica');
+    return tipoNorm.includes(filtroNorm);
+  });
+});
+
+const getIconoInstitucion = (tipo?: string): string => {
+  const t = normalizarTexto(tipo);
+  if (t.includes('laboratorio')) return '🧪';
+  if (t.includes('farmacia')) return '💊';
+  return '🏥';
+};
+
+const obtenerFotoDoctor = (doc: Doctor): string => {
+  return doc.FotoPath ? String(doc.FotoPath) : '';
+};
+
+type DoctorConDisponibilidad = Doctor & {
+  DisponibleAhora?: boolean | number | string;
+  Estado?: number | string;
+  horario_resumen?: string;
+};
+
+const doctorEstaDisponibleAhora = (doc: Doctor): boolean => {
+  const d = doc as DoctorConDisponibilidad;
+
+  // 1. Si está inactivo
+  if (d.Estado !== undefined && String(d.Estado) === '0') {
+    return false;
+  }
+
+  // 2. Si no tiene horario o no está configurado
+  if (!d.horario_resumen || d.horario_resumen.toLowerCase().includes('sin horario')) {
+    return false;
+  }
+
+  // 3. PARSEAR Y VALIDAR RANGO DE HORAS ("08:00 AM - 08:00 PM")
+  try {
+    const partes = d.horario_resumen.split(' - ');
+    const inicioStr = partes[0];
+    const finStr = partes[1];
+
+    if (!inicioStr || !finStr || partes.length !== 2) {
+      return Boolean(Number(d.DisponibleAhora));
+    }
+
+    // Convertir horas formato '08:00 PM' a minutos totales del día
+    const convertirAHoras = (horaStr: string): number => {
+      const segmentos = horaStr.trim().split(' ');
+      const tiempo = segmentos[0] ?? '';
+      const mod = segmentos[1] ?? 'AM';
+
+      const partesTiempo = tiempo.split(':');
+      let horas = Number(partesTiempo[0] ?? 0);
+      const minutos = Number(partesTiempo[1] ?? 0);
+
+      if (mod === 'PM' && horas < 12) horas += 12;
+      if (mod === 'AM' && horas === 12) horas = 0;
+
+      return horas * 60 + minutos;
+    };
+
+    const ahora = new Date();
+    const minutosActuales = ahora.getHours() * 60 + ahora.getMinutes();
+
+    const inicioMinutos = convertirAHoras(inicioStr);
+    const finMinutos = convertirAHoras(finStr);
+
+    // Retorna true SOLO si la hora actual está dentro del rango
+    return minutosActuales >= inicioMinutos && minutosActuales <= finMinutos;
+
+  } catch (error) {
+    console.warn("Error evaluando horario:", error);
+    return Boolean(Number(d.DisponibleAhora));
+  }
+};
 
 const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
   const p = pacienteActualSeleccionado.value;
@@ -699,23 +964,34 @@ const perfilPacienteActivo = computed<PatientExtendedProfile>(() => {
 });
 
 const fetchClinicas = async () => {
+  cargandoInstituciones.value = true;
   try {
-    const response = await api.get('/entidades');
-    const entidades = (response.data || []) as EntidadBackend[];
+    const entidades = await entityRepo.getEntidades();
 
-    listaClinicasDB.value = entidades
-      .filter((e: EntidadBackend) => e.EntidadID !== 1 && e.EntidadID !== '1')
-      .map((e: EntidadBackend) => ({
+    listaClinicasDB.value = (entidades as unknown as EntidadBackend[]).map((e: EntidadBackend) => {
+      const tipo = e.TipoEntidad || e.tipo_entidad || 'Clinica';
+      const nombre = e.NombreEntidad || e.NombreComercial || e.Nombre || 'Institución Salud';
+
+      return {
         EntidadID: Number(e.EntidadID),
-        NombreInstitucion: e.NombreComercial || e.Nombre || 'Clínica Asociada',
+        NombreInstitucion: nombre,
+        TipoEntidad: tipo,
         Descripcion: e.Descripcion || 'Centro médico con equipamiento avanzado.',
-        Direccion: e.Direccion || 'Área Médica Autorizada'
-      }));
-  } catch {
-    console.warn("Endpoint /entidades no encontrado. Usando respaldo.");
+        Direccion: e.Direccion || 'Área Médica Autorizada',
+        Telefono: e.Telefono || 'Atención en línea'
+      };
+    });
+  } catch (err) {
+    console.warn("Error cargando entidades de la API. Usando lista de respaldo.", err);
     listaClinicasDB.value = [
-      { EntidadID: 2, NombreInstitucion: 'Clínica Médica del Caribe', Descripcion: 'Atención médica de excelencia', Direccion: 'Roatán • Islas de la Bahía' }
+      { EntidadID: 1, NombreInstitucion: 'Clínica de Respaldo MedGo+', TipoEntidad: 'Clinica', Direccion: 'Sede Principal', Telefono: 'Atención en línea' },
+      { EntidadID: 2, NombreInstitucion: 'Clínica Médica Central', TipoEntidad: 'Clinica', Direccion: 'Roatán • Islas de la Bahía', Telefono: 'Atención en línea' },
+      { EntidadID: 3, NombreInstitucion: 'Clínica Juan Bautista', TipoEntidad: 'Clinica', Direccion: 'Sede Comercial', Telefono: 'Atención en línea' },
+      { EntidadID: 4, NombreInstitucion: 'Shamma', TipoEntidad: 'Laboratorio', Direccion: 'Área Médica Autorizada', Telefono: 'Atención en línea' },
+      { EntidadID: 5, NombreInstitucion: 'El Ahorro', TipoEntidad: 'Farmacia', Direccion: 'Dispensación Principal', Telefono: 'Atención en línea' }
     ];
+  } finally {
+    cargandoInstituciones.value = false;
   }
 };
 
@@ -736,7 +1012,8 @@ const seleccionarClinicaDirectaDesdeHome = async (idEntidad: number) => {
   activeTab.value = 'instituciones';
   clinicaActiva.value = {
     EntidadID: idEntidad,
-    NombreInstitucion: 'Clínica Médica del Caribe'
+    NombreInstitucion: 'Clínica Médica Central',
+    TipoEntidad: 'Clinica'
   };
   try {
     const response = await api.get(`/doctores/entidad/${idEntidad}`);
@@ -765,7 +1042,6 @@ const searchDoctors = async () => {
   try {
     const data = await directoryRepo.getDoctors(filters);
     let listado = data || [];
-
     if (filters.ingles) {
       listado = listado.filter((doc) => esVerdadero(doc.HablaIngles));
     }
@@ -856,7 +1132,7 @@ const ejecutarAutoRegistro = async () => {
       ...formAutoRegistro.value
     });
 
-    toast.success("¡Tu perfil clínico individual ha sido creado! Ya puedes seleccionarte en el menú superior.");
+    toast.success("¡Tu perfil clínico individual ha sido creado!");
     showAutoRegistroModal.value = false;
     necesitaPerfilTutor.value = false;
 

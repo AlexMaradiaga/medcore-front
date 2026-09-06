@@ -52,6 +52,20 @@
             <span class="text-base">📋</span>
             <span>Recetas & Histórico</span>
           </button>
+
+          <!-- NUEVA OPCIÓN DE MENÚ DE HORARIOS -->
+          <button
+            @click="tabActual = 'horarios'"
+            :class="[
+              'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer',
+              tabActual === 'horarios'
+                ? 'bg-[#e6f7f8] text-[#00a8b5]'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold'
+            ]"
+          >
+            <span class="text-base">⏰</span>
+            <span>Horarios</span>
+          </button>
         </nav>
       </div>
 
@@ -101,234 +115,241 @@
       </header>
 
       <main class="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto">
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
-            <div>
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Medicamentos</p>
-              <h3 class="text-2xl font-black text-slate-800 mt-1">{{ metricas.inventario_activo }}</h3>
-              <div class="flex items-center gap-1.5 mt-3">
-                <span class="text-[10px] font-black text-[#00a8b5] bg-[#e6f7f8] px-2 py-0.5 rounded-md">Ítems activos</span>
+        
+        <!-- VISTA SI SE SELECCIONA LA PESTAÑA DE HORARIOS -->
+        <div v-if="tabActual === 'horarios'" class="max-w-4xl mx-auto">
+          <EntityScheduleConfigurator :entityId="farmaciaId" />
+        </div>
+
+        <!-- VISTA DE DASHBOARD/RECETAS -->
+        <template v-else>
+          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Medicamentos</p>
+                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ metricas.inventario_activo }}</h3>
+                <div class="flex items-center gap-1.5 mt-3">
+                  <span class="text-[10px] font-black text-[#00a8b5] bg-[#e6f7f8] px-2 py-0.5 rounded-md">Ítems activos</span>
+                </div>
               </div>
-            </div>
-            <div class="w-10 h-10 rounded-2xl bg-[#e6f7f8] text-[#00a8b5] flex items-center justify-center font-bold text-lg">💊</div>
-          </div>
-
-          <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
-            <div>
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Recetas por Despachar</p>
-              <h3 class="text-2xl font-black text-slate-800 mt-1">{{ metricas.recetas_pendientes }}</h3>
-              <div class="mt-3">
-                <span class="text-[10px] font-black text-amber-800 bg-amber-100/80 px-2.5 py-1 rounded-md">Requiere atención</span>
-              </div>
-            </div>
-            <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">📄</div>
-          </div>
-
-          <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
-            <div>
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Stock Bajo / Alertas</p>
-              <h3 class="text-2xl font-black text-slate-800 mt-1">{{ metricas.alertas_stock }}</h3>
-              <div class="flex items-center gap-2 mt-3">
-                <span class="text-[10px] font-black text-rose-700 bg-rose-100/80 px-2.5 py-1 rounded-md">Nivel Crítico</span>
-              </div>
-            </div>
-            <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg">⚠️</div>
-          </div>
-
-          <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
-            <div>
-              <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Ventas del Día</p>
-              <h3 class="text-2xl font-black text-slate-800 mt-1">
-                L. {{ (metricas?.facturacion_diaria ?? 0).toLocaleString('es-HN', { minimumFractionDigits: 2 }) }}
-              </h3>
-              <div class="mt-3">
-                <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Facturación hoy</span>
-              </div>
-            </div>
-            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">💵</div>
-          </div>
-        </section>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div class="lg:col-span-8 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-2xs space-y-4">
-
-            <!-- CABECERA DE TABLA CON SELECTOR DE PESTAÑAS (PENDIENTES vs HISTÓRICO) -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
-              <h3 class="text-base font-black text-slate-800 tracking-tight">Pedidos & Consultas Médicas</h3>
-
-              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl self-start sm:self-auto">
-                <button
-                  @click="tabActual = 'pendientes'"
-                  :class="[
-                    'px-3.5 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer',
-                    tabActual === 'pendientes'
-                      ? 'bg-white text-[#00a8b5] shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
-                  ]"
-                >
-                  📋 Por Despachar
-                </button>
-                <button
-                  @click="tabActual = 'historico'"
-                  :class="[
-                    'px-3.5 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer',
-                    tabActual === 'historico'
-                      ? 'bg-white text-[#00a8b5] shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
-                  ]"
-                >
-                  ✅ Histórico (Surtidas)
-                </button>
-              </div>
+              <div class="w-10 h-10 rounded-2xl bg-[#e6f7f8] text-[#00a8b5] flex items-center justify-center font-bold text-lg">💊</div>
             </div>
 
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                    <th class="py-3 px-2">Paciente / Cliente</th>
-                    <th class="py-3 px-2">Medicamentos Prescritos</th>
-                    <th class="py-3 px-2">Médico</th>
-                    <th class="py-3 px-2">Fecha</th>
-                    <th class="py-3 px-2 text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
-                  <tr v-for="grupo in consultasFiltradas" :key="grupo.ConsultaID" class="hover:bg-[#faf9f5]/80 transition-colors">
-                    <td class="py-4 px-2 align-top">
-                      <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-full bg-[#00a8b5]/10 text-[#00a8b5] font-black flex items-center justify-center text-[11px] shrink-0">
-                          {{ getIniciales(grupo.Paciente) }}
-                        </div>
-                        <div>
-                          <p class="font-black text-slate-800 uppercase">{{ grupo.Paciente }}</p>
-                          <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
-                            <span class="text-[10px] font-bold text-[#00a8b5]">Consulta #{{ grupo.ConsultaID }}</span>
-                            <span class="text-[10px] font-semibold text-slate-400">| DNI: {{ grupo.PacienteDNI }}</span>
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Recetas por Despachar</p>
+                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ metricas.recetas_pendientes }}</h3>
+                <div class="mt-3">
+                  <span class="text-[10px] font-black text-amber-800 bg-amber-100/80 px-2.5 py-1 rounded-md">Requiere atención</span>
+                </div>
+              </div>
+              <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">📄</div>
+            </div>
+
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Stock Bajo / Alertas</p>
+                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ metricas.alertas_stock }}</h3>
+                <div class="flex items-center gap-2 mt-3">
+                  <span class="text-[10px] font-black text-rose-700 bg-rose-100/80 px-2.5 py-1 rounded-md">Nivel Crítico</span>
+                </div>
+              </div>
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg">⚠️</div>
+            </div>
+
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs flex justify-between items-start">
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Ventas del Día</p>
+                <h3 class="text-2xl font-black text-slate-800 mt-1">
+                  L. {{ (metricas?.facturacion_diaria ?? 0).toLocaleString('es-HN', { minimumFractionDigits: 2 }) }}
+                </h3>
+                <div class="mt-3">
+                  <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Facturación hoy</span>
+                </div>
+              </div>
+              <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">💵</div>
+            </div>
+          </section>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-8 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-2xs space-y-4">
+
+              <!-- CABECERA DE TABLA CON SELECTOR DE PESTAÑAS -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
+                <h3 class="text-base font-black text-slate-800 tracking-tight">Pedidos & Consultas Médicas</h3>
+
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl self-start sm:self-auto">
+                  <button
+                    @click="tabActual = 'pendientes'"
+                    :class="[
+                      'px-3.5 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer',
+                      tabActual === 'pendientes'
+                        ? 'bg-white text-[#00a8b5] shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    ]"
+                  >
+                    📋 Por Despachar
+                  </button>
+                  <button
+                    @click="tabActual = 'historico'"
+                    :class="[
+                      'px-3.5 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer',
+                      tabActual === 'historico'
+                        ? 'bg-white text-[#00a8b5] shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    ]"
+                  >
+                    ✅ Histórico (Surtidas)
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <th class="py-3 px-2">Paciente / Cliente</th>
+                      <th class="py-3 px-2">Medicamentos Prescritos</th>
+                      <th class="py-3 px-2">Médico</th>
+                      <th class="py-3 px-2">Fecha</th>
+                      <th class="py-3 px-2 text-right">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-xs">
+                    <tr v-for="grupo in consultasFiltradas" :key="grupo.ConsultaID" class="hover:bg-[#faf9f5]/80 transition-colors">
+                      <td class="py-4 px-2 align-top">
+                        <div class="flex items-center gap-2.5">
+                          <div class="w-8 h-8 rounded-full bg-[#00a8b5]/10 text-[#00a8b5] font-black flex items-center justify-center text-[11px] shrink-0">
+                            {{ getIniciales(grupo.Paciente) }}
                           </div>
-                         <!-- CÓDIGO DE CANJE EN LA TABLA (SOLO CÓDIGO SELECCIONABLE) -->
-                          <div v-if="grupo.CodigoCanje" class="mt-1">
-                            <div
-                              class="inline-flex items-center gap-1 text-[9px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-200/60 transition-colors"
-                              :title="grupo.CodigoCanje"
-                            >
-                              <span class="select-none">🔑</span>
-                              <span class="font-bold tracking-tight break-all select-all text-slate-700">
-                                {{ grupo.CodigoCanje }}
-                              </span>
+                          <div>
+                            <p class="font-black text-slate-800 uppercase">{{ grupo.Paciente }}</p>
+                            <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+                              <span class="text-[10px] font-bold text-[#00a8b5]">Consulta #{{ grupo.ConsultaID }}</span>
+                              <span class="text-[10px] font-semibold text-slate-400">| DNI: {{ grupo.PacienteDNI }}</span>
+                            </div>
+                            <div v-if="grupo.CodigoCanje" class="mt-1">
+                              <div
+                                class="inline-flex items-center gap-1 text-[9px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-200/60 transition-colors"
+                                :title="grupo.CodigoCanje"
+                              >
+                                <span class="select-none">🔑</span>
+                                <span class="font-bold tracking-tight break-all select-all text-slate-700">
+                                  {{ grupo.CodigoCanje }}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td class="py-4 px-2">
-                      <div class="space-y-1.5 max-w-sm max-h-36 overflow-y-auto pr-1">
-                        <div
-                          v-for="med in grupo.Medicamentos"
-                          :key="med.RecetaID"
-                          class="bg-slate-50 p-2 rounded-xl border border-slate-200/60 flex items-center justify-between gap-2"
-                        >
-                          <div>
-                            <p class="font-black text-slate-800 text-[11px]">💊 {{ med.NombreMedicamento }}</p>
-                            <p class="text-[10px] text-[#008b9b] font-bold" v-if="med.Dosis">{{ med.Dosis }}</p>
-                          </div>
-
-                          <button
-                            @click.stop="avanzarEstadoReceta(med, grupo)"
-                            :title="'Clic para cambiar estado'"
-                            :class="getBadgeClass(med.EstadoReceta)"
-                            class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                      <td class="py-4 px-2">
+                        <div class="space-y-1.5 max-w-sm max-h-36 overflow-y-auto pr-1">
+                          <div
+                            v-for="med in grupo.Medicamentos"
+                            :key="med.RecetaID"
+                            class="bg-slate-50 p-2 rounded-xl border border-slate-200/60 flex items-center justify-between gap-2"
                           >
-                            {{ med.EstadoReceta }}
-                          </button>
+                            <div>
+                              <p class="font-black text-slate-800 text-[11px]">💊 {{ med.NombreMedicamento }}</p>
+                              <p class="text-[10px] text-[#008b9b] font-bold" v-if="med.Dosis">{{ med.Dosis }}</p>
+                            </div>
+
+                            <button
+                              @click.stop="avanzarEstadoReceta(med, grupo)"
+                              :title="'Clic para cambiar estado'"
+                              :class="getBadgeClass(med.EstadoReceta)"
+                              class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                              {{ med.EstadoReceta }}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td class="py-4 px-2 font-bold text-slate-600 align-top">{{ grupo.MedicoTratante || 'Mostrador' }}</td>
-                    <td class="py-4 px-2 font-bold text-slate-500 text-[11px] align-top">{{ formatearFecha(grupo.FechaEmision) }}</td>
+                      <td class="py-4 px-2 font-bold text-slate-600 align-top">{{ grupo.MedicoTratante || 'Mostrador' }}</td>
+                      <td class="py-4 px-2 font-bold text-slate-500 text-[11px] align-top">{{ formatearFecha(grupo.FechaEmision) }}</td>
 
-                    <td class="py-4 px-2 text-right align-top">
-                      <button
-                        @click="abrirModalSurtidoConsulta(grupo)"
-                        :class="[
-                          'px-3.5 py-2 rounded-xl font-black text-[10px] uppercase cursor-pointer shadow-xs transition-all',
-                          tabActual === 'pendientes'
-                            ? 'bg-[#00a8b5] text-white hover:bg-[#008b9b]'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                        ]"
-                      >
-                        {{ tabActual === 'pendientes' ? 'Gestionar / Surtir' : 'Ver Detalle' }}
-                      </button>
-                    </td>
-                  </tr>
+                      <td class="py-4 px-2 text-right align-top">
+                        <button
+                          @click="abrirModalSurtidoConsulta(grupo)"
+                          :class="[
+                            'px-3.5 py-2 rounded-xl font-black text-[10px] uppercase cursor-pointer shadow-xs transition-all',
+                            tabActual === 'pendientes'
+                              ? 'bg-[#00a8b5] text-white hover:bg-[#008b9b]'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                          ]"
+                        >
+                          {{ tabActual === 'pendientes' ? 'Gestionar / Surtir' : 'Ver Detalle' }}
+                        </button>
+                      </td>
+                    </tr>
 
-                  <!-- MENSAJE DE ESTADO VACÍO -->
-                  <tr v-if="consultasFiltradas.length === 0">
-                    <td colspan="5" class="py-8 text-center text-slate-400 font-bold text-xs">
-                      {{ tabActual === 'pendientes' ? 'No hay recetas pendientes por despachar.' : 'No hay recetas registradas en el histórico de surtidas.' }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div v-if="pagination.last_page > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-500 font-medium">
-              <div>
-                Mostrando página <span class="font-black text-slate-800">{{ pagination.current_page }}</span> de <span class="font-black text-slate-800">{{ pagination.last_page }}</span> ({{ pagination.total }} registros totales)
+                    <tr v-if="consultasFiltradas.length === 0">
+                      <td colspan="5" class="py-8 text-center text-slate-400 font-bold text-xs">
+                        {{ tabActual === 'pendientes' ? 'No hay recetas pendientes por despachar.' : 'No hay recetas registradas en el histórico de surtidas.' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div class="flex items-center gap-1.5">
-                <button
-                  @click="cambiarPagina(pagination.current_page - 1)"
-                  :disabled="pagination.current_page === 1"
-                  class="px-3 py-1.5 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-                >
-                  ◀ Anterior
-                </button>
 
-                <div class="flex items-center gap-1">
+              <div v-if="pagination.last_page > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-500 font-medium">
+                <div>
+                  Mostrando página <span class="font-black text-slate-800">{{ pagination.current_page }}</span> de <span class="font-black text-slate-800">{{ pagination.last_page }}</span> ({{ pagination.total }} registros totales)
+                </div>
+                <div class="flex items-center gap-1.5">
                   <button
-                    v-for="page in paginasVisibles"
-                    :key="page"
-                    @click="cambiarPagina(page)"
-                    :class="[
-                      'w-8 h-8 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center',
-                      page === pagination.current_page
-                        ? 'bg-[#00a8b5] text-white shadow-xs'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    ]"
+                    @click="cambiarPagina(pagination.current_page - 1)"
+                    :disabled="pagination.current_page === 1"
+                    class="px-3 py-1.5 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
                   >
-                    {{ page }}
+                    ◀ Anterior
+                  </button>
+
+                  <div class="flex items-center gap-1">
+                    <button
+                      v-for="page in paginasVisibles"
+                      :key="page"
+                      @click="cambiarPagina(page)"
+                      :class="[
+                        'w-8 h-8 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center',
+                        page === pagination.current_page
+                          ? 'bg-[#00a8b5] text-white shadow-xs'
+                          : 'text-slate-600 hover:bg-slate-100'
+                      ]"
+                    >
+                      {{ page }}
+                    </button>
+                  </div>
+
+                  <button
+                    @click="cambiarPagina(pagination.current_page + 1)"
+                    :disabled="pagination.current_page === pagination.last_page"
+                    class="px-3 py-1.5 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                  >
+                    Siguiente ▶
                   </button>
                 </div>
+              </div>
+            </div>
 
+            <!-- BLOQUE ESCÁNER COMPACTO -->
+            <div class="lg:col-span-4 space-y-4">
+              <div class="bg-[#00685b] text-white rounded-2xl p-4 shadow-sm text-center space-y-2 relative overflow-hidden">
+                <div class="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-base">📷</div>
+                <h3 class="text-xs font-black uppercase tracking-tight">+ Nuevo Despacho / Escáner</h3>
+                <p class="text-[10px] text-white/80 font-medium leading-tight">Escanee código de barras o DNI del paciente.</p>
                 <button
-                  @click="cambiarPagina(pagination.current_page + 1)"
-                  :disabled="pagination.current_page === pagination.last_page"
-                  class="px-3 py-1.5 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                  @click="ejecutarEscanerLector"
+                  class="w-full bg-white text-[#00685b] hover:bg-slate-50 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow-xs mt-1"
                 >
-                  Siguiente ▶
+                  Activar Escáner
                 </button>
               </div>
             </div>
           </div>
-
-          <!-- BLOQUE ESCÁNER MÁS PEQUEÑO Y COMPACTO -->
-          <div class="lg:col-span-4 space-y-4">
-            <div class="bg-[#00685b] text-white rounded-2xl p-4 shadow-sm text-center space-y-2 relative overflow-hidden">
-              <div class="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-base">📷</div>
-              <h3 class="text-xs font-black uppercase tracking-tight">+ Nuevo Despacho / Escáner</h3>
-              <p class="text-[10px] text-white/80 font-medium leading-tight">Escanee código de barras o DNI del paciente.</p>
-              <button
-                @click="ejecutarEscanerLector"
-                class="w-full bg-white text-[#00685b] hover:bg-slate-50 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow-xs mt-1"
-              >
-                Activar Escáner
-              </button>
-            </div>
-          </div>
-        </div>
+        </template>
       </main>
     </div>
 
@@ -474,6 +495,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import { PharmacyRepository } from '../infrastructure/PharmacyRepository';
+import EntityScheduleConfigurator from '@/modules/entitySchedule/ui/EntityScheduleConfigurator.vue';
 import type { RecetaFarmaciaDTO, EstadoReceta, PharmacyMetricsDTO, PaginationDTO, ConsultaAgrupadaDTO } from '../domain/PharmacyModels';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
@@ -484,8 +506,8 @@ const authStore = useAuthStore();
 
 const inputBuscador = ref<HTMLInputElement | null>(null);
 
-// Pestaña activa ('pendientes' | 'historico')
-const tabActual = ref<'pendientes' | 'historico'>('pendientes');
+// Pestaña activa ('pendientes' | 'historico' | 'horarios')
+const tabActual = ref<'pendientes' | 'historico' | 'horarios'>('pendientes');
 
 const metricas = ref<PharmacyMetricsDTO>({
   inventario_activo: 0,
@@ -594,9 +616,11 @@ const paginasVisibles = computed<number[]>(() => {
   return pages;
 });
 
-watch(tabActual, () => {
-  pagination.value.current_page = 1;
-  cargarMetricas(1);
+watch(tabActual, (nuevoTab) => {
+  if (nuevoTab !== 'horarios') {
+    pagination.value.current_page = 1;
+    cargarMetricas(1);
+  }
 });
 
 const cargarMetricas = async (page: number = 1): Promise<void> => {

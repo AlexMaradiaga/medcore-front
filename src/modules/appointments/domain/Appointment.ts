@@ -12,16 +12,18 @@ export interface SchedulableProvider {
 
 export interface AppointmentRequest {
   UsuarioID: number;
+  paciente_id: number;
   doctor_id: number;
   entidad_id: number;
   fecha_hora: string;
   motivo: string;
   sintomas: string;
+  edad: number;
   alergias?: string;
   genero: string;
   TipoSangre?: string;
   aseguradora?: string;
-  numeropoliza?: string;
+  NumeroPoliza?: string;
   nombre_contacto_emergencia?: string | null;
   telefono_contacto_emergencia?: string | null;
   medicamentos_actuales?: string;

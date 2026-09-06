@@ -1,25 +1,31 @@
 <template>
   <div class="min-h-screen bg-[#f1f5f9] text-left font-premium p-8 animate-fade-in select-none">
 
-    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-8 gap-6">
-      <div class="space-y-1">
-        <span class="bg-linear-to-r from-[#005596] to-blue-600 text-white text-[10px] font-black px-3.5 py-1.5 rounded-lg uppercase tracking-[0.2em] shadow-xs">
-
+    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-300 pb-8 gap-6">
+      <div class="space-y-2">
+        <!-- Insignia en Turquesa Sólido de Alto Contraste -->
+        <span class="inline-block bg-[#005596] text-white text-[10px] font-black px-3.5 py-1.5 rounded-lg uppercase tracking-[0.2em] shadow-xs">
+          Panel de Control Global
         </span>
-        <h2 class="text-4xl font-black text-slate-800 uppercase tracking-tight mt-3">
-          Bienvenido, <span class="text-transparent bg-clip-text bg-linear-to-r from-[#005596] to-cyan-600">{{ authStore.user?.nombre || 'Admin' }}</span>
+
+        <!-- Título Principal con Color Oscuro Forzado -->
+        <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mt-2" style="color: #0f172a !important;">
+          BIENVENIDO, <span style="color: #0d9488 !important;">{{ authStore.user?.nombre || 'ADMIN' }}</span>
         </h2>
-        <p class="text-slate-500 text-xs font-bold flex items-center gap-2 mt-1">
-          <v-icon name="bi-gear-fill" scale="0.75" class="text-slate-400 animate-spin-slow" />
+
+        <!-- Subtítulo con Color Pizarra Oscuro Forzado -->
+        <p class="text-xs font-bold flex items-center gap-2 mt-1" style="color: #334155 !important;">
+          <v-icon name="bi-gear-fill" scale="0.75" class="animate-spin-slow" style="color: #0d9488 !important;" />
           Gestión de infraestructura, credenciales y planes SaaS de MedGo+ Global
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-4 self-end md:self-center z-40 relative">
 
+        <!-- Desplegable Operaciones -->
         <div class="relative group">
-          <button class="px-5 py-3 bg-white text-slate-700 font-black text-xs uppercase tracking-wider rounded-2xl border-2 border-transparent shadow-xs flex items-center gap-2.5 hover:border-emerald-400 hover:text-emerald-600 hover:shadow-md transition-all cursor-pointer relative">
-            <v-icon name="bi-briefcase-fill" class="text-emerald-500" scale="0.95" />
+          <button class="px-5 py-3 bg-white text-slate-800 font-black text-xs uppercase tracking-wider rounded-2xl border border-slate-200 shadow-xs flex items-center gap-2.5 hover:border-emerald-500 hover:text-emerald-700 hover:shadow-md transition-all cursor-pointer relative">
+            <v-icon name="bi-briefcase-fill" class="text-emerald-600" scale="0.95" />
             Operaciones
 
             <span v-if="doctoresPendientes.length > 0" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center animate-pulse border-2 border-white shadow-md font-sans">
@@ -30,91 +36,94 @@
           </button>
 
           <div class="absolute right-0 pt-2 w-64 hidden group-hover:block animate-slide-up">
-            <div class="bg-white border border-slate-100 rounded-3xl shadow-2xl p-2.5 space-y-1 ring-8 ring-black/5">
-              <button @click="setTab('alta-pacientes')" :class="activeAdminTab === 'alta-pacientes' ? 'bg-emerald-50 text-emerald-700 font-black ring-1 ring-emerald-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
-                <v-icon name="bi-person-fill" class="text-emerald-500" scale="0.9" /> Alta de Pacientes
+            <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl p-2.5 space-y-1 ring-8 ring-black/5">
+              <button @click="setTab('alta-pacientes')" :class="activeAdminTab === 'alta-pacientes' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
+                <v-icon name="bi-person-fill" class="text-emerald-600" scale="0.9" /> Alta de Pacientes
               </button>
-              <button @click="setTab('usuarios')" :class="activeAdminTab === 'usuarios' ? 'bg-emerald-50 text-emerald-700 font-black ring-1 ring-emerald-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
-                <v-icon name="bi-people-fill" class="text-emerald-500" scale="0.9" /> Usuarios Registrados
+              <button @click="setTab('usuarios')" :class="activeAdminTab === 'usuarios' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
+                <v-icon name="bi-people-fill" class="text-emerald-600" scale="0.9" /> Usuarios Registrados
               </button>
-              <button @click="setTab('doctores')" :class="activeAdminTab === 'doctores' ? 'bg-emerald-50 text-emerald-700 font-black ring-1 ring-emerald-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
-                <v-icon name="gi-stethoscope" class="text-emerald-500" scale="0.9" /> Alta de Doctores
+              <button @click="setTab('doctores')" :class="activeAdminTab === 'doctores' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
+                <v-icon name="gi-stethoscope" class="text-emerald-600" scale="0.9" /> Alta de Doctores
               </button>
 
-              <button @click="setTab('aprobaciones')" :class="activeAdminTab === 'aprobaciones' ? 'bg-emerald-50 text-emerald-700 font-black ring-1 ring-emerald-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center justify-between gap-3">
+              <button @click="setTab('aprobaciones')" :class="activeAdminTab === 'aprobaciones' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                  <v-icon name="bi-check-circle-fill" class="text-emerald-500" scale="0.9" /> Aprobaciones
+                  <v-icon name="bi-check-circle-fill" class="text-emerald-600" scale="0.9" /> Aprobaciones
                 </div>
-                <span v-if="doctoresPendientes.length > 0" class="bg-rose-100 text-rose-700 text-[9px] font-black px-2 py-0.5 rounded-md font-sans">
+                <span v-if="doctoresPendientes.length > 0" class="bg-rose-100 text-rose-800 text-[9px] font-black px-2 py-0.5 rounded-md font-sans">
                   {{ doctoresPendientes.length }} PEND
                 </span>
               </button>
 
-              <button @click="setTab('catalogos')" :class="activeAdminTab === 'catalogos' ? 'bg-emerald-50 text-emerald-700 font-black ring-1 ring-emerald-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
-                <v-icon name="bi-folder-fill" class="text-emerald-500" scale="0.9" /> Catálogos Especialidad
+              <button @click="setTab('catalogos')" :class="activeAdminTab === 'catalogos' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
+                <v-icon name="bi-folder-fill" class="text-emerald-600" scale="0.9" /> Catálogos Especialidad
               </button>
-              <button @click="setTab('planes')" :class="activeAdminTab === 'planes' ? 'bg-emerald-50 text-emerald-700 font-black ring-1 ring-emerald-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
-                <v-icon name="bi-credit-card-fill" class="text-emerald-500" scale="0.9" /> Suscripciones SaaS
+              <button @click="setTab('planes')" :class="activeAdminTab === 'planes' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
+                <v-icon name="bi-credit-card-fill" class="text-emerald-600" scale="0.9" /> Suscripciones SaaS
               </button>
             </div>
           </div>
         </div>
 
+        <!-- Desplegable Auditoría de Calidad -->
         <div class="relative group">
-          <button class="px-5 py-3 bg-linear-to-br from-[#005596] to-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-blue-900/10 flex items-center gap-2.5 hover:brightness-110 transition-all cursor-pointer">
+          <button class="px-5 py-3 bg-teal-800 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-teal-900/20 flex items-center gap-2.5 hover:bg-teal-900 transition-all cursor-pointer">
             <v-icon name="bi-bar-chart-fill" scale="0.95" />
             Auditoría de Calidad
             <v-icon name="bi-chevron-down" scale="0.7" class="group-hover:rotate-180 transition-transform duration-200" />
           </button>
 
           <div class="absolute right-0 pt-2 w-72 hidden group-hover:block animate-slide-up z-50">
-            <div class="bg-white border border-slate-100 rounded-3xl shadow-2xl p-2.5 space-y-1 ring-8 ring-black/5">
-              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-4 pt-2 pb-1">Visualizar en Panel</p>
-              <button @click="setTab('resumen')" :class="activeAdminTab === 'resumen' ? 'bg-blue-50 text-[#005596] font-black ring-1 ring-blue-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-graph-up" class="text-blue-600" scale="0.9" /> Módulo Estadístico Base
+            <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl p-2.5 space-y-1 ring-8 ring-black/5">
+              <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest px-4 pt-2 pb-1">Visualizar en Panel</p>
+              <button @click="setTab('resumen')" :class="activeAdminTab === 'resumen' ? 'bg-teal-50 text-teal-800 font-black ring-1 ring-teal-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-graph-up" class="text-teal-600" scale="0.9" /> Módulo Estadístico Base
               </button>
-              <button @click="setTab('ind-seguridad')" :class="activeAdminTab === 'ind-seguridad' ? 'bg-blue-50 text-[#005596] font-black ring-1 ring-blue-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-shield-fill-check" class="text-[#005596]" scale="0.9" /> Indicadores de Seguridad
+              <button @click="setTab('ind-seguridad')" :class="activeAdminTab === 'ind-seguridad' ? 'bg-teal-50 text-teal-800 font-black ring-1 ring-teal-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-shield-fill-check" class="text-teal-700" scale="0.9" /> Indicadores de Seguridad
               </button>
-              <button @click="setTab('ind-eficiencia')" :class="activeAdminTab === 'ind-eficiencia' ? 'bg-blue-50 text-[#005596] font-black ring-1 ring-blue-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-clock-history" class="text-emerald-500" scale="0.9" /> Eficiencia y Tiempos
+              <button @click="setTab('ind-eficiencia')" :class="activeAdminTab === 'ind-eficiencia' ? 'bg-teal-50 text-teal-800 font-black ring-1 ring-teal-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-clock-history" class="text-emerald-600" scale="0.9" /> Eficiencia y Tiempos
               </button>
-              <button @click="setTab('ind-paciente')" :class="activeAdminTab === 'ind-paciente' ? 'bg-blue-50 text-[#005596] font-black ring-1 ring-blue-100' : 'text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-heart-fill" class="text-rose-500" scale="0.9" /> Relación con Paciente
+              <button @click="setTab('ind-paciente')" :class="activeAdminTab === 'ind-paciente' ? 'bg-teal-50 text-teal-800 font-black ring-1 ring-teal-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-2.5 text-xs uppercase rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-heart-fill" class="text-rose-600" scale="0.9" /> Relación con Paciente
               </button>
 
-              <div class="border-t border-slate-100 my-2"></div>
-              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-4 pt-1 pb-1">Generar Reporte Impreso</p>
+              <div class="border-t border-slate-200 my-2"></div>
+              <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest px-4 pt-1 pb-1">Generar Reporte Impreso</p>
 
-              <button @click="emitirReporteEjecutivo('general')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-[#005596] rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-file-earmark-text-fill" class="text-slate-400" scale="0.9" /> Consolidado Clínico General
+              <button @click="emitirReporteEjecutivo('general')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-800 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-file-earmark-text-fill" class="text-slate-500" scale="0.9" /> Consolidado Clínico General
               </button>
-              <button @click="emitirReporteEjecutivo('seguridad')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-shield-fill-check" class="text-blue-500" scale="0.9" /> Reporte Seguridad Clínica
+              <button @click="emitirReporteEjecutivo('seguridad')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-800 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-shield-fill-check" class="text-teal-600" scale="0.9" /> Reporte Seguridad Clínica
               </button>
-              <button @click="emitirReporteEjecutivo('eficiencia')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-clock-history" class="text-emerald-500" scale="0.9" /> Reporte Eficiencia y Tiempos
+              <button @click="emitirReporteEjecutivo('eficiencia')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-clock-history" class="text-emerald-600" scale="0.9" /> Reporte Eficiencia y Tiempos
               </button>
-              <button @click="emitirReporteEjecutivo('pacientes')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-heart-fill" class="text-rose-500" scale="0.9" /> Reporte Relación Paciente
+              <button @click="emitirReporteEjecutivo('pacientes')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-700 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-heart-fill" class="text-rose-600" scale="0.9" /> Reporte Relación Paciente
               </button>
-              <button @click="emitirReporteEjecutivo('saas-general')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-file-earmark-text-fill" class="text-indigo-500" scale="0.9" /> Auditoría Global Licencias SaaS
+              <button @click="emitirReporteEjecutivo('saas-general')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-800 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-file-earmark-text-fill" class="text-indigo-600" scale="0.9" /> Auditoría Global Licencias SaaS
               </button>
-              <button @click="emitirReporteEjecutivo('saas-plan')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
-                <v-icon name="bi-credit-card-fill" class="text-purple-500" scale="0.9" /> Distribución Comercial por Plan
+              <button @click="emitirReporteEjecutivo('saas-plan')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-purple-700 rounded-xl transition-all flex items-center gap-3 cursor-pointer">
+                <v-icon name="bi-credit-card-fill" class="text-purple-600" scale="0.9" /> Distribución Comercial por Plan
               </button>
             </div>
           </div>
         </div>
 
+        <!-- Botón Cerrar Sesión -->
         <button
           @click="handleLogout"
           title="Cerrar Sesión"
-          class="p-4 bg-linear-to-br from-red-500 to-rose-600 text-white rounded-2xl shadow-md shadow-red-200 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center border-none"
+          class="p-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl shadow-md shadow-rose-200 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center border-none"
         >
           <v-icon name="bi-box-arrow-right" scale="1.1" class="text-white" />
         </button>
+
       </div>
     </header>
 
@@ -764,3 +773,4 @@ onMounted(() => {
   to { opacity: 1; transform: translateY(0); }
 }
 </style>
+
