@@ -28,8 +28,8 @@
             <v-icon name="bi-briefcase-fill" class="text-emerald-600" scale="0.95" />
             Operaciones
 
-            <span v-if="doctoresPendientes.length > 0" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center animate-pulse border-2 border-white shadow-md font-sans">
-              {{ doctoresPendientes.length }}
+            <span v-if="totalPendientesGlobal > 0" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center animate-pulse border-2 border-white shadow-md font-sans">
+              {{ totalPendientesGlobal }}
             </span>
 
             <v-icon name="bi-chevron-down" scale="0.7" class="group-hover:rotate-180 transition-transform duration-200" />
@@ -43,6 +43,9 @@
               <button @click="setTab('usuarios')" :class="activeAdminTab === 'usuarios' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
                 <v-icon name="bi-people-fill" class="text-emerald-600" scale="0.9" /> Usuarios Registrados
               </button>
+              <button @click="setTab('entidades-registradas')" :class="activeAdminTab === 'entidades-registradas' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
+                <v-icon name="bi-building" class="text-teal-600" scale="0.9" /> Entidades Registradas
+              </button>
               <button @click="setTab('doctores')" :class="activeAdminTab === 'doctores' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
                 <v-icon name="gi-stethoscope" class="text-emerald-600" scale="0.9" /> Alta de Doctores
               </button>
@@ -51,13 +54,13 @@
                 <div class="flex items-center gap-3">
                   <v-icon name="bi-check-circle-fill" class="text-emerald-600" scale="0.9" /> Aprobaciones
                 </div>
-                <span v-if="doctoresPendientes.length > 0" class="bg-rose-100 text-rose-800 text-[9px] font-black px-2 py-0.5 rounded-md font-sans">
-                  {{ doctoresPendientes.length }} PEND
+                <span v-if="totalPendientesGlobal > 0" class="bg-rose-100 text-rose-800 text-[9px] font-black px-2 py-0.5 rounded-md font-sans">
+                  {{ totalPendientesGlobal }} PEND
                 </span>
               </button>
 
               <button @click="setTab('catalogos')" :class="activeAdminTab === 'catalogos' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
-                <v-icon name="bi-folder-fill" class="text-emerald-600" scale="0.9" /> Catálogos Especialidad
+                <v-icon name="bi-folder-fill" class="text-emerald-600" scale="0.9" /> Catálogo Especialidades
               </button>
               <button @click="setTab('planes')" :class="activeAdminTab === 'planes' ? 'bg-emerald-50 text-emerald-800 font-black ring-1 ring-emerald-200' : 'text-slate-700 font-bold hover:bg-slate-50 hover:text-slate-900'" class="w-full text-left px-4 py-3 text-xs uppercase rounded-xl transition-all flex items-center gap-3">
                 <v-icon name="bi-credit-card-fill" class="text-emerald-600" scale="0.9" /> Suscripciones SaaS
@@ -252,6 +255,7 @@
       </div>
     </div>
 
+    <!-- MÓDULO: USUARIOS REGISTRADOS -->
     <div v-if="activeAdminTab === 'usuarios'" class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl p-8 space-y-8 animate-fade-in">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-5 gap-4">
         <div class="space-y-1">
@@ -315,75 +319,89 @@
       </div>
     </div>
 
-    <div v-if="activeAdminTab === 'alta-pacientes'" class="max-w-2xl mx-auto animate-fade-in">
-      <RegisterPatientForm @success="setTab('resumen')" />
-    </div>
+    <!-- MÓDULO NUEVO: ENTIDADES REGISTRADAS (CLÍNICAS, FARMACIAS, LABORATORIOS) -->
+    <div v-if="activeAdminTab === 'entidades-registradas'" class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl p-8 space-y-8 animate-fade-in">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-5 gap-4">
+        <div class="space-y-1">
+          <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+            <v-icon name="bi-building" class="text-teal-600" scale="1.1" />
+            Entidades Institucionales Registradas
+          </h3>
+          <p class="text-xs text-slate-400 font-bold">Catálogo activo de Clínicas, Farmacias y Laboratorios adscritos a la red de MedGo+</p>
+        </div>
 
-    <div v-if="activeAdminTab === 'aprobaciones'" class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl p-8 space-y-6 animate-fade-in text-left">
-      <div class="border-b border-slate-100 pb-4">
-        <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-          <v-icon name="bi-check-circle-fill" class="text-emerald-500" scale="1.1" />
-          Módulo de Auditoría y Alta Médica
-        </h3>
-        <p class="text-xs text-slate-400 font-bold uppercase mt-1">Verificación cruzada de credenciales, fotografía clínica y documentación legal indexada</p>
+        <div class="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 shadow-inner flex-wrap gap-1">
+          <button
+            @click="cambiarFiltroEntidades('todas')"
+            :class="subFiltroEntidad === 'todas' ? 'bg-white text-teal-700 font-black shadow-sm ring-1 ring-black/5' : 'text-slate-400 font-bold hover:text-slate-600'"
+            class="px-4 py-2 text-xs uppercase rounded-xl transition-all"
+          >
+            Todas
+          </button>
+          <button
+            @click="cambiarFiltroEntidades('Clinica')"
+            :class="subFiltroEntidad === 'Clinica' ? 'bg-white text-teal-700 font-black shadow-sm ring-1 ring-black/5' : 'text-slate-400 font-bold hover:text-slate-600'"
+            class="px-4 py-2 text-xs uppercase rounded-xl transition-all"
+          >
+            Clínicas
+          </button>
+          <button
+            @click="cambiarFiltroEntidades('Farmacia')"
+            :class="subFiltroEntidad === 'Farmacia' ? 'bg-white text-teal-700 font-black shadow-sm ring-1 ring-black/5' : 'text-slate-400 font-bold hover:text-slate-600'"
+            class="px-4 py-2 text-xs uppercase rounded-xl transition-all"
+          >
+            Farmacias
+          </button>
+          <button
+            @click="cambiarFiltroEntidades('Laboratorio')"
+            :class="subFiltroEntidad === 'Laboratorio' ? 'bg-white text-teal-700 font-black shadow-sm ring-1 ring-black/5' : 'text-slate-400 font-bold hover:text-slate-600'"
+            class="px-4 py-2 text-xs uppercase rounded-xl transition-all"
+          >
+            Laboratorios
+          </button>
+        </div>
       </div>
 
-      <div v-if="doctoresPendientes.length === 0" class="py-16 text-center text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-        <v-icon name="bi-shield-fill-check" scale="2.0" class="text-slate-300 mb-2 block mx-auto" />
-        No se registran solicitudes de alta pendientes en la cola de auditoría.
+      <div v-if="loadingEntidades" class="py-16 text-center">
+        <div class="animate-spin inline-block w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full shadow-xs"></div>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3">Consultando catálogo corporativo...</p>
       </div>
 
-      <div v-else class="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm bg-white">
+      <div v-else class="overflow-x-auto rounded-3xl shadow-xl border border-slate-200">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-wider border-b border-slate-200">
-              <th class="p-5 w-24">Foto</th>
-              <th class="p-5">Médico / Especialidad</th>
-              <th class="p-5">Nº Colegiación</th>
-              <th class="p-5 text-center">Expediente Digital (Auditar Enlaces)</th>
-              <th class="p-5 text-center w-36">Acción Final</th>
+            <tr class="bg-slate-100 text-slate-500 font-black text-[11px] uppercase tracking-wider border-b border-slate-200">
+              <th class="p-5 text-center w-20 rounded-tl-3xl">ID</th>
+              <th class="p-5">Nombre Comercial / Razón Social</th>
+              <th class="p-5 text-center">Tipo de Entidad</th>
+              <th class="p-5">RTN / Contacto</th>
+              <th class="p-5">Ubicación Principal</th>
+              <th class="p-5 text-center w-36 rounded-tr-3xl">Estado</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-600 bg-white">
-            <tr v-for="doc in doctoresPendientes" :key="doc.DoctorID" class="hover:bg-slate-50/50 transition-colors">
-
+          <tbody class="divide-y divide-slate-100 text-sm font-medium text-slate-600 bg-white">
+            <tr v-for="ent in listaEntidadesRegistradas" :key="ent.EntidadID" class="hover:bg-teal-50/30 transition-all duration-150">
+              <td class="p-5 text-center font-mono font-black text-slate-400 bg-slate-50/40 text-xs">{{ String(ent.EntidadID).padStart(4, '0') }}</td>
               <td class="p-5">
-                <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shadow-2xs flex items-center justify-center">
-                  <img v-if="doc.RutaFoto" :src="'http://localhost:8000/storage/' + doc.RutaFoto" class="w-full h-full object-cover" />
-                  <v-icon v-else name="bi-person-fill" class="text-slate-300" scale="1.2" />
-                </div>
+                <p class="font-black text-slate-800 uppercase tracking-tight text-xs">{{ ent.NombreEntidad }}</p>
+                <p v-if="ent.RazonSocial" class="text-[10px] text-slate-400 font-semibold uppercase">{{ ent.RazonSocial }}</p>
               </td>
-
-              <td class="p-5">
-                <p class="font-black text-slate-800 uppercase text-sm tracking-tight">Dr. {{ doc.Nombre }} {{ doc.Apellido }}</p>
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Especialidad Código: {{ doc.EspecialidadID }}</span>
-              </td>
-
-              <td class="p-5 font-mono font-bold uppercase text-slate-700 tracking-wider">
-                {{ doc.NumeroColegiado }}
-              </td>
-
-              <td class="p-5">
-                <div class="flex flex-wrap items-center justify-center gap-2">
-                  <a v-if="doc.RutaTituloMedico" :href="'http://localhost:8000/storage/' + doc.RutaTituloMedico" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
-                    📜 M. General
-                  </a>
-                  <a v-if="doc.RutaTituloEspecialista" :href="'http://localhost:8000/storage/' + doc.RutaTituloEspecialista" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
-                    🎓 Especialidad
-                  </a>
-                  <a v-if="doc.RutaConstanciaColegio" :href="'http://localhost:8000/storage/' + doc.RutaConstanciaColegio" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
-                    🏥 CMH Valido
-                  </a>
-                  <a v-if="doc.RutaDni" :href="'http://localhost:8000/storage/' + doc.RutaDni" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
-                    🪪 DNI / ID
-                  </a>
-                </div>
-              </td>
-
               <td class="p-5 text-center">
-                <button @click="aprobarDoctor(doc.DoctorID)" class="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md cursor-pointer transition-all active:scale-97 flex items-center justify-center gap-1">
-                  <v-icon name="bi-check-circle-fill" scale="0.8" /> Autorizar Alta
-                </button>
+                <span :class="ent.TipoEntidad === 'Clinica' ? 'bg-blue-50 text-blue-700 border-blue-200' : ent.TipoEntidad === 'Farmacia' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-purple-50 text-purple-700 border-purple-200'" class="px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg border shadow-3xs">
+                  {{ ent.TipoEntidad }}
+                </span>
+              </td>
+              <td class="p-5 font-mono text-xs">
+                <p class="font-black text-slate-700">{{ ent.RTN || 'N/A' }}</p>
+                <p class="text-[10px] text-slate-400 font-sans">{{ ent.Telefono || ent.TelefonoInstitucional || 'Sin teléfono' }}</p>
+              </td>
+              <td class="p-5 text-xs text-slate-600 font-semibold max-w-xs truncate">
+                {{ ent.Direccion || 'Dirección matriz registrada' }}
+              </td>
+              <td class="p-5 text-center">
+                <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-3xs">
+                  Activa
+                </span>
               </td>
             </tr>
           </tbody>
@@ -391,11 +409,166 @@
       </div>
     </div>
 
+    <div v-if="activeAdminTab === 'alta-pacientes'" class="max-w-2xl mx-auto animate-fade-in">
+      <RegisterPatientForm @success="setTab('resumen')" />
+    </div>
+
+    <!-- MÓDULO DE AUDITORÍA Y APROBACIONES MULTI-ENTIDAD -->
+    <div v-if="activeAdminTab === 'aprobaciones'" class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl p-8 space-y-6 animate-fade-in text-left">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-5 gap-4">
+        <div>
+          <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+            <v-icon name="bi-check-circle-fill" class="text-emerald-500" scale="1.1" />
+            Módulo de Auditoría y Aprobaciones
+          </h3>
+          <p class="text-xs text-slate-400 font-bold uppercase mt-1">Verificación cruzada de credenciales médicas e instituciones adscritas</p>
+        </div>
+
+        <div class="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 shadow-inner">
+          <button
+            @click="subTabAprobaciones = 'doctores'"
+            :class="subTabAprobaciones === 'doctores' ? 'bg-white text-[#005596] font-black shadow-sm ring-1 ring-black/5 scale-102' : 'text-slate-400 font-bold hover:text-slate-600'"
+            class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2"
+          >
+            <v-icon name="gi-stethoscope" scale="0.85" />
+            Médicos ({{ doctoresPendientes.length }})
+          </button>
+          <button
+            @click="subTabAprobaciones = 'entidades'"
+            :class="subTabAprobaciones === 'entidades' ? 'bg-white text-teal-600 font-black shadow-sm ring-1 ring-black/5 scale-102' : 'text-slate-400 font-bold hover:text-slate-600'"
+            class="px-5 py-2.5 text-xs uppercase rounded-xl cursor-pointer transition-all flex items-center gap-2"
+          >
+            <v-icon name="bi-briefcase-fill" scale="0.85" />
+            Instituciones ({{ entidadesPendientes.length }})
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLA DOCTORES PENDIENTES -->
+      <div v-if="subTabAprobaciones === 'doctores'">
+        <div v-if="doctoresPendientes.length === 0" class="py-16 text-center text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+          <v-icon name="bi-shield-fill-check" scale="2.0" class="text-slate-300 mb-2 block mx-auto" />
+          No se registran solicitudes de alta médicas pendientes.
+        </div>
+
+        <div v-else class="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm bg-white">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-wider border-b border-slate-200">
+                <th class="p-5 w-24">Foto</th>
+                <th class="p-5">Médico / Especialidad</th>
+                <th class="p-5">Nº Colegiación</th>
+                <th class="p-5 text-center">Expediente Digital (Auditar Enlaces)</th>
+                <th class="p-5 text-center w-36">Acción Final</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-600 bg-white">
+              <tr v-for="doc in doctoresPendientes" :key="doc.DoctorID" class="hover:bg-slate-50/50 transition-colors">
+                <td class="p-5">
+                  <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shadow-2xs flex items-center justify-center">
+                    <img v-if="doc.RutaFoto" :src="'http://localhost:8000/storage/' + doc.RutaFoto" class="w-full h-full object-cover" />
+                    <v-icon v-else name="bi-person-fill" class="text-slate-300" scale="1.2" />
+                  </div>
+                </td>
+
+                <td class="p-5">
+                  <p class="font-black text-slate-800 uppercase text-sm tracking-tight">Dr. {{ doc.Nombre }} {{ doc.Apellido }}</p>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase">Especialidad Código: {{ doc.EspecialidadID }}</span>
+                </td>
+
+                <td class="p-5 font-mono font-bold uppercase text-slate-700 tracking-wider">
+                  {{ doc.NumeroColegiado }}
+                </td>
+
+                <td class="p-5">
+                  <div class="flex flex-wrap items-center justify-center gap-2">
+                    <a v-if="doc.RutaTituloMedico" :href="'http://localhost:8000/storage/' + doc.RutaTituloMedico" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
+                      📜 M. General
+                    </a>
+                    <a v-if="doc.RutaTituloEspecialista" :href="'http://localhost:8000/storage/' + doc.RutaTituloEspecialista" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
+                      🎓 Especialidad
+                    </a>
+                    <a v-if="doc.RutaConstanciaColegio" :href="'http://localhost:8000/storage/' + doc.RutaConstanciaColegio" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
+                      🏥 CMH Valido
+                    </a>
+                    <a v-if="doc.RutaDni" :href="'http://localhost:8000/storage/' + doc.RutaDni" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-blue-400 hover:text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shadow-3xs">
+                      🪪 DNI / ID
+                    </a>
+                  </div>
+                </td>
+
+                <td class="p-5 text-center">
+                  <button @click="aprobarDoctor(doc.DoctorID)" class="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md cursor-pointer transition-all active:scale-97 flex items-center justify-center gap-1">
+                    <v-icon name="bi-check-circle-fill" scale="0.8" /> Autorizar Alta
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TABLA INSTITUCIONES PENDIENTES (CLÍNICAS, FARMACIAS, LABORATORIOS) -->
+      <div v-if="subTabAprobaciones === 'entidades'">
+        <div v-if="entidadesPendientes.length === 0" class="py-16 text-center text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+          <v-icon name="bi-shield-fill-check" scale="2.0" class="text-slate-300 mb-2 block mx-auto" />
+          No se registran solicitudes institucionales pendientes de aprobación.
+        </div>
+
+        <div v-else class="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm bg-white">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-wider border-b border-slate-200">
+                <th class="p-5">Entidad / Razón Social</th>
+                <th class="p-5 text-center">Giro</th>
+                <th class="p-5">RTN / Email</th>
+                <th class="p-5">Representante / Sanitario</th>
+                <th class="p-5 text-center">Documentos Legales</th>
+                <th class="p-5 text-center w-36">Acción Final</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-600 bg-white">
+              <tr v-for="ent in entidadesPendientes" :key="ent.EntidadID" class="hover:bg-slate-50/50 transition-colors">
+                <td class="p-5">
+                  <p class="font-black text-slate-800 uppercase text-sm tracking-tight">{{ ent.NombreEntidad }}</p>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase block">{{ ent.RazonSocial }}</span>
+                </td>
+                <td class="p-5 text-center">
+                  <span class="bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                    {{ ent.TipoEntidad }}
+                  </span>
+                </td>
+                <td class="p-5 font-mono text-xs">
+                  <p class="font-black text-slate-700">{{ ent.RTN }}</p>
+                  <p class="text-[10px] text-slate-400">{{ ent.EmailInstitucional }}</p>
+                </td>
+                <td class="p-5">
+                  <p class="font-bold text-slate-800 uppercase text-[11px]">Rep: {{ ent.RepNombre }}</p>
+                  <p v-if="ent.SanNombre" class="text-[10px] text-slate-500 font-semibold uppercase mt-0.5">San: {{ ent.SanNombre }} (Nº {{ ent.SanColegiacion }})</p>
+                </td>
+                <td class="p-5 text-center">
+                  <div class="flex flex-wrap items-center justify-center gap-2">
+                    <a v-if="ent.RepFoto" :href="'http://localhost:8000/storage/' + ent.RepFoto" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-teal-400 hover:text-teal-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all shadow-3xs">🪪 DNI Rep.</a>
+                    <a v-if="ent.SanDoc" :href="'http://localhost:8000/storage/' + ent.SanDoc" target="_blank" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-teal-400 hover:text-teal-600 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all shadow-3xs">🏥 Doc. Sanitario</a>
+                  </div>
+                </td>
+                <td class="p-5 text-center">
+                  <button @click="aprobarEntidad(ent.EntidadID)" class="w-full px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md cursor-pointer transition-all active:scale-97 flex items-center justify-center gap-1">
+                    <v-icon name="bi-check-circle-fill" scale="0.8" /> Autorizar Entidad
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <div v-if="activeAdminTab === 'doctores'" class="max-w-2xl mx-auto animate-fade-in relative">
-      <!-- Pasamos la entidad base por defecto '2' requerida para el alta inicial -->
       <RegisterDoctorForm :entidadId="2" @success="setTab('resumen')" />
     </div>
 
+    <!-- MÓDULO EXCLUSIVO: CATÁLOGO DE ESPECIALIDADES MÉDICAS -->
     <div v-if="activeAdminTab === 'catalogos'" class="animate-fade-in bg-white p-8 rounded-[2.5rem] shadow-xs">
       <SpecialtyClinicManager />
     </div>
@@ -512,7 +685,7 @@ import {
   BiCheckCircleFill, BiFolderFill, BiCreditCardFill, BiBarChartFill,
   BiGraphUp, BiShieldFillCheck, BiHeartFill, BiPersonFill,
   BiCalendarEvent, BiGraphDown, BiCashStack, BiClockHistory, BiCpuFill, BiFilterSquareFill, BiActivity, BiGearFill,
-  BiFileEarmarkTextFill, BiStarFill, BiLightningChargeFill
+  BiFileEarmarkTextFill, BiStarFill, BiLightningChargeFill, BiBuilding
 } from 'oh-vue-icons/icons';
 import { GiStethoscope, FaCrown} from 'oh-vue-icons/icons';
 
@@ -522,7 +695,7 @@ addIcons(
   BiGraphUp, BiShieldFillCheck, BiHeartFill, BiPersonFill,
   BiCalendarEvent, BiGraphDown, BiCashStack, BiClockHistory, GiStethoscope,
   BiCpuFill, BiFilterSquareFill, BiActivity, BiGearFill, BiFileEarmarkTextFill,
-  BiStarFill, BiLightningChargeFill, FaCrown
+  BiStarFill, BiLightningChargeFill, FaCrown, BiBuilding
 );
 
 interface DoctorPendienteContract {
@@ -536,6 +709,35 @@ interface DoctorPendienteContract {
   RutaTituloEspecialista: string | null;
   RutaConstanciaColegio: string | null;
   RutaDni: string | null;
+}
+
+interface EntidadPendienteContract {
+  EntidadID: number;
+  NombreEntidad: string;
+  RazonSocial: string;
+  TipoEntidad: string;
+  RTN: string;
+  EmailInstitucional: string;
+  TelefonoInstitucional: string;
+  FechaRegistro: string;
+  RepNombre: string;
+  RepDNI: string;
+  RepFoto: string | null;
+  SanNombre: string | null;
+  SanColegiacion: string | null;
+  SanDoc: string | null;
+  Direccion: string | null;
+}
+
+interface EntidadRegistradaContract {
+  EntidadID: number;
+  NombreEntidad: string;
+  RazonSocial?: string;
+  TipoEntidad: string;
+  RTN?: string;
+  Telefono?: string;
+  TelefonoInstitucional?: string;
+  Direccion?: string;
 }
 
 interface SuscripcionSaaSContract {
@@ -569,13 +771,19 @@ const router = useRouter();
 
 const activeAdminTab = ref<string>('resumen');
 const subFiltroRol = ref<number | null>(2);
+const subFiltroEntidad = ref<string>('todas');
 
 const loadingAnalytics = ref<boolean>(true);
 const loadingUsuarios = ref<boolean>(false);
+const loadingEntidades = ref<boolean>(false);
 const tipoGraficoInteractivo = ref<string>('bar');
 
 const listaUsuarios = ref<UsuarioAdminContract[]>([]);
+const listaEntidadesRegistradas = ref<EntidadRegistradaContract[]>([]);
 const doctoresPendientes = ref<DoctorPendienteContract[]>([]);
+const entidadesPendientes = ref<EntidadPendienteContract[]>([]);
+const subTabAprobaciones = ref<'doctores' | 'entidades'>('doctores');
+
 const analyticsData = ref<DashboardAnalyticsResponse>({
   funnel: [], pacientes: [], heatmap: [], evolucion: [], profesionales: []
 });
@@ -583,6 +791,8 @@ const analyticsData = ref<DashboardAnalyticsResponse>({
 const totalCitasRegistradas = computed<number>(() => analyticsData.value.funnel.reduce((acc, curr) => acc + Number(curr.cantidad), 0));
 const totalPacientesContados = computed<number>(() => analyticsData.value.pacientes.reduce((acc, curr) => acc + Number(curr.Total), 0));
 const totalIngresosAcumulados = computed<string>(() => analyticsData.value.evolucion.reduce((acc, curr) => acc + Number(curr.FacturacionTotal), 0).toFixed(0));
+
+const totalPendientesGlobal = computed<number>(() => doctoresPendientes.value.length + entidadesPendientes.value.length);
 
 const tasaCancelacionGeneral = computed<string>(() => {
   const canceladas = analyticsData.value.funnel.find(f => f.estado.toUpperCase() === 'CANCELADA')?.cantidad || 0;
@@ -672,6 +882,30 @@ const cargarUsuariosSegmentados = async () => {
   }
 };
 
+const cargarEntidadesRegistradas = async () => {
+  loadingEntidades.value = true;
+  try {
+    const params: Record<string, string> = {};
+
+    // Solo enviamos el filtro 'tipo' si es distinto de 'todas' e 'instituciones'
+    if (subFiltroEntidad.value && subFiltroEntidad.value !== 'todas' && subFiltroEntidad.value !== 'instituciones') {
+      params.tipo = subFiltroEntidad.value;
+    }
+
+    const response = await api.get('/entidades', { params });
+    listaEntidadesRegistradas.value = Array.isArray(response.data) ? response.data : (response.data.data || []);
+  } catch {
+    toast.error("Error al cargar el catálogo de entidades registradas.");
+  } finally {
+    loadingEntidades.value = false;
+  }
+};
+
+const cambiarFiltroEntidades = (tipo: string) => {
+  subFiltroEntidad.value = tipo;
+  cargarEntidadesRegistradas();
+};
+
 const conmutarEstadoUsuario = async (user: UsuarioAdminContract) => {
   const nuevoEstado = user.Estado == 1 ? 0 : 1;
   const textoInformativo = nuevoEstado === 0 ? 'suspendido' : 'activado';
@@ -693,6 +927,19 @@ const cargarDoctoresPendientes = async () => {
   }
 };
 
+const cargarEntidadesPendientes = async () => {
+  try {
+    const res = await api.get('admin/entidades-pendientes');
+    entidadesPendientes.value = res.data;
+  } catch {
+    toast.error('Error al cargar solicitudes pendientes de entidades');
+  }
+};
+
+const cargarTodasLasAprobaciones = async () => {
+  await Promise.all([cargarDoctoresPendientes(), cargarEntidadesPendientes()]);
+};
+
 const aprobarDoctor = async (id: number) => {
   try {
     await api.put('admin/doctores/' + id + '/aprobar');
@@ -701,6 +948,17 @@ const aprobarDoctor = async (id: number) => {
   } catch (error) {
     console.error(error);
     toast.error('No se pudo aprobar al doctor.');
+  }
+};
+
+const aprobarEntidad = async (id: number) => {
+  try {
+    await api.put(`admin/entidades/${id}/aprobar`);
+    toast.success('Entidad institucional aprobada con éxito.');
+    await cargarEntidadesPendientes();
+  } catch (error) {
+    console.error(error);
+    toast.error('No se pudo aprobar la entidad.');
   }
 };
 
@@ -742,8 +1000,9 @@ const cargarDatosMonitoreoSaaS = async () => {
 
 watch(activeAdminTab, (nuevaTab: string) => {
   if (nuevaTab === 'usuarios') cargarUsuariosSegmentados();
+  if (nuevaTab === 'entidades-registradas') cargarEntidadesRegistradas();
   if (nuevaTab === 'resumen') cargarMatrizAnalitica();
-  if (nuevaTab === 'aprobaciones') cargarDoctoresPendientes();
+  if (nuevaTab === 'aprobaciones') cargarTodasLasAprobaciones();
   if (nuevaTab === 'planes') cargarDatosMonitoreoSaaS();
 });
 
@@ -760,7 +1019,7 @@ const totalPaginasMedicos = computed(() => Math.ceil(medicosFiltrados.value.leng
 
 onMounted(() => {
   cargarMatrizAnalitica();
-  cargarDoctoresPendientes();
+  cargarTodasLasAprobaciones();
 });
 </script>
 
@@ -773,4 +1032,3 @@ onMounted(() => {
   to { opacity: 1; transform: translateY(0); }
 }
 </style>
-

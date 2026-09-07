@@ -121,16 +121,16 @@
             <v-icon name="bi-file-earmark-medical" class="text-blue-500" /> Exámenes a Agendar
           </h4>
           <span class="bg-blue-50 text-[#005596] font-black text-[10px] px-2.5 py-0.5 rounded-md">
-            {{ examenesSeleccionados.length }} seleccionados
+            {{ props.selectedExams.length }} seleccionados
           </span>
         </div>
 
-        <div v-if="examenesSeleccionados.length === 0" class="py-8 text-center text-xs text-slate-400 font-bold italic">
+        <div v-if="props.selectedExams.length === 0" class="py-8 text-center text-xs text-slate-400 font-bold italic">
           No se han asignado exámenes de laboratorio a la presente consulta.
         </div>
         <div v-else class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
           <div
-            v-for="item in examenesSeleccionados"
+            v-for="item in props.selectedExams"
             :key="item.ExamID"
             class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between text-xs"
           >
@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { LaboratoryRepository } from '../../infrastructure/LaboratoryRepository';
 import type { CatalogoExamen, EntidadLaboratorio } from '../../domain/LaboratoryModels';
 
@@ -183,19 +183,10 @@ const cargando = ref<boolean>(true);
 const busqueda = ref<string>('');
 const categoriaSeleccionada = ref<string>('Todos');
 
-const examenesSeleccionados = ref<CatalogoExamen[]>([...props.selectedExams]);
-const laboratorioSeleccionadoId = ref<number>(props.selectedLabId || 0);
-
-watch(() => props.selectedExams, (newVal) => {
-  examenesSeleccionados.value = [...newVal];
-}, { deep: true });
-
-watch(examenesSeleccionados, (newVal) => {
-  emit('update:selectedExams', newVal);
-}, { deep: true });
-
-watch(laboratorioSeleccionadoId, (newVal) => {
-  emit('update:selectedLabId', newVal);
+// Computed bidireccional para el selector de laboratorio sin causar bucles de watch
+const laboratorioSeleccionadoId = computed({
+  get: () => props.selectedLabId || 0,
+  set: (val: number) => emit('update:selectedLabId', val)
 });
 
 const categoriasCalculadas = computed<string[]>(() => {
@@ -213,20 +204,25 @@ const examenesFiltrados = computed<CatalogoExamen[]>(() => {
 });
 
 const montoTotalEstimado = computed<number>(() => {
-  return examenesSeleccionados.value.reduce((acc, item) => acc + Number(item.Precio || 0), 0);
+  return props.selectedExams.reduce((acc, item) => acc + Number(item.Precio || 0), 0);
 });
 
 const estaSeleccionado = (examId: number): boolean => {
-  return examenesSeleccionados.value.some(item => item.ExamID === examId);
+  return props.selectedExams.some(item => item.ExamID === examId);
 };
 
+// Emisión directa del nuevo arreglo sin mutar copias locales
 const toggleExamen = (examen: CatalogoExamen): void => {
-  const index = examenesSeleccionados.value.findIndex(i => i.ExamID === examen.ExamID);
+  const nuevaLista = [...props.selectedExams];
+  const index = nuevaLista.findIndex(i => i.ExamID === examen.ExamID);
+
   if (index >= 0) {
-    examenesSeleccionados.value.splice(index, 1);
+    nuevaLista.splice(index, 1);
   } else {
-    examenesSeleccionados.value.push(examen);
+    nuevaLista.push(examen);
   }
+
+  emit('update:selectedExams', nuevaLista);
 };
 
 const cargarDatosIniciales = async (): Promise<void> => {
@@ -244,10 +240,8 @@ const cargarDatosIniciales = async (): Promise<void> => {
     );
 
     const primerLaboratorio = laboratorios.value[0];
-    if (primerLaboratorio && laboratorioSeleccionadoId.value === 0) {
-      laboratorioSeleccionadoId.value = primerLaboratorio.EntidadID;
-    } else if (laboratorios.value.length === 0) {
-      laboratorioSeleccionadoId.value = 0;
+    if (primerLaboratorio && props.selectedLabId === 0) {
+      emit('update:selectedLabId', primerLaboratorio.EntidadID);
     }
   } catch (err) {
     console.error("Error al cargar laboratorios de la BD:", err);

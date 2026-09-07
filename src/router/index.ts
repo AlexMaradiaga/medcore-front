@@ -86,6 +86,11 @@ const router = createRouter({
       component: RegisterDoctorView
     },
     {
+      path: '/register-institution',
+      name: 'register-institution',
+      component: () => import('@/modules/auth/ui/RegisterInstitutionView.vue')
+    },
+    {
       path: '/medico/consulta/cierre/:id',
       name: 'ConsultaCierre',
       component: () => import('@/modules/consultations/ui/components/BillingModal.vue'),
@@ -145,7 +150,7 @@ const router = createRouter({
 router.beforeEach((to, _from) => {
   const authStore = useAuthStore();
 
-  const publicPages = ['/', '/register', '/register-doctor'];
+  const publicPages = ['/', '/register', '/register-doctor', '/register-institution'];
   const authRequired = !publicPages.includes(to.path);
 
   const loggedIn = !!authStore.token;

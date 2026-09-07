@@ -28,38 +28,38 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Nombre</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Nombre *</label>
             <input v-model="form.nombre" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 text-sm font-medium outline-hidden focus:border-[#005596] transition-all text-slate-700" required />
           </div>
           <div class="space-y-1">
-            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Apellido</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Apellido *</label>
             <input v-model="form.apellido" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 text-sm font-medium outline-hidden focus:border-[#005596] transition-all text-slate-700" required />
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Especialidad</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Especialidad *</label>
             <select v-model="form.especialidad_id" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 text-sm font-medium outline-hidden focus:border-[#005596] transition-all text-slate-700 cursor-pointer" required>
               <option value="" disabled>Seleccione...</option>
-              <option :value="1">Medicina General</option>
-              <option :value="2">Cardiología</option>
-              <option :value="3">Pediatría</option>
+              <option v-for="esp in especialidades" :key="esp.EspecialidadID || esp.id" :value="esp.EspecialidadID || esp.id">
+                {{ esp.NombreEspecialidad || esp.nombre }}
+              </option>
             </select>
           </div>
           <div class="space-y-1">
-            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Nº de Colegiación</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Nº de Colegiación *</label>
             <input v-model="form.numero_colegiado" type="text" placeholder="Ej. CMH-12345" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 text-sm font-medium outline-hidden focus:border-[#005596] transition-all text-slate-700 uppercase font-mono" required />
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Correo Electrónico</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Correo Electrónico *</label>
             <input v-model="form.email" type="email" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 text-sm font-medium outline-hidden focus:border-[#005596] transition-all text-slate-700" required />
           </div>
           <div class="space-y-1">
-            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Contraseña</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Contraseña *</label>
             <input v-model="form.password" type="password" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/40 text-sm font-medium outline-hidden focus:border-[#005596] transition-all text-slate-700" required />
           </div>
         </div>
@@ -103,15 +103,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import api from '@/shared/infrastructure/api';
+import type { AxiosError } from 'axios';
 
 const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
 const fotoPreview = ref<string | null>(null);
+
+interface EspecialidadItem {
+  EspecialidadID?: number;
+  id?: number;
+  NombreEspecialidad?: string;
+  nombre?: string;
+}
+
+const especialidades = ref<EspecialidadItem[]>([]);
 
 const form = ref({
   nombre: '',
@@ -136,6 +146,17 @@ const archivos = ref<ExpedienteDoctores>({
   titulo_especialista: null,
   constancia_colegio: null,
   dni: null
+});
+
+// Cargar catálogo de especialidades desde la API al montar la vista
+onMounted(async () => {
+  try {
+    const response = await api.get('/especialidades');
+    especialidades.value = response.data.data || response.data;
+  } catch (err) {
+    console.error("Error al cargar especialidades:", err);
+    toast.error("No se pudo cargar el catálogo de especialidades.");
+  }
 });
 
 const handleFotoUpload = (event: Event) => {
@@ -166,7 +187,7 @@ const handleFileChange = (event: Event, tipoKey: keyof ExpedienteDoctores) => {
 
     if (file.size > 3 * 1024 * 1024) {
       toast.error("Este documento clínico no debe superar los 3 MB.");
-      input.value = ""; 
+      input.value = "";
       archivos.value[tipoKey] = null;
       return;
     }
@@ -201,18 +222,17 @@ const registrarDoctor = async () => {
   formData.append('dni', archivos.value.dni);
 
   try {
-    await api.post('/register-doctor', formData, {
+    const response = await api.post('/register-doctor', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    toast.success("Solicitud de alta enviada correctamente al departamento de auditoría.");
+    toast.success(response.data.message || "Solicitud de alta enviada correctamente al departamento de auditoría.");
     router.push('/');
   } catch (error: unknown) {
-    console.error(error);
-    if (error instanceof Error) {
-      toast.error(error.message);
-    } else {
-      toast.error("Ocurrió un error desconocido al procesar el registro.");
-    }
+    const err = error as AxiosError<{ message?: string; error?: string }>;
+    console.error("Error en registro de doctor:", err);
+
+    const backendMessage = err.response?.data?.message || err.response?.data?.error || "Ocurrió un error al procesar la solicitud.";
+    toast.error(backendMessage);
   } finally {
     loading.value = false;
   }

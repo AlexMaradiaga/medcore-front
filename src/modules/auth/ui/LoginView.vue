@@ -28,7 +28,7 @@
             Bienvenido a MedGo+
           </h2>
           <h3 class="text-cyan-50/90 text-xs mt-3 font-semibold max-w-70 leading-relaxed">
-            Tu plataforma integral de gestión médica. Conectando pacientes y profesionales de la salud.
+            Encuenta médicos, agenda citas y gestiona tu salud de forma sencilla.
           </h3>
         </div>
       </div>
@@ -90,7 +90,7 @@
               </div>
               <span class="ml-2 font-bold group-hover:text-slate-900 transition-colors">Recordarme</span>
             </label>
-            <!-- En tu plantilla sustituye el <a> de '¿Olvidaste tu clave?' por: -->
+
             <a
               href="#"
               @click.prevent="showForgotModal = true"
@@ -99,7 +99,6 @@
               ¿Olvidaste tu clave?
             </a>
 
-            <!-- Al final del template de LoginView.vue (antes de cerrar </template>), agrega el modal: -->
             <Transition
               enter-active-class="transition duration-300 ease-out"
               enter-from-class="opacity-0 scale-95"
@@ -109,7 +108,6 @@
               leave-to-class="opacity-0 scale-95"
             >
               <div v-if="showForgotModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <!-- Fondo translúcido -->
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="showForgotModal = false"></div>
 
                 <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 relative z-10 text-left space-y-6">
@@ -189,7 +187,7 @@
             </div>
           </button>
 
-          <p class="text-center text-[13px] text-slate-500 font-bold pt-2">
+          <div class="text-center text-[13px] text-slate-500 font-bold pt-2">
             <template v-if="userType === 'paciente'">
               ¿No tienes una cuenta?
               <router-link to="/register" class="text-medgo-blue font-black hover:underline ml-1 underline-offset-4">
@@ -197,12 +195,22 @@
               </router-link>
             </template>
             <template v-else>
-              ¿Eres profesional de la salud?
-              <router-link to="/register-doctor" class="text-medgo-teal font-black hover:underline ml-1 underline-offset-4">
-                Solicita tu alta médica
-              </router-link>
+              <div class="space-y-2">
+                <p>
+                  ¿Eres médico independiente?
+                  <router-link to="/register-doctor" class="text-medgo-teal font-black hover:underline ml-1 underline-offset-4">
+                    Solicita tu alta médica
+                  </router-link>
+                </p>
+                <p class="text-xs text-slate-400">
+                  ¿Representas una Clínica, Farmacia o Laboratorio?
+                  <router-link to="/register-institution" class="text-[#005596] font-black hover:underline ml-1 underline-offset-4">
+                    Registra tu institución
+                  </router-link>
+                </p>
+              </div>
             </template>
-          </p>
+          </div>
         </div>
 
       </form>
@@ -314,6 +322,7 @@ const handleLogin = async () => {
     setTimeout(() => { loading.value = false; }, 150);
   }
 };
+
 const handleResetPassword = async () => {
   if (!forgotForm.email || !forgotForm.nueva_password) return;
   resetLoading.value = true;
@@ -345,7 +354,6 @@ const handleResetPassword = async () => {
   width: 96px;
   height: 96px;
   perspective: 1000px;
-  /* Animación de flotado suave */
   animation: flotarImagen 4.5s ease-in-out infinite;
 }
 
@@ -353,28 +361,26 @@ const handleResetPassword = async () => {
   width: 100%;
   height: 100%;
   border-radius: 26px;
-  padding: 2px; /* Pequeño borde interno para resaltar la iluminación */
+  padding: 2px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 100%);
 
-  /* Sombras para dar profundidad y volumen real a la imagen */
   box-shadow:
     0 16px 32px rgba(0, 120, 160, 0.35),
     0 4px 8px rgba(0, 0, 0, 0.1),
     inset 0 2px 4px rgba(255, 255, 255, 0.8);
 
-  /* Inclinación 3D */
   transform: rotateX(8deg) rotateY(-5deg);
   transform-style: preserve-3d;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* Efecto hover opcional: se endereza ligeramente cuando pasas el cursor */
 .contenedor-logo-3d:hover .logo-cuerpo-3d {
   transform: rotateX(0deg) rotateY(0deg) scale(1.05);
   box-shadow:
     0 20px 40px rgba(0, 160, 200, 0.45),
     0 6px 12px rgba(0, 0, 0, 0.12);
 }
+
 .etiqueta-nuevo {
   top: -8px;
   right: -12px;
